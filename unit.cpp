@@ -250,7 +250,7 @@ AString Unit::ReadyItem()
         ready = readyWeapon[i];
         if (ready != -1) {
             if (item) weaponstr += ", ";
-            weaponstr += ItemString(ready, 1);
+            weaponstr += item_string(ready, 1);
             ++item;
         }
     }
@@ -264,7 +264,7 @@ AString Unit::ReadyItem()
         ready = readyArmor[i];
         if (ready != -1) {
             if (item) armorstr += ", ";
-            armorstr += ItemString(ready, 1);
+            armorstr += item_string(ready, 1);
             ++item;
         }
     }
@@ -273,7 +273,7 @@ AString Unit::ReadyItem()
     armor = item;
 
     if (readyItem != -1) {
-        battlestr = AString("Ready item: ") + ItemString(readyItem, 1);
+        battlestr = AString("Ready item: ") + item_string(readyItem, 1);
         item = 1;
     } else
         item = 0;
@@ -314,11 +314,11 @@ AString Unit::StudyableSkills()
     return temp;
 }
 
-AString Unit::GetName(int obs)
+std::string Unit::get_name(int observation)
 {
-    AString ret = name;
+    std::string ret = name;
     int stealth = GetAttribute("stealth");
-    if (reveal == REVEAL_FACTION || obs > stealth) {
+    if (reveal == REVEAL_FACTION || observation > stealth) {
         ret += ", ";
         ret += faction->name;
     }
@@ -706,36 +706,30 @@ void Unit::build_json_report(
     }
 }
 
-AString *Unit::BattleReport(int obs)
+std::string Unit::battle_report(int observation)
 {
-    AString *temp = new AString("");
+    std::string temp = "";
     if (Globals->BATTLE_FACTION_INFO)
-        *temp += GetName(obs);
+        temp += get_name(observation);
     else
-        *temp += name;
+        temp += name;
 
-    if (GetFlag(FLAG_BEHIND)) *temp += ", behind";
+    if (GetFlag(FLAG_BEHIND)) temp += ", behind";
 
-    *temp += items.BattleReport();
+    temp += items.battle_report();
 
     for(const auto s: skills) {
         if (SkillDefs[s->type].flags & SkillType::BATTLEREP) {
             int lvl = GetAvailSkill(s->type);
-            if (lvl) {
-                *temp += ", ";
-                *temp += SkillDefs[s->type].name;
-                *temp += " ";
-                *temp += lvl;
-            }
+            if (lvl) temp += ", " + SkillDefs[s->type].name + " " + std::to_string(lvl);
         }
     }
 
     if (!describe.empty()) {
-        *temp += "; ";
-        *temp += describe;
+        temp += "; " + describe;
     }
 
-    *temp += ".";
+    temp += ".";
     return temp;
 }
 
@@ -1077,7 +1071,7 @@ void Unit::ConsumeShared(int item, int needed)
                 used = min(needed, amount);
                 u->items.SetNum(item, amount - used);
                 needed -= used;
-                string temp = u->name + " shares " + ItemString(item, used) + " with " + name + ".";
+                string temp = u->name + " shares " + item_string(item, used) + " with " + name + ".";
                 u->event(temp, "share");
                 // If the need has been filled, then we are done
                 if (needed == 0) return;
@@ -2302,58 +2296,58 @@ void Unit::CopyFlags(Unit *x)
     reveal = x->reveal;
 }
 
-int Unit::GetBattleItem(AString &itm)
+int Unit::get_battle_item(const std::string &item)
 {
-    int item = lookup_item(itm.const_str());
-    if (item == -1) return -1;
+    int item_num = lookup_item(item);
+    if (item_num == -1) return -1;
 
-    int num = items.GetNum(item);
+    int num = items.GetNum(item_num);
     if (num < 1) return -1;
 
-    if (!(ItemDefs[item].type & IT_BATTLE)) return -1;
+    if (!(ItemDefs[item_num].type & IT_BATTLE)) return -1;
     // Exclude weapons.  They will be handled later.
-    if (ItemDefs[item].type & IT_WEAPON) return -1;
-    items.SetNum(item, num - 1);
-    return item;
+    if (ItemDefs[item_num].type & IT_WEAPON) return -1;
+    items.SetNum(item_num, num - 1);
+    return item_num;
 }
 
-int Unit::GetArmor(AString &itm, int ass)
+int Unit::get_armor(const std::string &item, int ass)
 {
-    int item = lookup_item(itm.const_str());
-    auto armor_type = FindArmor(ItemDefs[item].abr.c_str());
+    int item_num = lookup_item(item);
+    auto armor_type = FindArmor(ItemDefs[item_num].abr.c_str());
 
     if (!armor_type) return -1;
     if (ass && !(armor_type->get().flags & ArmorType::USEINASSASSINATE)) return -1;
 
-    int num = items.GetNum(item);
+    int num = items.GetNum(item_num);
     if (num < 1) return -1;
 
-    if (!(ItemDefs[item].type & IT_ARMOR)) return -1;
-    items.SetNum(item, num - 1);
-    return item;
+    if (!(ItemDefs[item_num].type & IT_ARMOR)) return -1;
+    items.SetNum(item_num, num - 1);
+    return item_num;
 }
 
-int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
+int Unit::get_mount(const std::string &item, int canFly, int canRide, int &bonus)
 {
     bonus = 0;
 
     // This region doesn't allow riding or flying, so no mounts, bail
     if (!canFly && !canRide) return -1;
 
-    int item = lookup_item(itm.const_str());
-    auto pMnt = FindMount(ItemDefs[item].abr.c_str()).value().get();
+    int item_num = lookup_item(item);
+    auto pMnt = FindMount(ItemDefs[item_num].abr.c_str()).value().get();
 
-    int num = items.GetNum(item);
+    int num = items.GetNum(item_num);
     if (num < 1) return -1;
 
     if (canFly) {
         // If the mount cannot fly, and the region doesn't allow
         // riding mounts, bail
-        if (!ItemDefs[item].fly && !canRide) return -1;
+        if (!ItemDefs[item_num].fly && !canRide) return -1;
     } else {
         // This region allows riding mounts, so if the mount
         // can not carry at a riding level, bail
-        if (!ItemDefs[item].ride) return -1;
+        if (!ItemDefs[item_num].ride) return -1;
     }
 
     if (pMnt.skill) {
@@ -2369,7 +2363,7 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
         // If the mount can fly and the terrain doesn't allow
         // flying mounts, limit the bonus to the maximum hampered
         // bonus allowed by the mount
-        if (ItemDefs[item].fly && !canFly) {
+        if (ItemDefs[item_num].fly && !canFly) {
             if (bonus > pMnt.maxHamperedBonus)
                 bonus = pMnt.maxHamperedBonus;
         }
@@ -2380,24 +2374,25 @@ int Unit::GetMount(AString &itm, int canFly, int canRide, int &bonus)
 
     // Remove the mount from the unit to attach it to the soldier
     // UNLESS it IS the soldier (looking at you, Centaurs)
-    if (!(ItemDefs[item].type & IT_MAN))
-        items.SetNum(item, num - 1);
-    return item;
+    if (!(ItemDefs[item_num].type & IT_MAN))
+        items.SetNum(item_num, num - 1);
+    return item_num;
 }
 
-int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
-        int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage)
+int Unit::get_weapon(
+    const std::string &item, int riding, int ridingBonus, int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage
+)
 {
-    int item = lookup_item(itm.const_str());
-    auto weapontype = FindWeapon(ItemDefs[item].abr.c_str());
+    int item_num = lookup_item(item);
+    auto weapontype = FindWeapon(ItemDefs[item_num].abr.c_str());
 
     if (!weapontype) return -1;
     auto weapon = weapontype->get();
 
-    int num = items.GetNum(item);
+    int num = items.GetNum(item_num);
     if (num < 1) return -1;
 
-    if (!(ItemDefs[item].type & IT_WEAPON)) return -1;
+    if (!(ItemDefs[item_num].type & IT_WEAPON)) return -1;
 
     attackBonus = 0;
     defenseBonus = 0;
@@ -2439,8 +2434,8 @@ int Unit::GetWeapon(AString &itm, int riding, int ridingBonus,
     }
 
     // get the weapon
-    items.SetNum(item, num-1);
-    return item;
+    items.SetNum(item_num, num-1);
+    return item_num;
 }
 
 void Unit::MoveUnit(Object *toobj)

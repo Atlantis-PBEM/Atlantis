@@ -165,7 +165,7 @@ int StudyRateAdjustment(int days, int exp)
     int prevd = 0;
     int diff = days - exp;
     if (diff <= 0) {
-        rate += abs(diff) / 3;
+        rate += std::abs(diff) / 3;
     } else  {
         int level = 0;
         long int ctr = 0;
@@ -339,15 +339,13 @@ int SkillList::GetStudyRate(int skill, int nummen)
     return StudyRateAdjustment(days, exp);
 }
 
-AString SkillList::Report(int nummen)
+std::string SkillList::report(int nummen)
 {
-    AString temp;
-    if (!size()) {
-        temp += "none";
-        return temp;
-    }
+    if (!size()) return "none";
+
     int i = 0;
     int displayed = 0;
+    std::string temp;
     for(const auto s: skills) {
         if (s->days == 0) continue;
         displayed++;
@@ -357,14 +355,13 @@ AString SkillList::Report(int nummen)
             i=1;
         }
         temp += SkillStrs(s->type);
-        temp += AString(" ") + GetLevelByDays(s->days/nummen) +
-            AString(" (") + AString(s->days/nummen);
+        temp += " " + std::to_string(GetLevelByDays(s->days/nummen)) + " (" + std::to_string(s->days/nummen);
         if (Globals->REQUIRED_EXPERIENCE) {
-            temp += AString("+") + AString(GetStudyRate(s->type, nummen));
+            temp += "+" + std::to_string(GetStudyRate(s->type, nummen));
         }
-        temp += AString(")");
+        temp += ")";
     }
-    if (!displayed) temp += "none";
+    if (!displayed) return "none";
     return temp;
 }
 

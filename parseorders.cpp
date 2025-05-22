@@ -1399,7 +1399,7 @@ BuildOrder* Game::ProcessBuildHelp(Unit *unit, parser::string_parser& parser, or
 
 BuildOrder* Game::ProcessBuildShip(Unit *unit, int object_type, orders_check *checker)
 {
-    int shipType = abs(object_type + 1);
+    int shipType = std::abs(object_type + 1);
 
     // the ship type was checked in the caller for being a valid type of item.
     int flying = ItemDefs[shipType].fly;

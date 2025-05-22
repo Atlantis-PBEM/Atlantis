@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ITEMS_CLASS
-#define ITEMS_CLASS
+#ifndef ITEMS_H
+#define ITEMS_H
 
 class Item;
 class ItemType;
@@ -419,14 +419,14 @@ extern std::optional<std::reference_wrapper<WeaponType>> FindWeapon(char const *
 extern std::optional<std::reference_wrapper<MountType>> FindMount(char const *abbr);
 extern std::optional<std::reference_wrapper<MonType>> FindMonster(char const *abbr, int illusion);
 extern std::optional<std::reference_wrapper<ManType>> FindRace(char const *abbr);
-extern AString AttType(int atype);
+extern std::string attack_type(int atype);
 
 enum {
     FULLNUM = 0x01,
     ALWAYSPLURAL = 0x02
 };
-extern std::string ItemString(int type, int num, int flags = 0);
-extern AString *ItemDescription(int item, int full);
+extern std::string item_string(int type, int num, int flags = 0);
+extern std::string item_description(int item, int full);
 
 extern int IsSoldier(int);
 
@@ -439,7 +439,7 @@ class Item
         void Readin(std::istream& f);
         void Writeout(std::ostream& f);
 
-        AString Report(int);
+        std::string report(bool see_illusions);
 
         int type;
         int num;
@@ -457,9 +457,9 @@ class ItemList
         void Readin(std::istream& f);
         void Writeout(std::ostream& f);
 
-        AString Report(int, int, int);
-        AString BattleReport();
-        AString ReportByType(int, int, int, int);
+        std::string report(int obs, int seeillusions, int nofirstcomma);
+        std::string battle_report();
+        std::string report_by_type(int type, int obs, int seeillusions, int nofirstcomma);
 
         int Weight();
         int GetNum(int);
@@ -477,6 +477,6 @@ class ItemList
 
 };
 
-extern AString ShowSpecial(char const *special, int level, int expandLevel, int fromItem);
+extern std::string show_special(char const *special, int level, int expandLevel, int fromItem);
 
-#endif
+#endif // ITEMS_H

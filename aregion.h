@@ -261,7 +261,7 @@ class ARegion
         int IsGuarded();
 
         int Wages();
-        AString WagesForReport();
+        std::string wages_for_report();
         int Population();
 
         // ruleset specific movment checks
