@@ -7,8 +7,6 @@
 #include <sstream>
 #include <iomanip>
 
-using namespace std;
-
 const std::vector<std::string> AttitudeStrs = {
     "Hostile",
     "Unfriendly",
@@ -126,7 +124,7 @@ Faction::~Faction()
     attitudes.clear();
 }
 
-void Faction::Writeout(ostream& f)
+void Faction::Writeout(std::ostream& f)
 {
     f << num << '\n';
 
@@ -155,7 +153,7 @@ void Faction::Writeout(ostream& f)
     for (const auto& attitude: attitudes) f << attitude.factionnum << '\n' << static_cast<int>(attitude.attitude) << '\n';
 }
 
-void Faction::Readin(istream& f)
+void Faction::Readin(std::istream& f)
 {
     f >> num;
 
@@ -173,12 +171,12 @@ void Faction::Readin(istream& f)
     f >> unclaimed;
 
     std::string str;
-    std::getline(f >> ws, str);
+    std::getline(f >> std::ws, str);
     set_name(str | filter::strip_number);
 
-    std::getline(f >> ws, address);
+    std::getline(f >> std::ws, address);
 
-    std::getline(f >> ws, password);
+    std::getline(f >> std::ws, password);
     f >> times;
     f >> showunitattitudes;
     f >> temformat;
@@ -225,8 +223,8 @@ void Faction::set_address(const std::string& strNewAddress)
     address = strNewAddress;
 }
 
-vector<FactionStatistic> Faction::compute_faction_statistics(Game *game, size_t **citems) {
-    vector<FactionStatistic> stats;
+std::vector<FactionStatistic> Faction::compute_faction_statistics(Game *game, size_t **citems) {
+    std::vector<FactionStatistic> stats;
     // To allow testing, just return an empty vector if we don't have any item arrays inbound
     if (!citems) return stats;
 
@@ -263,9 +261,9 @@ inline bool Faction::gets_gm_report(Game *game) {
 }
 
 struct GmData {
-    vector<ShowSkill> skills;
-    vector<ShowItem> items;
-    vector<ShowObject> objects;
+    std::vector<ShowSkill> skills;
+    std::vector<ShowItem> items;
+    std::vector<ShowObject> objects;
 };
 
 static inline GmData collect_gm_data() {
@@ -287,9 +285,9 @@ void Faction::build_gm_json_report(json& j, Game *game) {
 
     json skills = json::array();
     for (auto &skillshow : data.skills) {
-        string skill_name = SkillDefs[skillshow.skill].name;
-        string abbr = SkillDefs[skillshow.skill].abbr;
-        string description = skillshow.Report(this);
+        std::string skill_name = SkillDefs[skillshow.skill].name;
+        std::string abbr = SkillDefs[skillshow.skill].abbr;
+        std::string description = skillshow.Report(this);
         if (description.empty()) continue;
         skills.push_back({
             { "name", skill_name }, { "tag", abbr }, { "level", skillshow.level }, { "description", description }
@@ -299,9 +297,9 @@ void Faction::build_gm_json_report(json& j, Game *game) {
 
     json items = json::array();
     for (auto &itemshow : data.items) {
-        string item_name = itemshow.display_name();
-        string tag = itemshow.display_tag();
-        string description = ItemDescription(itemshow.item, itemshow.full)->const_str();
+        std::string item_name = itemshow.display_name();
+        std::string tag = itemshow.display_tag();
+        std::string description = item_description(itemshow.item, itemshow.full);
         if (description.empty()) continue;
         items.push_back({ { "name", item_name }, {"tag", tag }, { "description", description } });
     }
@@ -309,9 +307,9 @@ void Faction::build_gm_json_report(json& j, Game *game) {
 
     json objects = json::array();
     for (auto &objectshow : data.objects) {
-        string obj_name = ObjectDefs[objectshow.obj].name;
-        string description = ObjectDescription(objectshow.obj)->const_str();
-        if(description.empty()) continue;
+        std::string obj_name = ObjectDefs[objectshow.obj].name;
+        std::string description = object_description(objectshow.obj);
+        if (description.empty()) continue;
         objects.push_back({ { "name", obj_name }, { "description", description } });
     }
     j["object_reports"] = objects;
@@ -357,7 +355,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
     if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
         j["type"] = json::object();
         for (auto &ft : *FactionTypes) {
-            string factype = ft | filter::lowercase;
+            std::string factype = ft | filter::lowercase;
             if (type[ft]) j["type"][factype] = type[ft];
         }
     }
@@ -391,7 +389,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
         };
 
         if (Globals->APPRENTICES_EXIST) {
-            string name = Globals->APPRENTICE_NAME;
+            std::string name = Globals->APPRENTICE_NAME;
             name[0] = toupper(name[0]);
             j["status"]["apprentices"] = {
                 { "current", numapprentices },
@@ -459,7 +457,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
     j["attitudes"] = json::object();
     j["attitudes"]["default"] = AttitudeStrs[static_cast<int>(defaultattitude)] | filter::lowercase;
     for (int i=0; i<static_cast<int>(AttitudeType::ATTITUDE_COUNT); i++) {
-        string attitude = AttitudeStrs[i] | filter::lowercase;
+        std::string attitude = AttitudeStrs[i] | filter::lowercase;
         j["attitudes"][attitude] = json::array(); // [] = json::array();
         for (const auto& a: attitudes) {
             if (a.attitude == static_cast<AttitudeType>(i)) {
@@ -477,9 +475,9 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 
     json skills = json::array();
     for (auto &skillshow : shows) {
-        string skill_name = SkillDefs[skillshow.skill].name;
-        string abbr = SkillDefs[skillshow.skill].abbr;
-        string description = skillshow.Report(this);
+        std::string skill_name = SkillDefs[skillshow.skill].name;
+        std::string abbr = SkillDefs[skillshow.skill].abbr;
+        std::string description = skillshow.Report(this);
         if (description.empty()) continue;
         skills.push_back({
             { "name", skill_name }, { "tag", abbr }, { "level", skillshow.level }, { "description", description }
@@ -489,9 +487,9 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 
     json items = json::array();
     for (auto &itemshow : itemshows) {
-        string item_name = itemshow.display_name();
-        string tag = itemshow.display_tag();
-        string description = ItemDescription(itemshow.item, itemshow.full)->const_str();
+        std::string item_name = itemshow.display_name();
+        std::string tag = itemshow.display_tag();
+        std::string description = item_description(itemshow.item, itemshow.full);
         if (description.empty()) continue;
         items.push_back({ { "name", item_name }, {"tag", tag }, { "description", description } });
     }
@@ -499,8 +497,8 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
 
     json objects = json::array();
     for(const auto objectshow : objectshows) {
-        string obj_name = ObjectDefs[objectshow.obj].name;
-        string description = ObjectDescription(objectshow.obj)->const_str();
+        std::string obj_name = ObjectDefs[objectshow.obj].name;
+        std::string description = object_description(objectshow.obj);
         if(description.empty()) continue;
         objects.push_back({ { "name", obj_name }, { "description", description } });
     }
@@ -516,7 +514,7 @@ void Faction::build_json_report(json& j, Game *game, size_t **citems) {
     j["regions"] = regions;
 }
 
-void Faction::WriteFacInfo(ostream &f)
+void Faction::WriteFacInfo(std::ostream &f)
 {
     f << "Faction: " << num << '\n';
     f << "Name: " << name << '\n';
@@ -545,14 +543,14 @@ void Faction::CheckExist(ARegionList& regs)
     }
 }
 
-void Faction::error(const string& s, Unit* u) {
+void Faction::error(const std::string& s, Unit* u) {
     if (is_npc) return;
     auto count = errors.size();
     if (count == 1000) errors.push_back({.message = "Too many errors!", .unit = u});
     if (count < 1000) errors.push_back({.message = s, .unit = u});
 }
 
-void Faction::event(const string& message, const string& category, ARegion* r,  Unit *u)
+void Faction::event(const std::string& message, const std::string& category, ARegion* r,  Unit *u)
 {
     if (is_npc) return;
     events.push_back({.message = message, .category = category, .unit = u, .region = r});
@@ -671,7 +669,7 @@ void Faction::DefaultOrders()
 void Faction::TimesReward()
 {
     if (Globals->TIMES_REWARD) {
-        event("Times reward of " + to_string(Globals->TIMES_REWARD) + " silver.", "reward");
+        event("Times reward of " + std::to_string(Globals->TIMES_REWARD) + " silver.", "reward");
         unclaimed += Globals->TIMES_REWARD;
     }
 }
@@ -679,15 +677,13 @@ void Faction::TimesReward()
 Faction *GetFaction(std::list <Faction *>& facs, int factionid)
 {
     for(const auto f : facs)
-        if (f->num == factionid)
-            return f;
+        if (f->num == factionid) return f;
     return nullptr;
 }
 
 void Faction::DiscoverItem(int item, int force, int full)
 {
     int seen, skill, i;
-    AString skname;
 
     seen = items.GetNum(item);
     if (!seen) {

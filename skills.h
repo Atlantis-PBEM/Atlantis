@@ -120,7 +120,7 @@ public:
     void Combine(SkillList *skl);
     int GetStudyRate(int sk, int men);
     SkillList *Split(int total, int split);
-    AString Report(int men);
+    std::string report(int men);
     void Readin(std::istream& f);
     void Writeout(std::ostream& f);
     inline int size() { return skills.size(); }

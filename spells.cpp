@@ -821,8 +821,8 @@ int Game::RunMindReading(ARegion *r,Unit *u)
     string temp = "Casts Mind Reading: " + tar->name + ", " + tar->faction->name + ".";
 
     if (level >= 3) {
-        temp += string(tar->items.Report(2,5,0).const_str()) + ". Skills: ";
-        temp += string(tar->skills.Report(tar->GetMen()).const_str()) + ".";
+        temp += tar->items.report(2,5,0) + ". Skills: ";
+        temp += tar->skills.report(tar->GetMen()) + ".";
     }
 
     u->event(temp, "spell");
@@ -1005,7 +1005,7 @@ int Game::RunSummonBalrog(ARegion *r,Unit *u)
         num = ItemDefs[I_BALROG].max_inventory - u->items.GetNum(I_BALROG);
 
     u->items.SetNum(I_BALROG,u->items.GetNum(I_BALROG) + num);
-    u->event("Summons " + ItemString(I_BALROG, num) + ".", "spell");
+    u->event("Summons " + item_string(I_BALROG, num) + ".", "spell");
     return 1;
 }
 
@@ -1022,7 +1022,7 @@ int Game::RunSummonDemon(ARegion *r,Unit *u)
     if (num < 1)
         num = 1;
     u->items.SetNum(I_DEMON,u->items.GetNum(I_DEMON) + num);
-    u->event("Summons " + ItemString(I_DEMON, num) + ".", "spell");
+    u->event("Summons " + item_string(I_DEMON, num) + ".", "spell");
     return 1;
 }
 
@@ -1038,7 +1038,7 @@ int Game::RunSummonImps(ARegion *r,Unit *u)
     num = RandomiseSummonAmount(num);
 
     u->items.SetNum(I_IMP,u->items.GetNum(I_IMP) + num);
-    u->event("Summons " + ItemString(I_IMP, num) + ".", "spell");
+    u->event("Summons " + item_string(I_IMP, num) + ".", "spell");
     return 1;
 }
 
@@ -1075,7 +1075,7 @@ int Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
     } else {
         u->items.SetNum(item,u->items.GetNum(item) + num);
     }
-    u->event("Creates " + ItemString(item, num) + ".", "spell");
+    u->event("Creates " + item_string(item, num) + ".", "spell");
     if (num == 0) return 0;
     return 1;
 }
@@ -1095,7 +1095,7 @@ int Game::RunSummonLich(ARegion *r,Unit *u)
     int num = (chance + rng::get_random(100))/100;
 
     u->items.SetNum(I_LICH,u->items.GetNum(I_LICH) + num);
-    u->event("Summons " + ItemString(I_LICH, num) + ".", "spell");
+    u->event("Summons " + item_string(I_LICH, num) + ".", "spell");
     if (num == 0) return 0;
     return 1;
 }
@@ -1116,7 +1116,7 @@ int Game::RunRaiseUndead(ARegion *r,Unit *u)
     num = RandomiseSummonAmount(num);
 
     u->items.SetNum(I_UNDEAD,u->items.GetNum(I_UNDEAD) + num);
-    u->event("Raises " + ItemString(I_UNDEAD, num) + ".", "spell");
+    u->event("Raises " + item_string(I_UNDEAD, num) + ".", "spell");
     if (num == 0) return 0;
     return 1;
 }
@@ -1137,7 +1137,7 @@ int Game::RunSummonSkeletons(ARegion *r,Unit *u)
     num = RandomiseSummonAmount(num);
 
     u->items.SetNum(I_SKELETON,u->items.GetNum(I_SKELETON) + num);
-    u->event("Summons " + ItemString(I_SKELETON, num) + ".", "spell");
+    u->event("Summons " + item_string(I_SKELETON, num) + ".", "spell");
     if (num == 0) return 0;
     return 1;
 }
@@ -1222,7 +1222,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
         num = max - u->items.GetNum(I_EAGLE);
 
     u->items.SetNum(I_EAGLE,u->items.GetNum(I_EAGLE) + num);
-    u->event("Summons " + ItemString(I_EAGLE, num) + ".", "spell");
+    u->event("Summons " + item_string(I_EAGLE, num) + ".", "spell");
     return 1;
 }
 
@@ -1239,7 +1239,7 @@ int Game::RunWolfLore(ARegion *r,Unit *u)
         num = max - curr;
     if (num < 0) num = 0;
 
-    u->event("Casts Wolf Lore, summoning " + ItemString(I_WOLF, num) + ".", "spell");
+    u->event("Casts Wolf Lore, summoning " + item_string(I_WOLF, num) + ".", "spell");
     u->items.SetNum(I_WOLF, num + curr);
     if (num == 0) return 0;
     return 1;
@@ -1868,7 +1868,7 @@ int Game::RunTransmutation(ARegion *r, Unit *u)
     if (num < order->number) u->error("CAST: Can't create that many.");
     u->ConsumeShared(source, num);
     u->items.SetNum(order->item, u->items.GetNum(order->item) + num);
-    u->event("Transmutes " + ItemString(source, num) + " into " + ItemString(order->item, num) + ".", "spell");
+    u->event("Transmutes " + item_string(source, num) + " into " + item_string(order->item, num) + ".", "spell");
 
     return 1;
 }
@@ -1878,7 +1878,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
     int level, num, sactype, sacrifices, i, sac, relics;
     Object *tower;
     Unit *victim;
-    AString message;
+    std::string message;
 
     level = mage->GetSkill(S_BLASPHEMOUS_RITUAL);
     if (level < 1) {
@@ -1943,7 +1943,7 @@ int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 
         // Write article with a details
         message = "Vile ritual has been performed at " + r->short_print() + "!";
-        WriteTimesArticle(message);
+        write_times_article(message);
 
         mage->event("Sacrifices " + ItemDefs[sac].name + " from " + victim->name, "spell");
         if (!victim->GetMen())

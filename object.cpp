@@ -1,29 +1,3 @@
-// START A3HEADER
-//
-// This source file is part of the Atlantis PBM game program.
-// Copyright (C) 1995-1999 Geoff Dunbar
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program, in the file license.txt. If not, write
-// to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-// Boston, MA 02111-1307, USA.
-//
-// See the Atlantis Project web page for details:
-// http://www.prankster.com/project
-//
-// END A3HEADER
-// 13/06/04 changed Object class to handle fleets (ravanrooke)
-
 #include "object.h"
 #include "items.h"
 #include "skills.h"
@@ -706,103 +680,78 @@ int Object::GetFleetSpeed(int report)
     return speed;
 }
 
-AString *ObjectDescription(int obj)
+std::string object_description(int obj)
 {
-    if (ObjectDefs[obj].flags & ObjectType::DISABLED)
-        return new AString("");
+    if (ObjectDefs[obj].flags & ObjectType::DISABLED) return "";
 
     ObjectType *o = &ObjectDefs[obj];
-    AString *temp = new AString;
+    std::string temp;
     if (ObjectDefs[obj].flags & ObjectType::GROUP) {
-        *temp += "This is a group of ships.";
+        temp += "This is a group of ships.";
     } else if (o->capacity) {
-        *temp += "This is a ship.";
+        temp += "This is a ship.";
     } else {
-        *temp += "This is a building.";
+        temp += "This is a building.";
     }
 
     if (o->flags & ObjectType::SACRIFICE) {
-        *temp += " This structure requires a sacrifice of ";
-        *temp += AString(o->sacrifice_amount) + " ";
-        *temp += strings::plural(o->sacrifice_amount, ItemDefs[o->sacrifice_item].name, ItemDefs[o->sacrifice_item].names);
-        *temp += " [";
-        *temp += ItemDefs[o->sacrifice_item].abr;
-        *temp += "].";
+        temp += " This structure requires a sacrifice of " + std::to_string(o->sacrifice_amount) + " " +
+            strings::plural(o->sacrifice_amount, ItemDefs[o->sacrifice_item].name, ItemDefs[o->sacrifice_item].names) +
+            " [" + ItemDefs[o->sacrifice_item].abr + "].";
     }
 
     if (o->flags & ObjectType::GRANTSKILL) {
-        *temp += " This structure grants the owner the skill " + SkillDefs[o->granted_skill].name + " [" +
-            SkillDefs[o->granted_skill].abbr + "] at a skill level of ";
-        *temp += AString(o->granted_level) + ".";
+        temp += " This structure grants the owner the skill " + SkillDefs[o->granted_skill].name + " [" +
+            SkillDefs[o->granted_skill].abbr + "] at a skill level of " + std::to_string(o->granted_level) + ".";
     }
 
     if (Globals->LAIR_MONSTERS_EXIST && (o->monster != -1)) {
-        *temp += AString(" ") + (ItemDefs[o->monster].names | filter::capitalize) +
-            " can potentially lair in this structure.";
-        if (o->flags & ObjectType::NOMONSTERGROWTH) {
-            *temp += " Monsters in this structures will never regenerate.";
-        }
+        temp += " " + (ItemDefs[o->monster].names | filter::capitalize) + " can potentially lair in this structure.";
+        if (o->flags & ObjectType::NOMONSTERGROWTH) temp += " Monsters in this structures will never regenerate.";
     }
 
-    if (o->flags & ObjectType::CANENTER) {
-        *temp += " Units may enter this structure.";
-    }
+    if (o->flags & ObjectType::CANENTER) temp += " Units may enter this structure.";
 
     if (o->protect) {
-        *temp += AString(" This structure provides defense to the first ") +
-            o->protect + " men inside it.";
-        // Now add the description to temp
-        *temp += AString(" This structure gives a defensive bonus of ");
+        temp += " This structure provides defense to the first " + std::to_string(o->protect) + " men inside it. " +
+            "This structure gives a defensive bonus of ";
         std::vector<std::string> defences;
         for (int i=0; i<NUM_ATTACK_TYPES; i++) {
             if (o->defenceArray[i]) {
-                std::string def = std::to_string(o->defenceArray[i]) + " against " +
-                    std::string(AttType(i).const_str()) + " attacks";
+                std::string def = std::to_string(o->defenceArray[i]) + " against " + attack_type(i) + " attacks";
                 defences.push_back(def);
             }
         }
-        *temp += strings::join(defences, ", ", " and ") + (defences.size() > 0 ? "." : "");
+        temp += strings::join(defences, ", ", " and ") + (defences.size() > 0 ? "." : "");
 
         // Capacity check prevents showing wrong details for ships
         if (Globals->EXTENDED_FORT_DEFENCE && !o->capacity) {
-            *temp += AString(" This structure also protects in all adjacent regions.");
+            temp += " This structure also protects in all adjacent regions.";
         }
     }
 
-    /*
-     * Handle all the specials
-     */
     for (auto const &spd : SpecialDefs) {
-        AString effect = "are";
+        std::string effect = "are";
         int match = 0;
-        if (!(spd.targflags & SpecialType::HIT_BUILDINGIF) &&
-                !(spd.targflags & SpecialType::HIT_BUILDINGEXCEPT)) {
-            continue;
-        }
+        if (!(spd.targflags & SpecialType::HIT_BUILDINGIF) && !(spd.targflags & SpecialType::HIT_BUILDINGEXCEPT)) continue;
         for (int j = 0; j < SPECIAL_BUILDINGS; j++)
             if (spd.buildings[j] == obj) match = 1;
         if (!match) continue;
-        if (spd.targflags & SpecialType::HIT_BUILDINGEXCEPT) {
-            effect += " not";
-        }
-        *temp += " Units in this structure ";
-        *temp += effect + " affected by " + spd.specialname + ".";
+        if (spd.targflags & SpecialType::HIT_BUILDINGEXCEPT) effect += " not";
+        temp += " Units in this structure " + effect + " affected by " + spd.specialname + ".";
     }
 
     if (o->sailors) {
-        *temp += AString(" This ship requires ") + o->sailors +
-            " total levels of sailing skill to sail.";
+        temp += " This ship requires " + std::to_string(o->sailors) + " total levels of sailing skill to sail.";
     }
     if (o->maxMages && Globals->LIMITED_MAGES_PER_BUILDING) {
-        *temp += " This structure will allow ";
+        temp += " This structure will allow ";
         if (o->maxMages > 1) {
-            *temp += "up to ";
-            *temp += o->maxMages;
-            *temp += " mages";
+            temp += "up to " + std::to_string(o->maxMages) + " mages";
         } else {
-            *temp += "one mage";
+            temp += "one mage";
         }
-        *temp += " to study above level 2.";
+        temp += " to study above level 2.";
     }
     int buildable = 1;
     auto pS = FindSkill(o->skill);
@@ -815,26 +764,25 @@ AString *ObjectDescription(int obj)
         buildable = 0;
     }
     if (!buildable && !(ObjectDefs[obj].flags & ObjectType::GROUP)) {
-        *temp += " This structure cannot be built by players.";
+        temp += " This structure cannot be built by players.";
     }
 
     if (o->productionAided != -1 && !(ItemDefs[o->productionAided].flags & ItemType::DISABLED)) {
-        *temp += " This trade structure increases the amount of " +
+        temp += " This trade structure increases the amount of " +
             (o->productionAided == I_SILVER ? "entertainment" : ItemDefs[o->productionAided].names) +
             " available in the region.";
     }
 
     if (Globals->DECAY) {
         if (o->flags & ObjectType::NEVERDECAY) {
-            *temp += " This structure will never decay.";
+            temp += " This structure will never decay.";
         } else {
-            *temp += AString(" This structure can take ") + o->maxMaintenance +
+            temp += " This structure can take " + std::to_string(o->maxMaintenance) +
                 " units of damage before it begins to decay.";
-            *temp += AString(" Damage can occur at a maximum rate of ") +
-                o->maxMonthlyDecay + " units per month.";
+            temp += " Damage can occur at a maximum rate of " + std::to_string(o->maxMonthlyDecay) + " units per month.";
             if (buildable) {
-                *temp += AString(" Repair of damage is accomplished at ") + "a rate of " + o->maintFactor +
-                    " damage units per " + "unit of " +
+                temp += " Repair of damage is accomplished at a rate of " + std::to_string(o->maintFactor) +
+                    " damage units per unit of " +
                     (o->item == I_WOOD_OR_STONE ? "wood or stone." : ItemDefs[o->item].name);
             }
         }

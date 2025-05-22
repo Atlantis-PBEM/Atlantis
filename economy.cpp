@@ -51,16 +51,14 @@ int ARegion::Wages()
     return wages;
 }
 
-// Removed the function LakeEffect()!
-
-AString ARegion::WagesForReport()
+std::string ARegion::wages_for_report()
 {
     Production *p = get_production_for_skill(I_SILVER, -1);
     if (p) {
-        return AString("$") + (p->productivity / 10) +
-            "." + (p->productivity % 10) + " (Max: $" + p->amount + ")";
+        return "$" + std::to_string(p->productivity / 10) +
+            "." + std::to_string(p->productivity % 10) + " (Max: $" + std::to_string(p->amount) + ")";
     } else
-        return AString("$") + 0;
+        return "$" + std::to_string(0);
 }
 
 void ARegion::SetupHabitat(TerrainType* terrain) {

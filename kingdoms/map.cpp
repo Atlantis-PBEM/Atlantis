@@ -24,7 +24,7 @@ int ARegion::Slope()
     for (int i=0; i<NDIRS; i++) {
         ARegion *n = neighbors[i];
         if (!n) continue;
-        int d = abs(n->elevation - elevation);
+        int d = std::abs(n->elevation - elevation);
         if (d > retval) retval = d;
     }
     return retval;
@@ -36,7 +36,7 @@ int ARegion::SurfaceWater()
     for (int i=0; i<NDIRS; i++) {
         ARegion *n = neighbors[i];
         if (!n) continue;
-        int d = abs(n->humidity - humidity);
+        int d = std::abs(n->humidity - humidity);
         if (d > retval) retval = d;
     }
     return retval;
@@ -48,7 +48,7 @@ int ARegion::Soil()
     for (int i=0; i<NDIRS; i++) {
         ARegion *n = neighbors[i];
         if (!n) continue;
-        int d = abs(n->vegetation - vegetation);
+        int d = std::abs(n->vegetation - vegetation);
         if (d > retval) retval = d;
     }
     return retval;
@@ -60,7 +60,7 @@ int ARegion::Winds()
     for (int i=0; i<NDIRS; i++) {
         ARegion *n = neighbors[i];
         if (!n) continue;
-        int d = abs(n->temperature - temperature);
+        int d = std::abs(n->temperature - temperature);
         if (d > retval) retval = d;
     }
     return retval;
@@ -69,7 +69,7 @@ int ARegion::Winds()
 int ARegion::TerrainFactor(int value, int average)
 {
     int retval = 0;
-    int df = abs(value-average);
+    int df = std::abs(value-average);
     if (df > 9) {
         if (df < 15) retval = 1;
         else retval = df - 14;
@@ -1067,8 +1067,8 @@ void ARegionList::NameRegions(ARegionArray *pArr)
                 int lastnamed = 0;
                 int xmin = tnamedx[TerrainDefs[r1->type].similar_type];
                 int ymin = tnamedy[TerrainDefs[r1->type].similar_type];
-                int dx = abs(r1->xloc - xmin);
-                int dy = abs((r1->yloc - ymin) / 2);
+                int dx = std::abs(r1->xloc - xmin);
+                int dy = std::abs((r1->yloc - ymin) / 2);
                 if ((xmin > 0) && (r1->xloc > xmin))
                     lastnamed += dx;
                 if ((ymin > 0) && (r1->yloc > ymin))
@@ -1641,7 +1641,7 @@ void GeoMap::Generate(int spread, int smoothness)
     for (int x = 0; x <= size; x += step) {
         for (int y = 0; y <= size; y += step) {
             Geography g;
-            int tval = (size/2 - abs(size/2 - y)) * 25 / (size/2);
+            int tval = (size/2 - std::abs(size/2 - y)) * 25 / (size/2);
             g.elevation = rng::get_random(30)+rng::get_random(30)+20;
             g.humidity = rng::get_random(30)+rng::get_random(30)+20;
             g.temperature = rng::get_random(tval/2)+rng::get_random(tval/2)+tval;
@@ -1709,7 +1709,7 @@ void GeoMap::Generate(int spread, int smoothness)
                 int r5 = rng::get_random(2*frac) - frac;
                 g.elevation = av_ele/nb + av_ele%nb + r1;
                 g.humidity = av_hum/nb + av_hum%nb + r2;
-                int tmean = (size/2 - abs(size/2 - ycoor)) * 100 / (size/2);
+                int tmean = (size/2 - std::abs(size/2 - ycoor)) * 100 / (size/2);
                 g.temperature = (tmean + av_tem/nb + av_tem%nb + r3)/2;
                 g.vegetation = av_veg/nb + av_veg%nb + r4;
                 g.culture = av_cul/nb + av_cul%nb + r5;
@@ -1807,7 +1807,7 @@ void GeoMap::Generate(int spread, int smoothness)
                     int r5 = rng::get_random(2*frac) - frac;
                     g.elevation = av_ele/nb + av_ele%nb + r1;
                     g.humidity = av_hum/nb + av_hum%nb + r2;
-                    int tmean = (size/2 - abs(size/2 - dy)) * 100 / (size/2);
+                    int tmean = (size/2 - std::abs(size/2 - dy)) * 100 / (size/2);
                     g.temperature = (tmean + av_tem/nb + av_tem%nb + r3)/2;
                     g.vegetation = av_veg/nb + av_veg%nb + r4;
                     g.culture = av_cul/nb + av_cul%nb + r5;
@@ -1905,9 +1905,9 @@ void GeoMap::ApplyGeography(ARegionArray *pArr)
             int ctr = 0;
             for (int dx = -3; dx < 4; dx++) {
                 for (int dy = -3; dy < 4; dy++) {
-                    if (abs(dx * dy) == 9) continue;
+                    if (std::abs(dx * dy) == 9) continue;
                     int f = 64;
-                    for (int i = abs(dx * dy); i > 0; i--) f = f / 2;
+                    for (int i = std::abs(dx * dy); i > 0; i--) f = f / 2;
                     int lx = cx + dx;
                     int ly = cy + dy;
                     if ((dx == 0) && (dy == 0)) f = 12 / Globals->TERRAIN_GRANULARITY;

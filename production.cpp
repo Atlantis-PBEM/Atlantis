@@ -59,5 +59,5 @@ void Production::read_in(istream& f)
 }
 
 string Production::write_report() {
-    return ItemString(itemtype, amount);
+    return item_string(itemtype, amount);
 }
