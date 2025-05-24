@@ -36,7 +36,7 @@ class Battle
         ~Battle();
 
         void build_json_report(json &j, Faction *fac);
-        void AddLine(const AString &);
+        void AddLine(const std::string& line);
 
         int Run(
             Events* events, ARegion *region, Unit *att, std::list<Location *>& atts,

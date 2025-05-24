@@ -18,7 +18,7 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
     auto leaderName = army.leader->name;
     std::string header = leaderName + " army:";
 
-    battle.AddLine(AString(header.c_str()));
+    battle.AddLine(header);
 
     auto stats = category == StatsCategory::ROUND
         ? army.stats.roundStats
@@ -31,7 +31,7 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
             continue;
         }
 
-        battle.AddLine(AString("- ") + us.unitName.c_str() + ":");
+        battle.AddLine("- " + us.unitName + ":");
 
         for (auto &att : us.attackStats) {
             std::string s = "  - ";
@@ -85,15 +85,13 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
             s += ", " + to_string(att.damage) + " total damage";
             s += ", and killed " + to_string(att.killed)  + " " + strings::plural(att.killed, "enemy", "enemies") + ".";
 
-            battle.AddLine(AString(s.c_str()));
+            battle.AddLine(s);
         }
 
         statLines++;
     }
 
-    if (statLines == 0) {
-        battle.AddLine(AString("Army made no attacks."));
-    }
+    if (statLines == 0) battle.AddLine("Army made no attacks.");
 }
 
 Battle::Battle() { }
@@ -197,7 +195,8 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
                     else tot += num;
                 }
             }
-            if (tot != -1) AddLine(a->name + " " + spd.spelldesc + ", " + spd.spelldesc2 + tot + spd.spelltarget + ".");
+            if (tot != -1)
+                AddLine(a->name + " " + spd.spelldesc + ", " + spd.spelldesc2 + std::to_string(tot) + spd.spelltarget + ".");
         }
     }
     if (!def->NumAlive()) return;
@@ -240,7 +239,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 void Battle::NormalRound(int round,Army * a,Army * b)
 {
     /* Write round header */
-    AddLine(AString("Round ") + round + ":");
+    AddLine("Round " + to_string(round) + ":");
 
     if (a->tactics_bonus > b->tactics_bonus) {
         AddLine(a->leader->name + " tactics bonus " + std::to_string(a->tactics_bonus) + ".");
@@ -304,7 +303,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
     AddLine("");
 
     if (Globals->BATTLE_LOG_LEVEL == BattleLogLevel::VERBOSE) {
-        AddLine(AString("Round ") + round + " statistics:");
+        AddLine("Round " + std::to_string(round) + " statistics:");
         AddLine("");
 
         WriteStats(*this, *a, StatsCategory::ROUND);
@@ -332,7 +331,7 @@ void Battle::GetSpoils(std::list<Location *>& losers, ItemList& spoils, int ass)
         if (!numalive) {
             if (quests.check_kill_target(u, spoils, &quest_rewards)) {
                 // TODO why doesn't the unit get an event here?
-                AddLine(AString("Quest completed! ") + quest_rewards);
+                AddLine("Quest completed! " + quest_rewards);
             }
         }
         for(auto it = u->items.begin(); it != u->items.end();) {
@@ -454,7 +453,7 @@ int Battle::Run(
 )
 {
     Army * armies[2];
-    AString temp;
+    std::string temp;
     assassination = ASS_NONE;
     attacker = att->faction;
 
@@ -525,7 +524,7 @@ int Battle::Run(
         armies[0]->Lose(this, spoils);
         GetSpoils(atts, spoils, ass);
         if (spoils.size()) {
-            temp = AString("Spoils: ") + spoils.Report(2,0,1) + ".";
+            temp = "Spoils: " + spoils.report(2,0,1) + ".";
         } else {
             temp = "Spoils: none.";
         }
@@ -578,7 +577,7 @@ int Battle::Run(
         armies[1]->Lose(this, spoils);
         GetSpoils(defs, spoils, ass);
         if (spoils.size()) {
-            temp = AString("Spoils: ") + spoils.Report(2,0,1) + ".";
+            temp = "Spoils: " + spoils.report(2,0,1) + ".";
         } else {
             temp = "Spoils: none.";
         }
@@ -647,18 +646,12 @@ void Battle::WriteSides(
     for(const auto at : atts) {
         int a = at->unit->GetAttribute("observation");
         if (a > aobs) aobs = a;
-        AString *temp = at->unit->BattleReport(dobs);
-        AddLine(temp->const_str());
-        delete temp;
+        AddLine(at->unit->battle_report(dobs));
     }
 
     AddLine("");
     AddLine("Defenders:");
-    for(const auto de : defs) {
-        AString *temp = de->unit->BattleReport(aobs);
-        AddLine(temp->const_str());
-        delete temp;
-    }
+    for(const auto de : defs) AddLine(de->unit->battle_report(aobs));
     AddLine("");
 }
 
@@ -674,8 +667,8 @@ void Battle::build_json_report(json& j, Faction *fac) {
     j["report"] = text;
 }
 
-void Battle::AddLine(const AString & s) {
-    text.push_back(s.const_str());
+void Battle::AddLine(const std::string& line) {
+    text.push_back(line);
 }
 
 void Game::GetDFacs(ARegion * r, Unit * t, std::set<Faction *>& facs)
@@ -938,7 +931,7 @@ int Game::KillDead(Location * l, Battle *b, int max_susk, int max_rais)
 {
     int uncontrolled = 0;
     int skel, undead;
-    AString tmp;
+    std::string tmp;
 
     if (!l->unit->IsAlive()) {
         l->region->Kill(l->unit);
@@ -957,10 +950,10 @@ int Game::KillDead(Location * l, Battle *b, int max_susk, int max_rais)
             }
 
             skel = l->unit->raised - undead;
-            tmp = ItemString(I_SKELETON, skel);
+            tmp = item_string(I_SKELETON, skel);
             if (undead > 0) {
                 tmp += " and ";
-                tmp += ItemString(I_UNDEAD, undead);
+                tmp += item_string(I_UNDEAD, undead);
             }
             tmp += " rise";
             if ((skel + undead) == 1)
@@ -1087,10 +1080,10 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
         // Number of UNDE or SKEL raised as uncontrolled
         int undead = rng::get_random(uncontrolled * 2 / 3 + 1);
         int skel = uncontrolled - undead;
-        AString tmp = ItemString(I_SKELETON, skel);
+        std::string tmp = item_string(I_SKELETON, skel);
         if (undead > 0) {
             tmp += " and ";
-            tmp += ItemString(I_UNDEAD, undead);
+            tmp += item_string(I_UNDEAD, undead);
         }
         tmp += " rise";
         if ((skel + undead) == 1)

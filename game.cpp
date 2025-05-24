@@ -81,28 +81,22 @@ void Game::DefaultWorkOrder()
     }
 }
 
-AString Game::GetXtraMap(ARegion *reg,int type)
+std::string Game::GetXtraMap(ARegion *reg, int type)
 {
     int i;
 
-    if (!reg)
-        return(" ");
+    if (!reg) return " ";
 
     switch (type) {
         case 0:
-            return (reg->IsStartingCity() ? "!" :
-                    (reg->HasShaft() ? "*" : " "));
+            return reg->IsStartingCity() ? "!" : (reg->HasShaft() ? "*" : " ");
         case 1:
             i = reg->CountWMons();
-            return (i ? ((AString) i) : (AString(" ")));
+            return (i ? std::to_string(i) : " ");
         case 2:
             for(const auto o : reg->objects) {
                 if (!(ObjectDefs[o->type].flags & ObjectType::CANENTER)) {
-                    if (o->units.front()) {
-                        return "*";
-                    } else {
-                        return ".";
-                    }
+                    return (o->units.front() ? "*" : ".");
                 }
             }
             return " ";
@@ -110,7 +104,7 @@ AString Game::GetXtraMap(ARegion *reg,int type)
             if (reg->gate) return "*";
             return " ";
     }
-    return(" ");
+    return " ";
 }
 
 void Game::WriteSurfaceMap(ostream& f, ARegionArray *pArr, int type)
@@ -121,11 +115,11 @@ void Game::WriteSurfaceMap(ostream& f, ARegionArray *pArr, int type)
 
     f << "Map (" << xx*32 << "," << yy*16 << ")\n";
     for (int y=0; y < pArr->y; y+=2) {
-        AString temp;
+        std::string temp;
         int x;
         for (x=0; x< pArr->x; x+=2) {
             reg = pArr->GetRegion(x+xx*32,y+yy*16);
-            temp += AString(GetRChar(reg));
+            temp += GetRChar(reg);
             temp += GetXtraMap(reg,type);
             temp += "  ";
         }
@@ -133,7 +127,7 @@ void Game::WriteSurfaceMap(ostream& f, ARegionArray *pArr, int type)
         temp = "  ";
         for (x=1; x< pArr->x; x+=2) {
             reg = pArr->GetRegion(x+xx*32,y+yy*16+1);
-            temp += AString(GetRChar(reg));
+            temp += GetRChar(reg);
             temp += GetXtraMap(reg,type);
             temp += "  ";
         }
@@ -149,13 +143,13 @@ void Game::WriteUnderworldMap(ostream& f, ARegionArray *pArr, int type)
     int yy = 0;
     f << "Map (" << xx*32 << "," << yy*16 << ")\n";
     for (int y=0; y< pArr->y; y+=2) {
-        AString temp = " ";
-        AString temp2;
+        std::string temp = " ";
+        std::string temp2;
         int x;
         for (x=0; x< pArr->x; x+=2) {
             reg = pArr->GetRegion(x+xx*32,y+yy*16);
             reg2 = pArr->GetRegion(x+xx*32+1,y+yy*16+1);
-            temp += AString(GetRChar(reg));
+            temp += GetRChar(reg);
             temp += GetXtraMap(reg,type);
             if (reg2 && reg2->neighbors[D_NORTH]) temp += "|";
             else temp += " ";
@@ -181,8 +175,8 @@ void Game::WriteUnderworldMap(ostream& f, ARegionArray *pArr, int type)
             if (reg2 && reg2->neighbors[D_SOUTH]) temp += "|";
             else temp += " ";
 
-            temp += AString(" ");
-            temp += AString(GetRChar(reg));
+            temp += " ";
+            temp += GetRChar(reg);
             temp += GetXtraMap(reg,type);
 
             if (reg && reg->neighbors[D_SOUTHWEST]) temp2 += "/";
@@ -199,7 +193,7 @@ void Game::WriteUnderworldMap(ostream& f, ARegionArray *pArr, int type)
     f << "\n";
 }
 
-int Game::ViewMap(const AString & typestr,const AString & mapfile)
+int Game::view_map(const std::string& typestr,const std::string& mapfile)
 {
     int type = 0;
     if (typestr == "wmon") type = 1;
@@ -208,7 +202,7 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
     if (typestr == "cities") type = 4;
     if (typestr == "hex") type = 5;
 
-    ofstream f(mapfile.const_str(), ios::out|ios::ate);
+    std::ofstream f(mapfile, std::ios::out|std::ios::ate);
     if (!f.is_open()) return(0);
 
     switch (type) {
@@ -398,8 +392,8 @@ int Game::OpenGame()
         return(0);
     }
 
-    AString gameName;
-    f >> ws >> gameName;
+    std::string gameName;
+    f >> std::ws >> gameName;
     if (f.eof()) return(0);
 
     if (!(gameName == Globals->RULESET_NAME)) {
@@ -857,7 +851,7 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
         int has = u->items.GetNum(it);
         u->items.SetNum(it, has + val.value_or(0));
         if (!u->gm_alias) {
-            u->event("Is given " + ItemString(it, val.value_or(0)) + " by the gods.", "gm_gift");
+            u->event("Is given " + item_string(it, val.value_or(0)) + " by the gods.", "gm_gift");
         }
         u->faction->DiscoverItem(it, 0, 1);
         return true;
@@ -954,15 +948,15 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
     return true;
 }
 
-int Game::Doorders_check(const AString &strOrders, const AString &strCheck)
+int Game::do_orders_check(const std::string& strOrders, const std::string& strCheck)
 {
-    ifstream ordersFile(strOrders.const_str(), ios::in);
+    std::ifstream ordersFile(strOrders, std::ios::in);
     if (!ordersFile.is_open()) {
         logger::write("No such orders file!");
         return(0);
     }
 
-    ofstream checkFile(strCheck.const_str(), ios::out|ios::ate);
+    std::ofstream checkFile(strCheck, std::ios::out|std::ios::ate);
     if (!checkFile.is_open()) {
         logger::write("Couldn't open the orders check file!");
         return(0);
@@ -1031,7 +1025,7 @@ void Game::WriteWorldEvents() {
     std::string text = this->events->Write(Globals->RULESET_NAME, MonthNames[this->month], this->year);
     if (text.empty() || text.length() == 0) return;
 
-    this->WriteTimesArticle(text.c_str());
+    this->write_times_article(text);
 }
 
 void Game::PreProcessTurn()
@@ -1070,10 +1064,10 @@ void Game::ReadOrders()
 {
     for(const auto fac : factions) {
         if (!fac->is_npc) {
-            AString str = "orders.";
-            str += fac->num;
+            std::string str = "orders.";
+            str += std::to_string(fac->num);
 
-            ifstream file(str.const_str(), ios::in);
+            ifstream file(str, ios::in);
             if(file.is_open()) {
                 ParseOrders(fac->num, file, nullptr);
                 file.close();
@@ -1507,7 +1501,7 @@ void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
 
 void Game::MonsterCheck(ARegion *r, Unit *u)
 {
-    AString tmp;
+    std::string tmp;
     int skill;
     int linked = 0;
     map< int, int > chances;
@@ -1534,7 +1528,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                     if (u->GetSkill(skill) >= ItemDefs[i->type].esc_val) losses = 0;
                 }
                 if (losses) {
-                    string temp = ItemString(i->type, losses) + strings::plural(losses, " decay", " decays") +
+                    string temp = item_string(i->type, losses) + strings::plural(losses, " decay", " decays") +
                         " into nothingness.";
                     u->event(temp, "decay");
                     u->items.SetNum(i->type,i->num - losses);
@@ -1552,7 +1546,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                         // full spoils)
                         mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
                     }
-                    u->event("Loses control of " + ItemString(i->type, i->num) + ".", "escape");
+                    u->event("Loses control of " + item_string(i->type, i->num) + ".", "escape");
                     u->items.SetNum(i->type, 0);
                 }
             } else {
@@ -1587,7 +1581,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                         // This will be zero unless these are set. (0 means full spoils)
                         mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
                     }
-                    u->event("Loses control of " + ItemString(i->type, i->num) + ".", "escape");
+                    u->event("Loses control of " + item_string(i->type, i->num) + ".", "escape");
                     u->items.SetNum(i->type, 0);
                 }
             }
@@ -1613,7 +1607,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                             // This will be zero unless these are set. (0 means full spoils)
                             mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
                         }
-                        u->event("Loses control of " + ItemString(it->type, it->num) + ".", "escape");
+                        u->event("Loses control of " + item_string(it->type, it->num) + ".", "escape");
                         u->items.SetNum(it->type, 0);
                     }
                 }
@@ -1924,12 +1918,12 @@ void Game::Equilibrate()
     logger::write("");
 }
 
-void Game::WriteTimesArticle(AString article)
+void Game::write_times_article(std::string article)
 {
-    string fname;
+    std::string fname;
 
-    do { fname = "times." + to_string(rng::get_random(10000)); } while (filesystem::exists(fname));
-    ofstream f(fname, ios::out | ios::trunc);
+    do { fname = "times." + std::to_string(rng::get_random(10000)); } while (filesystem::exists(fname));
+    std::ofstream f(fname, std::ios::out | std::ios::trunc);
     if (f.is_open()) {
         f << indent::wrap(78,70,0) << article << '\n';
     }

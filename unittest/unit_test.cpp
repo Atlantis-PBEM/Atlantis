@@ -107,17 +107,17 @@ ut::suite<"Unit"> unit_suite = []
     // Someone with no observation should not see the unit's faction, since it's not revealing.
     // Technically they shouldn't even see the unit, but that's handled in the region code, NOT in the unit code.
     // This function is only called if something asserts the unit is visible before calling this.
-    std::string current = unit->GetName(0).Str();
+    std::string current = unit->get_name(0);
     std::string expected = "Test Unit (500)";
     expect(eq(current, expected));
 
     // Someone with observation 2 should not see the unit's faction.
-    current = unit->GetName(2).Str();
+    current = unit->get_name(2);
     expected = "Test Unit (500)";
     expect(eq(current, expected));
 
     // Someone with observation 3 should see the unit's faction.
-    current = unit->GetName(3).Str();
+    current = unit->get_name(3);
     expected = "Test Unit (500), Faction (1)";
     expect(eq(current, expected));
 

@@ -112,11 +112,11 @@ class Unit {
             json& j, int obs, int truesight, int detfac, int autosee, AttitudeType attitude, bool showattitudes
         );
         json write_json_orders();
-        AString GetName(int);
+        std::string get_name(int observation);
         AString MageReport();
         AString ReadyItem();
         AString StudyableSkills();
-        AString * BattleReport(int);
+        std::string battle_report(int observation);
 
         void ClearOrders();
         void ClearCastOrders();
@@ -195,11 +195,13 @@ class Unit {
         int GetFlag(int);
         void SetFlag(int,int);
         void CopyFlags(Unit *);
-        int GetBattleItem(AString &itm);
-        int GetArmor(AString &itm, int ass);
-        int GetMount(AString &itm, int canFly, int canRide, int &bonus);
-        int GetWeapon(AString &itm, int riding, int ridingBonus,
-                int &attackBonus, int &defenseBonus, int &attacks, int &hitDamage);
+        int get_battle_item(const std::string &item);
+        int get_armor(const std::string &item, int ass);
+        int get_mount(const std::string &item, int canFly, int canRide, int &bonus);
+        int get_weapon(
+            const std::string &item, int riding, int ridingBonus, int &attackBonus, int &defenseBonus,
+            int &attacks, int &hitDamage
+        );
         int CanUseWeapon(const WeaponType& weapon, int riding);
         int Taxers(int);
 

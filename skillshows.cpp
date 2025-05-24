@@ -1282,16 +1282,16 @@ const std::string ShowSkill::Report(Faction *f) const
                     !(ItemDefs[I_STONE].flags & ItemType::DISABLED) &&
                     !(ItemDefs[I_ROOTSTONE].flags & ItemType::DISABLED)
                 ) {
-                    std::string option = ItemString(I_STONE, ItemDefs[I_ROOTSTONE].mOut) +
-                        " times the skill level into " + ItemString(I_ROOTSTONE, 1);
+                    std::string option = item_string(I_STONE, ItemDefs[I_ROOTSTONE].mOut) +
+                        " times the skill level into " + item_string(I_ROOTSTONE, 1);
                     options.push_back(option);
                 }
                 if (
                     !(ItemDefs[I_IRON].flags & ItemType::DISABLED) &&
                     !(ItemDefs[I_MITHRIL].flags & ItemType::DISABLED)
                 ) {
-                    std::string option = ItemString(I_IRON, ItemDefs[I_MITHRIL].mOut) +
-                        " times the skill level into " + ItemString(I_MITHRIL, 1);
+                    std::string option = item_string(I_IRON, ItemDefs[I_MITHRIL].mOut) +
+                        " times the skill level into " + item_string(I_MITHRIL, 1);
                     options.push_back(option);
                 }
                 if (options.size() > 0) {
@@ -1308,22 +1308,22 @@ const std::string ShowSkill::Report(Faction *f) const
                     !(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
                     !(ItemDefs[I_IRONWOOD].flags & ItemType::DISABLED)
                 ) {
-                    str += "At this level the mage may transmute " + ItemString(I_WOOD, ItemDefs[I_IRONWOOD].mOut) +
-                        " times the skill level into " + ItemString(I_IRONWOOD, 1) + ".";
+                    str += "At this level the mage may transmute " + item_string(I_WOOD, ItemDefs[I_IRONWOOD].mOut) +
+                        " times the skill level into " + item_string(I_IRONWOOD, 1) + ".";
                 }
             } else if (level == 3) {
                 if (
                     !(ItemDefs[I_FUR].flags & ItemType::DISABLED) && !(ItemDefs[I_FLOATER].flags & ItemType::DISABLED)
                 ) {
-                    str += "At this level the mage may transmute " + ItemString(I_FUR, ItemDefs[I_FLOATER].mOut) +
-                        " times the skill level into " + ItemString(I_FLOATER, 1) + ".";
+                    str += "At this level the mage may transmute " + item_string(I_FUR, ItemDefs[I_FLOATER].mOut) +
+                        " times the skill level into " + item_string(I_FLOATER, 1) + ".";
                 }
             } else if (level == 4) {
                 if (
                     !(ItemDefs[I_WOOD].flags & ItemType::DISABLED) && !(ItemDefs[I_YEW].flags & ItemType::DISABLED)
                 ) {
-                    str += "At this level the mage may transmute " + ItemString(I_WOOD, ItemDefs[I_YEW].mOut) +
-                        " times the skill level into " + ItemString(I_YEW, 1) + ".";
+                    str += "At this level the mage may transmute " + item_string(I_WOOD, ItemDefs[I_YEW].mOut) +
+                        " times the skill level into " + item_string(I_YEW, 1) + ".";
                 }
             } else if (level == 5) {
                 if (
@@ -1331,16 +1331,16 @@ const std::string ShowSkill::Report(Faction *f) const
                     !(ItemDefs[I_WHORSE].flags & ItemType::DISABLED)
                 ) {
                     str += "At this level the mage may transmute " +
-                        ItemString(I_HORSE, ItemDefs[I_WHORSE].mOut, ALWAYSPLURAL) + " times the skill level into " +
-                        ItemString(I_WHORSE, 1, ALWAYSPLURAL) + ".";
+                        item_string(I_HORSE, ItemDefs[I_WHORSE].mOut, ALWAYSPLURAL) + " times the skill level into " +
+                        item_string(I_WHORSE, 1, ALWAYSPLURAL) + ".";
                 }
                 if (
                     !(ItemDefs[I_IRON].flags & ItemType::DISABLED) &&
                     !(ItemDefs[I_ADMANTIUM].flags & ItemType::DISABLED)
                 ) {
                     str += " At this level the mage may transmute " +
-                        ItemString(I_IRON, ItemDefs[I_ADMANTIUM].mOut, ALWAYSPLURAL) + " times the skill level into " +
-                        ItemString(I_ADMANTIUM, 1, ALWAYSPLURAL) + ".";
+                        item_string(I_IRON, ItemDefs[I_ADMANTIUM].mOut, ALWAYSPLURAL) + " times the skill level into " +
+                        item_string(I_ADMANTIUM, 1, ALWAYSPLURAL) + ".";
                 }
             }
             break;
@@ -1455,15 +1455,12 @@ const std::string ShowSkill::Report(Faction *f) const
 
     // If this is a combat spell, note it.
     if (level == 1 && (SkillDefs[skill].flags & SkillType::COMBAT)) {
-        str += " A mage with this skill can cast ";
-        str += ShowSpecial(SkillDefs[skill].special, level, 0, 0).const_str();
-        str += " In order to use this spell in combat, the mage should use "
-            "the COMBAT order to set it as his combat spell.";
+        str += " A mage with this skill can cast " + show_special(SkillDefs[skill].special, level, 0, 0) +
+            " In order to use this spell in combat, the mage should use the COMBAT order to set it as his combat spell.";
     }
 
     // production and ability to see items
-    temp = "A unit with this skill is able to determine if a region "
-        "contains ";
+    temp = "A unit with this skill is able to determine if a region contains ";
     temp1 = "A unit with this skill may PRODUCE ";
     temp2 = "";
     // for the new ship items
@@ -1563,7 +1560,7 @@ const std::string ShowSkill::Report(Faction *f) const
                             temp2 += temp4;
                             count++;
                         }
-                        temp4 = ItemString(ItemDefs[i].mInput[c].item, ItemDefs[i].mInput[c].amt);
+                        temp4 = item_string(ItemDefs[i].mInput[c].item, ItemDefs[i].mInput[c].amt);
                     }
                     if (count > 0)
                         temp2 += " and ";
@@ -1630,7 +1627,7 @@ const std::string ShowSkill::Report(Faction *f) const
                             temp1 += temp4;
                             count++;
                         }
-                        temp4 = ItemString(ItemDefs[i].pInput[c].item,
+                        temp4 = item_string(ItemDefs[i].pInput[c].item,
                             ItemDefs[i].type & IT_SHIP ?
                                 ItemDefs[i].pMonths :
                                 ItemDefs[i].pInput[c].amt);

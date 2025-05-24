@@ -566,7 +566,7 @@ void Game::RunBuildShipOrder(ARegion *r, Object *obj, Unit *u)
     int ship, skill, level, maxbuild, unfinished, output, percent;
     AString skname;
 
-    ship = abs(u->build);
+    ship = std::abs(u->build);
     skill = lookup_skill(ItemDefs[ship].pSkill);
     level = u->GetSkill(skill);
 
@@ -707,7 +707,7 @@ void Game::RunBuildHelpers(ARegion *r)
                         tarobj = r->GetObject(target->build);
                     } else {
                         // help build ships
-                        int ship = abs(target->build);
+                        int ship = std::abs(target->build);
                         int skill = lookup_skill(ItemDefs[ship].pSkill);
                         int level = u->GetSkill(skill);
                         int needed = 0;
@@ -984,7 +984,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
     }
 
     if (o->item == -1 || ItemDefs[o->item].flags & ItemType::DISABLED) {
-        std::string name = (o->item == -1) ? "that" : ItemString(o->item, 1, ALWAYSPLURAL);
+        std::string name = (o->item == -1) ? "that" : item_string(o->item, 1, ALWAYSPLURAL);
         u->error("PRODUCE: Can't produce " + name + ".");
         delete u->monthorders;
         u->monthorders = nullptr;
@@ -993,7 +993,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 
     int input = ItemDefs[o->item].pInput[0].item;
     if (input == -1) {
-        u->error("PRODUCE: Can't produce " + ItemString(o->item, 1, ALWAYSPLURAL) + ".");
+        u->error("PRODUCE: Can't produce " + item_string(o->item, 1, ALWAYSPLURAL) + ".");
         delete u->monthorders;
         u->monthorders = nullptr;
         return;
@@ -1001,7 +1001,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 
     int level = u->GetSkill(o->skill);
     if (level < ItemDefs[o->item].pLevel) {
-        u->error("PRODUCE: Can't produce " + ItemString(o->item, 1, ALWAYSPLURAL) + ".");
+        u->error("PRODUCE: Can't produce " + item_string(o->item, 1, ALWAYSPLURAL) + ".");
         delete u->monthorders;
         u->monthorders = nullptr;
         return;
@@ -1037,7 +1037,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
     if (ItemDefs[o->item].flags & ItemType::SKILLOUT_HALF) { output *= (level + 1) / 2; }
 
     u->items.SetNum(o->item, u->items.GetNum(o->item) + output);
-    u->event("Produces " + ItemString(o->item, output) + " in " + r->short_print() + ".", "produce", r);
+    u->event("Produces " + item_string(o->item, output) + " in " + r->short_print() + ".", "produce", r);
     u->Practice(o->skill);
     o->target -= output;
     if (o->target > 0) {
@@ -1243,7 +1243,7 @@ void Game::RunAProduction(ARegion *r, Production *p)
                 }
             } else {
                 /* Everything else */
-                u->event("Produces " + ItemString(po->item, ubucks) + " in " + r->short_print() + ".", "produce", r);
+                u->event("Produces " + item_string(po->item, ubucks) + " in " + r->short_print() + ".", "produce", r);
                 u->Practice(po->skill);
             }
             delete u->monthorders;
@@ -1441,7 +1441,7 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
         string str = "Studies " + SkillDefs[sk].name;
         taughtdays = taughtdays / u->GetMen();
         if (taughtdays) { str += " and was taught for " + to_string(taughtdays) + " days"; }
-        str += " at a cost of " + ItemString(I_SILVER, cost) + ".";
+        str += " at a cost of " + item_string(I_SILVER, cost) + ".";
         u->event(str, "study");
         // study to level order
         if (o->level != -1) {
@@ -1720,12 +1720,9 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
     forbid = newreg->Forbidden(unit);
     if (forbid && !startmove && unit->guard != GUARD_ADVANCE) {
         int obs = unit->GetAttribute("observation");
-        unit->event(
-            "Is forbidden entry to " + newreg->short_print() + " by " + forbid->GetName(obs).const_str() + ".",
-            "movement"
-        );
+        unit->event("Is forbidden entry to " + newreg->short_print() + " by " + forbid->get_name(obs) + ".", "movement");
         obs = forbid->GetAttribute("observation");
-        forbid->event(std::string("Forbids entry to ") + unit->GetName(obs).const_str() + ".", "guarding");
+        forbid->event(std::string("Forbids entry to ") + unit->get_name(obs) + ".", "guarding");
         goto done_moving;
     }
 

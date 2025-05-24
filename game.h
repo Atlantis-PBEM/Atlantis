@@ -66,12 +66,12 @@ public:
     bool ReadPlayers();
     bool ReadPlayersLine(parser::token& token, parser::string_parser& parser, Faction *fac, bool new_player);
 
-    int ViewMap(const AString &, const AString &);
+    int view_map(const std::string& typestr,const std::string& mapfile);
     // LLS
     void UnitFactionMap();
     int generate_rules(const std::string& rules, const std::string& css, const std::string& intro);
     std::string FactionTypeDescription(Faction &fac);
-    int Doorders_check(const AString &strOrders, const AString &strCheck);
+    int do_orders_check(const std::string& strOrders, const std::string& strCheck);
 
     Faction *AddFaction(int noleader = 0, ARegion *pStart = nullptr);
 
@@ -160,7 +160,7 @@ private:
     void WriteSurfaceMap(std::ostream& f, ARegionArray *pArr, int type);
     void WriteUnderworldMap(std::ostream& f, ARegionArray *pArr, int type);
     char GetRChar(ARegion *r);
-    AString GetXtraMap(ARegion *, int);
+    std::string GetXtraMap(ARegion *, int type);
 
     // LLS
     // Functions to do upgrades to the ruleset -- should be in extras.cpp
@@ -414,7 +414,7 @@ private:
     void DoGiveOrders();
     void DoWithdrawOrders();
 
-    void WriteTimesArticle(AString);
+    void write_times_article(std::string article);
 
     void DoExchangeOrders();
     void DoExchangeOrder(ARegion *, Unit *, ExchangeOrder *);

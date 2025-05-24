@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
                 break;
             }
 
-            if (!game.ViewMap(args[2], args[3])) {
+            if (!game.view_map(args[2], args[3])) {
                 logger::write("Couldn't write the map file!");
                 break;
             }
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
             }
 
             game.DummyGame();
-            if (!game.Doorders_check(args[2], args[3])) {
+            if (!game.do_orders_check(args[2], args[3])) {
                 logger::write("Couldn't check the orders!");
                 break;
             }

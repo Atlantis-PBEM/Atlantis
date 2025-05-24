@@ -156,7 +156,6 @@ enum {
 
 Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 {
-    AString abbr;
     int i;
 
     race = r;
@@ -254,9 +253,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
     if (ItemDefs[r].type & IT_MONSTER) {
         auto mp = FindMonster(ItemDefs[r].abr.c_str(), (ItemDefs[r].type & IT_ILLUSION))->get();
         if((u->type == U_WMON) || (ItemDefs[r].flags & ItemType::MANPRODUCE))
-            name = AString(mp.name) + " in " + unit->name;
+            name = mp.name + " in " + unit->name;
         else
-            name = AString(mp.name) + " controlled by " + unit->name;
+            name = mp.name + " controlled by " + unit->name;
         askill = mp.attackLevel;
         dskill[ATTACK_COMBAT] += mp.defense[ATTACK_COMBAT];
         if (mp.defense[ATTACK_ENERGY] > dskill[ATTACK_ENERGY]) dskill[ATTACK_ENERGY] = mp.defense[ATTACK_ENERGY];
@@ -292,8 +291,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
         // Check preferred armor first.
         int item = unit->readyArmor[i];
         if (item == -1) break;
-        abbr = ItemDefs[item].abr;
-        item = unit->GetArmor(abbr, ass);
+        item = unit->get_armor(ItemDefs[item].abr, ass);
         if (item != -1) {
             armor = item;
             break;
@@ -301,8 +299,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
     }
     if (armor == -1) {
         for (auto armorType : ArmorDefs) {
-            abbr = armorType.abbr;
-            int item = unit->GetArmor(abbr, ass);
+            int item = unit->get_armor(armorType.abbr, ass);
             if (item != -1) {
                 armor = item;
                 break;
@@ -325,13 +322,11 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
         if (ItemDefs[race].type & IT_MOUNT) {
             // If the man is a mount (Centaurs), then the only option
             // they have for riding is the built-in one
-            abbr = ItemDefs[race].abr;
-            item = unit->GetMount(abbr, canFly, canRide, ridingBonus);
+            item = unit->get_mount(ItemDefs[race].abr, canFly, canRide, ridingBonus);
         } else {
             for (const auto& mount : MountDefs) {
-                abbr = mount.abbr;
                 // See if this mount is an option
-                item = unit->GetMount(abbr, canFly, canRide, ridingBonus);
+                item = unit->get_mount(mount.abbr, canFly, canRide, ridingBonus);
                 if (item == -1) continue;
                 // No riding other men in combat
                 if (ItemDefs[item].type & IT_MAN) {
@@ -365,8 +360,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
         // Check the preferred weapon first.
         int item = unit->readyWeapon[i];
         if (item == -1) break;
-        abbr = ItemDefs[item].abr;
-        item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus, defenseBonus, numAttacks, numHitDamage);
+        item = unit->get_weapon(
+            ItemDefs[item].abr, riding, ridingBonus, attackBonus, defenseBonus, numAttacks, numHitDamage
+        );
         if (item != -1) {
             weapon = item;
             break;
@@ -374,8 +370,9 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
     }
     if (weapon == -1) {
         for (auto& weapontype : WeaponDefs) {
-            abbr = weapontype.abbr;
-            int item = unit->GetWeapon(abbr, riding, ridingBonus, attackBonus, defenseBonus, numAttacks, numHitDamage);
+            int item = unit->get_weapon(
+                weapontype.abbr, riding, ridingBonus, attackBonus, defenseBonus, numAttacks, numHitDamage
+            );
             if (item != -1) {
                 weapon = item;
                 break;
@@ -444,8 +441,7 @@ void Soldier::SetupCombatItems()
     int exclusive = 0;
 
     for (auto pBat : BattleItemDefs) {
-        AString abbr = pBat.abbr;
-        int item = unit->GetBattleItem(abbr);
+        int item = unit->get_battle_item(pBat.abbr);
         if (item == -1) continue;
 
         // If we are using the ready command, skip this item unless
@@ -770,12 +766,12 @@ void Army::WriteLosses(Battle * b) {
         }
 
         int comma = 0;
-        AString damaged;
+        std::string damaged;
         for(const auto u : units) {
             if (comma) {
-                damaged += AString(", ") + AString(u->num);
+                damaged += ", " + std::to_string(u->num);
             } else {
-                damaged = AString("Damaged units: ") + AString(u->num);
+                damaged = "Damaged units: " + std::to_string(u->num);
                 comma = 1;
             }
         }
@@ -854,21 +850,22 @@ void Army::Regenerate(Battle *b)
         if (i<notbehind) {
             int diff = s->maxhits - s->hits;
             if (diff > 0) {
-                AString aName = s->name;
+                std::string aName = s->name;
 
                 if (s->damage != 0) {
-                    b->AddLine(aName + " takes " + s->damage + " hits bringing it to " +
-                        s->hits + "/" + s->maxhits + ".");
+                    b->AddLine(aName + " takes " + std::to_string(s->damage) + " hits bringing it to " +
+                        std::to_string(s->hits) + "/" + std::to_string(s->maxhits) + ".");
                     s->damage = 0;
                 } else {
-                    b->AddLine(aName + " takes no hits leaving it at " + s->hits + "/" + s->maxhits + ".");
+                    b->AddLine(aName + " takes no hits leaving it at " + std::to_string(s->hits) + "/" +
+                        std::to_string(s->maxhits) + ".");
                 }
                 if (s->regen) {
                     int regen = s->regen;
                     if (regen > diff) regen = diff;
                     s->hits += regen;
-                    b->AddLine(aName + " regenerates " + regen + " hits bringing it to " +
-                        s->hits + "/" + s->maxhits + ".");
+                    b->AddLine(aName + " regenerates " + std::to_string(regen) + " hits bringing it to " +
+                        std::to_string(s->hits) + "/" + std::to_string(s->maxhits) + ".");
                 }
             }
         }

@@ -345,12 +345,12 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
     u->items.SetNum(so->item, u->items.GetNum(so->item) + amt);
     tar->items.SetNum(so->item, tar->items.GetNum(so->item) - amt);
 
-    string temp = u->name + " steals " + ItemString(so->item, amt) + " from " + tar->name + ".";
+    string temp = u->name + " steals " + item_string(so->item, amt) + " from " + tar->name + ".";
     for(const auto f : seers) {
         f->event(temp, "theft", r, u);
     }
 
-    tar->event("Has " + ItemString(so->item, amt) + " stolen.", "theft");
+    tar->event("Has " + item_string(so->item, amt) + " stolen.", "theft");
     u->PracticeAttribute("stealth");
     return;
 }
@@ -1312,7 +1312,7 @@ void Game::RunSellOrders()
         for(const auto obj : r->objects) {
             for(const auto u : obj->units) {
                 std::for_each(u->sellorders.begin(), u->sellorders.end(), [u](SellOrder* o) {
-                    u->error("SELL: Can't sell " + ItemString(o->item, o->num, FULLNUM) + ".");
+                    u->error("SELL: Can't sell " + item_string(o->item, o->num, FULLNUM) + ".");
                     delete o;
                 });
                 u->sellorders.clear();
@@ -1372,7 +1372,7 @@ void Game::DoSell(ARegion *r, Market *m)
                     u->ConsumeShared(o->item, temp);
                     u->SetMoney(u->GetMoney() + temp * m->price);
                     oit = u->sellorders.erase(oit);
-                    u->event("Sells " + ItemString(o->item, temp) + " at $" + to_string(m->price) + " each.", "sell");
+                    u->event("Sells " + item_string(o->item, temp) + " at $" + to_string(m->price) + " each.", "sell");
                     delete o;
                     continue;
                 }
@@ -1392,7 +1392,7 @@ void Game::RunBuyOrders()
         for(const auto obj : r->objects) {
             for(const auto u : obj->units) {
                 std::for_each(u->buyorders.begin(), u->buyorders.end(), [u](BuyOrder* o) {
-                    u->error("BUY: Can't buy " + ItemString(o->item, o->num, FULLNUM) + ".");
+                    u->error("BUY: Can't buy " + item_string(o->item, o->num, FULLNUM) + ".");
                     delete o;
                 });
                 u->buyorders.clear();
@@ -1519,7 +1519,7 @@ void Game::DoBuy(ARegion *r, Market *m)
                     u->faction->DiscoverItem(o->item, 0, 1);
                     u->ConsumeSharedMoney(temp * m->price);
                     oit = u->buyorders.erase(oit);
-                    u->event("Buys " + ItemString(o->item, temp) + " at $" + to_string(m->price) + " each.", "buy");
+                    u->event("Buys " + item_string(o->item, temp) + " at $" + to_string(m->price) + " each.", "buy");
                     delete o;
                     continue;
                 }
@@ -1558,7 +1558,7 @@ void Game::CheckUnitMaintenanceItem(int item, int value, int consume)
                             u->needed -= eat * value;
                             u->items.SetNum(item, amount - eat);
 
-                            u->event("Consumes " + ItemString(item, eat) + " for maintenance.", "maintenance");
+                            u->event("Consumes " + item_string(item, eat) + " for maintenance.", "maintenance");
                         }
                     }
                 }
@@ -1597,9 +1597,9 @@ void Game::CheckFactionMaintenanceItem(int item, int value, int consume)
                                         u->needed -= eat * value;
                                         u2->items.SetNum(item, amount - eat);
 
-                                        u->event("Borrows " + ItemString(item, eat) + " from " + u2->name +
+                                        u->event("Borrows " + item_string(item, eat) + " from " + u2->name +
                                             " for maintenance.", "maintenance");
-                                        u2->event(u->name + " borrows " + ItemString(item, eat) +
+                                        u2->event(u->name + " borrows " + item_string(item, eat) +
                                             " for maintenance.", "maintenance");
                                     }
                                 }
@@ -1643,9 +1643,9 @@ void Game::CheckAllyMaintenanceItem(int item, int value)
                                     if (eat) {
                                         u->needed -= eat * value;
                                         u2->items.SetNum(item, amount - eat);
-                                        u2->event(u->name + " borrows " + ItemString(item, eat) +
+                                        u2->event(u->name + " borrows " + item_string(item, eat) +
                                             " for maintenance.", "maintenance");
-                                        u->event("Borrows " + ItemString(item, eat) + " from " +
+                                        u->event("Borrows " + item_string(item, eat) + " from " +
                                             u2->name + " for maintenance.", "maintenance");
                                     }
                                 }
@@ -1679,7 +1679,7 @@ void Game::CheckUnitHungerItem(int item, int value)
                         }
                         if(eat) {
                             u->items.SetNum(item, amount - eat);
-                            u->event("Consumes " + ItemString(item, eat) + " to fend off starvation.", "maintenance");
+                            u->event("Consumes " + item_string(item, eat) + " to fend off starvation.", "maintenance");
                         }
                     }
                 }
@@ -1711,9 +1711,9 @@ void Game::CheckFactionHungerItem(int item, int value)
                                     }
                                     if (eat) {
                                         u2->items.SetNum(item, amount - eat);
-                                        u->event("Borrows " + ItemString(item, eat) + " from " + u2->name +
+                                        u->event("Borrows " + item_string(item, eat) + " from " + u2->name +
                                             " to fend off starvation.", "maintenance");
-                                        u2->event(u->name + " borrows " + ItemString(item, eat) +
+                                        u2->event(u->name + " borrows " + item_string(item, eat) +
                                             " to fend off starvation.", "maintenance");
                                     }
                                 }
@@ -1751,9 +1751,9 @@ void Game::CheckAllyHungerItem(int item, int value)
                                     }
                                     if (eat) {
                                         u2->items.SetNum(item, amount - eat);
-                                        u2->event(u->name + " borrows " + ItemString(item, eat) +
+                                        u2->event(u->name + " borrows " + item_string(item, eat) +
                                             " to fend off starvation.", "maintenance");
-                                        u->event("Borrows " + ItemString(item, eat) + " from " +
+                                        u->event("Borrows " + item_string(item, eat) + " from " +
                                             u2->name + " to fend off starvation.", "maintenance");
                                     }
                                 }
@@ -1817,14 +1817,14 @@ void Game::AssessMaintenance()
                                 int eat = (u->hunger + value - 1) / value;
                                 /* Now see if faction has money */
                                 if (u->faction->unclaimed >= eat * cost) {
-                                    u->event("Withdraws " + ItemString(i, eat) + " for maintenance.", "maintenance");
+                                    u->event("Withdraws " + item_string(i, eat) + " for maintenance.", "maintenance");
                                     u->faction->unclaimed -= eat * cost;
                                     u->hunger -= eat * value;
                                     u->stomach_space -= eat * value;
                                     u->needed -= eat * value;
                                 } else {
                                     int amount = u->faction->unclaimed / cost;
-                                    u->event("Withdraws " + ItemString(i, amount) + " for maintenance.", "maintenance");
+                                    u->event("Withdraws " + item_string(i, amount) + " for maintenance.", "maintenance");
                                     u->faction->unclaimed -= amount * cost;
                                     u->hunger -= amount * value;
                                     u->stomach_space -= amount * value;
@@ -1944,20 +1944,20 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
     }
 
     if (cost > u->faction->unclaimed) {
-        u->error(string("WITHDRAW: Too little unclaimed silver to withdraw ") + ItemString(itm, amt) + ".");
+        u->error(string("WITHDRAW: Too little unclaimed silver to withdraw ") + item_string(itm, amt) + ".");
         return 0;
     }
 
     if (ItemDefs[itm].max_inventory) {
         int cur = u->items.GetNum(itm) + amt;
         if (cur > ItemDefs[itm].max_inventory) {
-            u->error(string("WITHDRAW: Unit cannot have more than ") + ItemString(itm, ItemDefs[itm].max_inventory));
+            u->error(string("WITHDRAW: Unit cannot have more than ") + item_string(itm, ItemDefs[itm].max_inventory));
             return 0;
         }
     }
 
     u->faction->unclaimed -= cost;
-    u->event("Withdraws " + ItemString(o->item, amt) + ".", "withdraw");
+    u->event("Withdraws " + item_string(o->item, amt) + ".", "withdraw");
     u->items.SetNum(itm, u->items.GetNum(itm) + amt);
     u->faction->DiscoverItem(itm, 0, 1);
     return 0;
@@ -2110,9 +2110,9 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
     // Check other unit has enough to give
     int amtRecieve = o->expectAmount;
     if (amtRecieve > t->GetSharedNum(o->expectItem)) {
-        t->error(string("EXCHANGE: Not giving enough. Expecting ") + ItemString(o->expectItem, o->expectAmount) + ".");
+        t->error(string("EXCHANGE: Not giving enough. Expecting ") + item_string(o->expectItem, o->expectAmount) + ".");
         u->error(string("EXCHANGE: Exchange aborted.  Not enough recieved. Expecting ") +
-            ItemString(o->expectItem, o->expectAmount) + ".");
+            item_string(o->expectItem, o->expectAmount) + ".");
         return;
     }
 
@@ -2124,27 +2124,27 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
             exchangeOrderFound = true;
             if (tOrder->giveAmount < o->expectAmount) {
                 t->error(string("EXCHANGE: Not giving enough. Expecting ") +
-                    ItemString(o->expectItem, o->expectAmount) + ".");
+                    item_string(o->expectItem, o->expectAmount) + ".");
                 u->error(string("EXCHANGE: Exchange aborted. Not enough recieved. Expecting ") +
-                    ItemString(o->expectItem, o->expectAmount) + ".");
+                    item_string(o->expectItem, o->expectAmount) + ".");
                 tOrder->exchangeStatus = 0;
                 o->exchangeStatus = 0;
                 return;
             }
             if (tOrder->giveAmount > o->expectAmount) {
                 t->error(string("EXCHANGE: Exchange aborted. Too much given. Expecting ") +
-                    ItemString(o->expectItem, o->expectAmount) + ".");
+                    item_string(o->expectItem, o->expectAmount) + ".");
                 u->error(string("EXCHANGE: Exchange aborted. Too much offered. Expecting ") +
-                    ItemString(o->expectItem, o->expectAmount) + ".");
+                    item_string(o->expectItem, o->expectAmount) + ".");
                 tOrder->exchangeStatus = 0;
                 o->exchangeStatus = 0;
             }
             if (tOrder->giveAmount == o->expectAmount) o->exchangeStatus = 1;
             if (o->exchangeStatus == 1 && tOrder->exchangeStatus == 1) {
-                u->event("Exchanges " + ItemString(o->giveItem, o->giveAmount) + " with " + t->name +
-                    " for " + ItemString(tOrder->giveItem, tOrder->giveAmount) +    ".", "exchange");
-                t->event("Exchanges " + ItemString(tOrder->giveItem, tOrder->giveAmount) + " with " +
-                    u->name + " for " + ItemString(o->giveItem, o->giveAmount) + ".", "exchange");
+                u->event("Exchanges " + item_string(o->giveItem, o->giveAmount) + " with " + t->name +
+                    " for " + item_string(tOrder->giveItem, tOrder->giveAmount) +    ".", "exchange");
+                t->event("Exchanges " + item_string(tOrder->giveItem, tOrder->giveAmount) + " with " +
+                    u->name + " for " + item_string(o->giveItem, o->giveAmount) + ".", "exchange");
                 u->ConsumeShared(o->giveItem, o->giveAmount);
                 t->items.SetNum(o->giveItem, t->items.GetNum(o->giveItem) + o->giveAmount);
                 t->ConsumeShared(tOrder->giveItem, tOrder->giveAmount);
@@ -2193,7 +2193,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
                 ship = -1;
                 for(auto it : u->items) {
                     if (it->type == o->item) {
-                        u->event("Abandons " + string(it->Report(1).const_str()) + ".", event_type);
+                        u->event("Abandons " + it->report(true) + ".", event_type);
                         ship = it->type;
                     }
                 }
@@ -2233,7 +2233,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
             }
 
             u->object->SetNumShips(o->item, num - o->amount);
-            u->event("Abandons " + ItemString(o->item, num - o->amount) + ".", event_type);
+            u->event("Abandons " + item_string(o->item, num - o->amount) + ".", event_type);
             return 0;
         }
         // GIVE to unit:
@@ -2321,11 +2321,11 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
             it->type = o->item;
             it->num = s->items.GetNum(o->item);
             if (o->type == O_TAKE) {
-                u->event("Takes " + string(it->Report(1).const_str()) + " from " + s->name + ".", event_type);
+                u->event("Takes " + it->report(true) + " from " + s->name + ".", event_type);
             } else {
-                u->event("Gives " + string(it->Report(1).const_str()) + " to " + t->name + ".", event_type);
+                u->event("Gives " + it->report(true) + " to " + t->name + ".", event_type);
                 if (s->faction != t->faction) {
-                    t->event("Receives " + string(it->Report(1).const_str()) + " from " + s->name + ".", event_type);
+                    t->event("Receives " + it->report(true) + " from " + s->name + ".", event_type);
                 }
             }
             s->items.SetNum(o->item, 0);
@@ -2373,7 +2373,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
                 cur = t->object->GetNumShips(o->item) + amt;
                 if (cur > ItemDefs[o->item].max_inventory) {
                     u->error(ord + ": Fleets cannot have more than " +
-                        ItemString(o->item, ItemDefs[o->item].max_inventory) + ".");
+                        item_string(o->item, ItemDefs[o->item].max_inventory) + ".");
                     return 0;
                 }
             }
@@ -2392,9 +2392,9 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
                 }
             }
 
-            s->event("Transfers " + ItemString(o->item, amt) + " to " + t->object->name + ".", ord);
+            s->event("Transfers " + item_string(o->item, amt) + " to " + t->object->name + ".", ord);
             if (s->faction != t->faction) {
-                t->event("Receives " + ItemString(o->item, amt) + " from " + s->object->name + ".", ord);
+                t->event("Receives " + item_string(o->item, amt) + " from " + s->object->name + ".", ord);
             }
             s->object->SetNumShips(o->item, s->object->GetNumShips(o->item) - amt);
             t->object->SetNumShips(o->item, t->object->GetNumShips(o->item) + amt);
@@ -2454,7 +2454,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
         } else {
             u->ConsumeShared(o->item, amt);
         }
-        u->event(temp + ItemString(o->item, amt) + ".", event_type);
+        u->event(temp + item_string(o->item, amt) + ".", event_type);
         return 0;
     }
 
@@ -2476,9 +2476,9 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
     }
     if (u == t) {
         if (o->type == O_TAKE)
-            u->error(ord + ": Attempt to take " + ItemString(o->item, amt) + " from self.");
+            u->error(ord + ": Attempt to take " + item_string(o->item, amt) + " from self.");
         else
-            u->error(ord + ": Attempt to give " + ItemString(o->item, amt) + " to self.");
+            u->error(ord + ": Attempt to give " + item_string(o->item, amt) + " to self.");
         return 0;
     }
     // New RULE -- Must be able to see unit to give something to them!
@@ -2647,17 +2647,17 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
     if (ItemDefs[o->item].max_inventory) {
         cur = t->items.GetNum(o->item) + amt;
         if (cur > ItemDefs[o->item].max_inventory) {
-            u->error(ord + ": Unit cannot have more than " + ItemString(o->item, ItemDefs[o->item].max_inventory));
+            u->error(ord + ": Unit cannot have more than " + item_string(o->item, ItemDefs[o->item].max_inventory));
             return 0;
         }
     }
 
     if (o->type == O_TAKE) {
-        u->event("Takes " + ItemString(o->item, amt) + " from " + s->name + ".", event_type);
+        u->event("Takes " + item_string(o->item, amt) + " from " + s->name + ".", event_type);
     } else {
-        u->event("Gives " + ItemString(o->item, amt) + " to " + t->name + ".", event_type);
+        u->event("Gives " + item_string(o->item, amt) + " to " + t->name + ".", event_type);
         if (s->faction != t->faction)
-            t->event("Receives " + ItemString(o->item, amt) + " from " + s->name + ".", event_type);
+            t->event("Receives " + item_string(o->item, amt) + " from " + s->name + ".", event_type);
     }
     s->ConsumeShared(o->item, amt);
     t->items.SetNum(o->item, t->items.GetNum(o->item) + amt);
@@ -2928,10 +2928,10 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
                     } else if (amt > u->GetSharedNum(t->item)) {
                         amt = u->GetSharedNum(t->item);
                         if (amt) {
-                            u->error("TRANSPORT: Do not have " + ItemString(t->item, t->amount) +
-                                ". Transporting " + ItemString(t->item, amt) + " instead.");
+                            u->error("TRANSPORT: Do not have " + item_string(t->item, t->amount) +
+                                ". Transporting " + item_string(t->item, amt) + " instead.");
                         } else {
-                            u->error("TRANSPORT: Unable to transport. Have " + ItemString(t->item, 0) + ".");
+                            u->error("TRANSPORT: Unable to transport. Have " + item_string(t->item, 0) + ".");
                             continue;
                         }
                     }
@@ -2940,7 +2940,7 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
                         int cur = tar->unit->items.GetNum(t->item) + amt;
                         if (cur > ItemDefs[t->item].max_inventory) {
                             u->error("TRANSPORT: Target cannot have more than " +
-                                    ItemString(t->item, ItemDefs[t->item].max_inventory) + ".");
+                                    item_string(t->item, ItemDefs[t->item].max_inventory) + ".");
                             continue;
                         }
                     }
@@ -2959,16 +2959,16 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 
                     // if not, don't ship
                     if (cost > u->GetSharedMoney()) {
-                        u->error("TRANSPORT: Cannot afford shipping cost for " + ItemString(t->item, amt) + ".");
+                        u->error("TRANSPORT: Cannot afford shipping cost for " + item_string(t->item, amt) + ".");
                         continue;
                     }
                     u->ConsumeSharedMoney(cost);
 
                     u->ConsumeShared(t->item, amt);
-                    u->event("Transports " + ItemString(t->item, amt) + " to " + tar->unit->name +
+                    u->event("Transports " + item_string(t->item, amt) + " to " + tar->unit->name +
                         " for $" + to_string(cost) + ".", "transport");
                     if (u->faction != tar->unit->faction) {
-                        tar->unit->event("Receives " + ItemString(t->item, amt) + " from " + u->name + ".", "transport");
+                        tar->unit->event("Receives " + item_string(t->item, amt) + " from " + u->name + ".", "transport");
                     }
 
                     if (phase == TransportOrder::TransportPhase::INTER_QM_TRANSPORT) {
@@ -3026,7 +3026,7 @@ void Game::RunSacrificeOrders() {
 
                     int current = u->items.GetNum(o->item);
                     if (current < o->amount) {
-                        u->error("SACRIFICE: You can only sacrifice up to " + ItemString(o->item, current) + ".");
+                        u->error("SACRIFICE: You can only sacrifice up to " + item_string(o->item, current) + ".");
                         o->amount = current;
                     }
 
@@ -3036,7 +3036,7 @@ void Game::RunSacrificeOrders() {
                     // Okay we have a valid sacrifice.  Do it.
                     sacrifice_object->incomplete += used;
                     u->items.SetNum(o->item, current - used);
-                    u->event("Sacrifices " + ItemString(o->item, used) + ".", "sacrifice");
+                    u->event("Sacrifices " + item_string(o->item, used) + ".", "sacrifice");
                     // sacrifice objects store the remaining needed sacrifices as negative numbers in incomplete
                     if (sacrifice_object->incomplete >= 0) {
                         // was the reward an item
@@ -3047,7 +3047,7 @@ void Game::RunSacrificeOrders() {
                                     if (recip->faction == u->faction && recip->GetMen() != 0) {
                                         done = true;
                                         recip->items.SetNum(reward_item, recip->items.GetNum(reward_item) + reward_amt);
-                                        recip->event("Gains " + ItemString(reward_item, reward_amt) +
+                                        recip->event("Gains " + item_string(reward_item, reward_amt) +
                                             " from sacrifice.", "sacrifice");
                                         recip->faction->DiscoverItem(reward_item, 0, 1);
 
@@ -3073,7 +3073,7 @@ void Game::RunSacrificeOrders() {
 
                 // If we didn't succeed, log the error
                 if (!succeeded) {
-                    u->error("SACRIFICE: Unable to sacrifice " + ItemString(o->item, o->amount));
+                    u->error("SACRIFICE: Unable to sacrifice " + item_string(o->item, o->amount));
                 }
             }
         }

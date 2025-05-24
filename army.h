@@ -97,7 +97,7 @@ class Soldier {
         void Dead();
 
         /* Unit info */
-        AString name;
+        std::string name;
         Unit * unit;
         int race;
         int riding;

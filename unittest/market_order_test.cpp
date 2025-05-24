@@ -69,7 +69,7 @@ ut::suite<"Market Orders"> market_order_suite = []
 
     expect(faction->errors.size() == 0_ul);
     expect(faction->events.size() == 4_ul);
-    std::string amt_string = ItemString(item_id, max_amount / 4);
+    std::string amt_string = item_string(item_id, max_amount / 4);
     expect(faction->events[0].message == "Buys " + amt_string + " at $" + std::to_string(price) + " each.");
     expect(faction->events[0].unit == unit);
     expect(faction->events[1].message == "Buys " + amt_string + " at $" + std::to_string(price) + " each.");
@@ -147,7 +147,7 @@ ut::suite<"Market Orders"> market_order_suite = []
 
     expect(faction->errors.size() == 0_ul);
     expect(faction->events.size() == 4_ul);
-    std::string amt_string = ItemString(item_id, max_amount / 4);
+    std::string amt_string = item_string(item_id, max_amount / 4);
     expect(faction->events[0].message == "Sells " + amt_string + " at $" + std::to_string(price) + " each.");
     expect(faction->events[0].unit == unit);
     expect(faction->events[1].message == "Sells " + amt_string + " at $" + std::to_string(price) + " each.");

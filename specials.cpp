@@ -185,7 +185,7 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
         Army *def, int behind, int canattackback)
 {
     int i, num, tot = -1;
-    AString results[4];
+    std::string results[4];
     int dam = 0;
 
     if (a->special == NULL) return;
@@ -211,10 +211,10 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 
         if (spd.effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {
             if (spd.damage[i].effect == NULL) {
-                results[dam] = AString("killing ") + num;
+                results[dam] = "killing " + std::to_string(num);
                 dam++;
             } else {
-                results[dam] = AString(spd.spelldesc2) + num;
+                results[dam] = spd.spelldesc2 + std::to_string(num);
             }
         }
         if (num != -1) {
@@ -225,18 +225,19 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
     if (tot == -1) AddLine(a->name + " " + spd.spelldesc + ", but it is deflected.");
     else if (tot > 0) {
         if (spd.effectflags & SpecialType::FX_DONT_COMBINE) {
-            AString temp = a->name + " " + spd.spelldesc;
+            std::string temp = a->name + " " + spd.spelldesc;
             for (i = 0; i < dam; i++) {
                 if (i) temp += ", ";
                 if (i == dam-1) temp += " and ";
                 temp += results[dam];
             }
 
-            temp += AString(spd.spelltarget) + ".";
+            temp += std::string(spd.spelltarget) + ".";
             AddLine(temp);
         }
         else {
-            AddLine(a->name + " " + spd.spelldesc + ", " + spd.spelldesc2 + tot + spd.spelltarget + ".");
+            AddLine(a->name + " " + spd.spelldesc + ", " + spd.spelldesc2 + std::to_string(tot) +
+                spd.spelltarget + ".");
         }
     }
 }

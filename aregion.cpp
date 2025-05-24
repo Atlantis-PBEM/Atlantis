@@ -16,7 +16,6 @@
 #include <queue>
 #include "scoped_enum.hpp"
 #include "strings_util.hpp"
-using namespace std;
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -67,7 +66,7 @@ TownInfo::TownInfo()
 
 TownInfo::~TownInfo() { }
 
-void TownInfo::Readin(istream &f)
+void TownInfo::Readin(std::istream &f)
 {
     std::string temp;
     std::getline(f >> std::ws, temp);
@@ -76,7 +75,7 @@ void TownInfo::Readin(istream &f)
     f >> hab;
 }
 
-void TownInfo::Writeout(ostream& f)
+void TownInfo::Writeout(std::ostream& f)
 {
     f << name << '\n' << pop << '\n' << hab << '\n';
 }
@@ -884,7 +883,7 @@ std::set<Faction *>ARegion::PresentFactions()
     return facs;
 }
 
-void ARegion::Writeout(ostream& f)
+void ARegion::Writeout(std::ostream& f)
 {
     f << name << '\n';
     f << num << '\n';
@@ -935,14 +934,14 @@ static int lookup_region_type(const std::string& token)
     return -1;
 }
 
-void ARegion::Readin(istream &f, std::list<Faction *>& facs)
+void ARegion::Readin(std::istream &f, std::list<Faction *>& facs)
 {
     std::getline(f >> std::ws, name);
 
     f >> num;
 
     std::string str;
-    f >> ws >> str;
+    f >> std::ws >> str;
     type = lookup_region_type(str);
 
     f >> buildingseq;
@@ -950,7 +949,7 @@ void ARegion::Readin(istream &f, std::list<Faction *>& facs)
     if (gate > 0) f >> gatemonth;
 
 
-    f >> ws >> str;
+    f >> std::ws >> str;
     race = lookup_item(str);
 
     f >> population;
@@ -1015,7 +1014,7 @@ void ARegion::Readin(istream &f, std::list<Faction *>& facs)
 
 int ARegion::CanMakeAdv(Faction *fac, int item)
 {
-    AString skname;
+    std::string skname;
     int sk;
 
     if (Globals->IMPROVED_FARSIGHT) {
@@ -1066,13 +1065,13 @@ json ARegion::basic_region_data() {
     json j;
     j["terrain"] = TerrainDefs[type].name;
 
-    string label = (this->level->strName.empty() ? "surface" : this->level->strName);
+    std::string label = (this->level->strName.empty() ? "surface" : this->level->strName);
     j["coordinates"] = { { "x", xloc }, { "y", yloc }, { "z", zloc }, { "label", label } };
 
     // in order to support games with different UW settings, we need to put a bit more information in the JSON to
     // make the text report easier.. exact depth being hidden is really stupid, but that's the way the text report is.
     if (!Globals->EASIER_UNDERWORLD) {
-        string z_prefix = "";
+        std::string z_prefix = "";
         if (zloc >= 2 && zloc < Globals->UNDERWORLD_LEVELS + 2) {
             for (int i = zloc; i > 3; i--) {
                 z_prefix += "very ";
@@ -1118,14 +1117,14 @@ void ARegion::build_json_report(json& j, Faction *fac, int month, ARegionList& r
     }
 
     if (Globals->WEATHER_EXISTS) {
-        string weather_name = clearskies ? "unnaturally clear" : SeasonNames[weather];
+        std::string weather_name = clearskies ? "unnaturally clear" : SeasonNames[weather];
         j["weather"] = {
             { "current", weather_name }, { "next", SeasonNames[regions.GetWeather(this, (month + 1) % 12)] }
         };
     }
 
     if (type == R_NEXUS) {
-        stringstream desc;
+        std::stringstream desc;
         desc << Globals->WORLD_NAME << " Nexus is a magical place: the entryway to the world of "
              << Globals->WORLD_NAME << ". Enjoy your stay; the city guards should keep you safe as long "
              << "as you should choose to stay. However, rumor has it that once you have left the Nexus, "
@@ -1397,7 +1396,7 @@ int ARegion::IsCoastalOrLakeside()
     return seacount;
 }
 
-int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, string *road)
+int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, std::string *road)
 {
     int cost = 1;
     if (Globals->WEATHER_EXISTS) {
@@ -1481,7 +1480,7 @@ bool ARegion::notify_spell_use(Unit *caster, const std::string& spell, ARegionLi
     }
 
     for(const auto f : facs) {
-        string tmp = caster->name + " uses " + SkillStrs(sp) + " in " + print() + ".";
+        std::string tmp = caster->name + " uses " + SkillStrs(sp) + " in " + print() + ".";
         f->event(tmp, "cast", this);
     }
     return true;
@@ -1499,7 +1498,7 @@ void ARegion::notify_city(Unit *caster, const std::string& oldname, const std::s
         }
     }
     for(const auto f : flist) {
-        string tmp = caster->name + " renames " + oldname + " to " + newname + ".";
+        std::string tmp = caster->name + " renames " + oldname + " to " + newname + ".";
         f->event(tmp, "rename");
     }
 }
@@ -1589,7 +1588,7 @@ int ARegion::CountWMons()
 void ARegion::AddFleet(Object *fleet)
 {
     objects.push_back(fleet);
-    newfleets.insert(make_pair(fleetalias++, fleet->num));
+    newfleets.insert(std::make_pair(fleetalias++, fleet->num));
 }
 
 int ARegion::ResolveFleetAlias(int alias)
@@ -1620,7 +1619,7 @@ ARegionList::~ARegionList()
     regions.clear();
 }
 
-void ARegionList::WriteRegions(ostream& f)
+void ARegionList::WriteRegions(std::ostream& f)
 {
     f << regions.size() << "\n";
     f << numLevels << "\n";
@@ -1642,7 +1641,7 @@ void ARegionList::WriteRegions(ostream& f)
     }
 }
 
-int ARegionList::ReadRegions(istream &f, std::list<Faction *>& factions)
+int ARegionList::ReadRegions(std::istream &f, std::list<Faction *>& factions)
 {
     int num;
     f >> num;
@@ -1654,7 +1653,7 @@ int ARegionList::ReadRegions(istream &f, std::list<Faction *>& factions)
         int curX, curY;
         f >> curX >> curY;
         std::string name;
-        std::getline(f >> ws, name);
+        std::getline(f >> std::ws, name);
         ARegionArray *pRegs = new ARegionArray(curX, curY);
         if (name == "none") {
             pRegs->strName = "";
@@ -1678,8 +1677,8 @@ int ARegionList::ReadRegions(istream &f, std::list<Faction *>& factions)
     }
 
     logger::write("Setting up the neighbors...");
-    AString temp;
-    f >> ws >> temp;
+    std::string temp;
+    f >> std::ws >> temp;
     for(const auto reg : regions) {
         for (i = 0; i < NDIRS; i++) {
             int j;
@@ -2118,10 +2117,10 @@ public:
 
 // This doesn't really need to be on the ARegionList but, it's okay for now.
 int ARegionList::get_connected_distance(ARegion *start, ARegion *target, int penalty, int maxdist) {
-    unordered_set<RegionVisited, RegionVisitHash> visited_regions;
+    std::unordered_set<RegionVisited, RegionVisitHash> visited_regions;
     // We want to search the closest regions first so that as soon as we find one that is too far we know *all* the
     // rest will be too far as well.
-    priority_queue<QEntry, vector<QEntry>, QEntryCompare> q;
+    std::priority_queue<QEntry, std::vector<QEntry>, QEntryCompare> q;
 
     if (start == 0 || target == 0) {
         // We were given some unusual (nonexistant) regions
@@ -3098,7 +3097,7 @@ void subdivideArea(
     std::unordered_map<graphs::Location2D, std::vector<graphs::Location2D>> centers;
     for (auto &p : points) {
         centers[p] = { };
-        cout << "{ x: " << p.x << ", y: " << p.y << " }" << std::endl;
+        logger::write("{ x: " + std::to_string(p.x) + ", y: " + std::to_string(p.y) + " }");
     }
 
     for (auto &reg : regions) {

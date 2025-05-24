@@ -467,7 +467,7 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
         }
         if (far_entity) {
             far_entity->items.SetNum(I_IMPRISONED_ENTITY, far_entity->items.GetNum(I_IMPRISONED_ENTITY) - 1);
-            far_entity->event(ItemString(I_IMPRISONED_ENTITY, 1) + " vanishes suddenly.", "anomaly");
+            far_entity->event(item_string(I_IMPRISONED_ENTITY, 1) + " vanishes suddenly.", "anomaly");
             return;
         }
     }
@@ -502,7 +502,7 @@ int report_and_count_entities(ARegionList& regions, std::list<Faction *>& factio
                     for(const auto f : factions) {
                         if (f->is_npc) continue;
                         f->event("An imprisoned entity has been spotted in " + r->short_print() +
-                            " in the possession of " + u->GetName(0).const_str() + ".", "anomaly", r);
+                            " in the possession of " + u->get_name(0) + ".", "anomaly", r);
                     }
                 }
             }
@@ -520,7 +520,7 @@ Faction *Game::CheckVictory()
     ARegion *r, *start;
     Object *o;
     Location *l;
-    AString message, times, temp;
+    std::string message, times, temp;
     map <string, int> vRegions, uvRegions;
     map <string, int>::iterator it;
     string stlstr;
@@ -588,18 +588,15 @@ Faction *Game::CheckVictory()
             d = rng::get_random(6);
         }
         if (d == 2) {
-            message = "Be productive and strong; "
-                "explore new land and find a way to survive.";
-            WriteTimesArticle(message);
+            message = "Be productive and strong; explore new land and find a way to survive.";
+            write_times_article(message);
         } else if (d == 3) {
-            message = "Go into all the world, and tell all "
-                "people that new world is great.";
-            WriteTimesArticle(message);
+            message = "Go into all the world, and tell all people that new world is great.";
+            write_times_article(message);
         } else if (d == 4 || d == 5) {
-            message = "Players have visited ";
-            message += (visited * 100 / (visited + unvisited));
-            message += "% of all inhabited regions.";
-            WriteTimesArticle(message);
+            message = "Players have visited " + std::to_string(visited * 100 / (visited + unvisited)) +
+                "% of all inhabited regions.";
+            write_times_article(message);
         } else if (d == 6) {
             // report an incompletely explored region
             count = 0;
@@ -622,16 +619,10 @@ Faction *Game::CheckVictory()
                     if (it->first == r->name) {
                         if (!count--) {
                             // report this hex
-                            message = "The ";
-                            message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
-                            message += " of ";
-                            message += r->name;
-                            if (TerrainDefs[r->type].similar_type == R_TUNNELS)
-                                message += " are";
-                            else
-                                message += " is";
-                            message += " only partly explored.";
-                            WriteTimesArticle(message);
+                            message = "The " + TerrainDefs[TerrainDefs[r->type].similar_type].name + " of " + r->name +
+                                (TerrainDefs[r->type].similar_type == R_TUNNELS ? " are" : " is") +
+                                " only partly explored.";
+                            write_times_article(message);
                         }
                     }
                 }
@@ -661,14 +652,9 @@ Faction *Game::CheckVictory()
                             // report this hex
                             dir = -1;
                             start = regions.FindNearestStartingCity(r, &dir);
-                            message = "The ";
-                            message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
-                            message += " of ";
-                            message += r->name;
+                            message = "The " + TerrainDefs[TerrainDefs[r->type].similar_type].name + " of " + r->name;
                             if (start == r) {
-                                message += ", containing ";
-                                message += start->town->name;
-                                message += ",";
+                                message += ", containing " + start->town->name + ",";
                             } else if (start && dir != -1) {
                                 message += ", ";
                                 if (r->zloc != start->zloc && dir != MOVE_IN)
@@ -692,16 +678,11 @@ Faction *Game::CheckVictory()
                                         message += "through a shaft in";
                                         break;
                                 }
-                                message += " ";
-                                message += start->town->name;
-                                message += ",";
+                                message += " " + start->town->name + ",";
                             }
-                            if (TerrainDefs[r->type].similar_type == R_TUNNELS)
-                                message += " have";
-                            else
-                                message += " has";
+                            message += (TerrainDefs[r->type].similar_type == R_TUNNELS ? " have" : " has");
                             message += " yet to be visited by exiles from destroyed worlds.";
-                            WriteTimesArticle(message);
+                            write_times_article(message);
                         }
                     }
                 }
@@ -727,7 +708,7 @@ Faction *Game::CheckVictory()
                                 message += " are still in need of your guidance.";
                                 break;
                         }
-                        WriteTimesArticle(message);
+                        write_times_article(message);
                     }
                 }
             }
@@ -756,7 +737,7 @@ Faction *Game::CheckVictory()
                     message += " the ";
                     message += l->unit->name;
                     message += ".  Free the world from this menace and be rewarded!";
-                    WriteTimesArticle(message);
+                    write_times_article(message);
                     delete l;
                 }
 
@@ -768,7 +749,7 @@ Faction *Game::CheckVictory()
                 message += " of ";
                 message += r->name;
                 message += ".";
-                WriteTimesArticle(message);
+                write_times_article(message);
                 break;
             case Quest::BUILD:
                 message = "Quest: Build a ";
@@ -776,7 +757,7 @@ Faction *Game::CheckVictory()
                 message += " in ";
                 message += q->regionname;
                 message += " for the glory of the Gods.";
-                WriteTimesArticle(message);
+                write_times_article(message);
                 break;
             case Quest::VISIT:
                 message = "Quest: Show your devotion by visiting ";
@@ -795,7 +776,7 @@ Faction *Game::CheckVictory()
                     message += it2->c_str();
                 }
                 message += ".";
-                WriteTimesArticle(message);
+                write_times_article(message);
                 break;
             case Quest::DEMOLISH:
                 r = regions.GetRegion(q->regionnum);
@@ -815,7 +796,7 @@ Faction *Game::CheckVictory()
                     message += " in ";
                     message += r->name;
                     message += "!";
-                    WriteTimesArticle(message);
+                    write_times_article(message);
                 }
                 break;
             default:
@@ -889,11 +870,11 @@ Faction *Game::CheckVictory()
                 if (tie) {
                     message += "\nThere is a tie for the most votes with multiple factions having ";
                 } else {
-                    message += string("\n") + "The current leader is " + maxFaction->name + " with ";
+                    message += "\nThe current leader is " + maxFaction->name + " with ";
                 }
                 message += to_string(max_vote) + "/" + to_string(total_cities) + " votes (" + to_string(percent) + "%).";
             }
-            WriteTimesArticle(message);
+            write_times_article(message);
         }
     }
 

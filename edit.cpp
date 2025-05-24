@@ -270,7 +270,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
         logger::write(std::to_string(pReg->Population()) + " " + ItemDefs[pReg->race].names + " totalpop");
 
         // write wages
-        logger::write("Wages: " + std::string(pReg->WagesForReport().const_str()) + ".");
+        logger::write("Wages: " + pReg->wages_for_report() + ".");
         logger::write("Maxwages: " + std::to_string(pReg->maxwages) + ".");
 
         // write products
@@ -527,7 +527,7 @@ void Game::EditGameRegionMarkets(ARegion *pReg)
         logger::write("Wanted: ");
         for (const auto &m : pReg->markets) {
             if (m->type == Market::MarketType::M_SELL) {
-                std::string temp = ItemString(m->item, m->amount) + " at $" + std::to_string(m->price) +
+                std::string temp = item_string(m->item, m->amount) + " at $" + std::to_string(m->price) +
                     "(" + std::to_string(m->baseprice) + ").";
                 temp += " Pop: " + std::to_string(m->minpop) + "/" + std::to_string(m->maxpop) + ".";
                 temp += " Amount: " + std::to_string(m->minamt) + "/" + std::to_string(m->maxamt) + ".";
@@ -538,7 +538,7 @@ void Game::EditGameRegionMarkets(ARegion *pReg)
         logger::write("For Sale: ");
         for (const auto &m : pReg->markets) {
             if (m->type == Market::MarketType::M_BUY) {
-                std::string temp = ItemString(m->item, m->amount) + " at $" + std::to_string(m->price) +
+                std::string temp = item_string(m->item, m->amount) + " at $" + std::to_string(m->price) +
                     "(" + std::to_string(m->baseprice) + ").";
                 temp += " Pop: " + std::to_string(m->minpop) + "/" + std::to_string(m->maxpop) + ".";
                 temp += " Amount: " + std::to_string(m->minamt) + "/" + std::to_string(m->maxamt) + ".";
@@ -851,7 +851,7 @@ void Game::EditGameUnit(Unit *unit)
 void Game::EditGameUnitItems(Unit *pUnit)
 {
     do {
-        logger::write("Unit items: " + std::string(pUnit->items.Report(2, 1, 1).const_str()));
+        logger::write("Unit items: " + pUnit->items.report(2, 1, 1));
         logger::write("  [item] [number] to update an item.");
         logger::write("  q) Stop editing the items.");
 
@@ -889,7 +889,7 @@ void Game::EditGameUnitItems(Unit *pUnit)
 void Game::EditGameUnitSkills(Unit *pUnit)
 {
     do {
-        logger::write("Unit skills: " + std::string(pUnit->skills.Report(pUnit->GetMen()).const_str()));
+        logger::write("Unit skills: " + pUnit->skills.report(pUnit->GetMen()));
         logger::write("  [skill] [days] to update a skill.");
         logger::write("  q) Stop editing the skills.");
 

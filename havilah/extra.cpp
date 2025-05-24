@@ -290,7 +290,7 @@ Faction *Game::CheckVictory()
     ARegion *r, *start;
     Object *o;
     Location *l;
-    AString message, times, temp;
+    std::string message, times, temp;
     map <string, int> vRegions, uvRegions;
     map <string, int>::iterator it;
     string stlstr;
@@ -355,18 +355,15 @@ Faction *Game::CheckVictory()
             d = rng::get_random(6);
         }
         if (d == 2) {
-            message = "Be productive and multiply; "
-                "fill the land and subdue it.";
-            WriteTimesArticle(message);
+            message = "Be productive and multiply; fill the land and subdue it.";
+            write_times_article(message);
         } else if (d == 3) {
-            message = "Go into all the world, and tell all "
-                "people of your fall from grace.";
-            WriteTimesArticle(message);
+            message = "Go into all the world, and tell all people of your fall from grace.";
+            write_times_article(message);
         } else if (d == 4 || d == 5) {
-            message = "Players have visited ";
-            message += (visited * 100 / (visited + unvisited));
-            message += "% of all inhabited regions.";
-            WriteTimesArticle(message);
+            message = "Players have visited " + std::to_string(visited * 100 / (visited + unvisited)) +
+                "% of all inhabited regions.";
+            write_times_article(message);
         } else if (d == 6) {
             // report an incompletely explored region
             count = 0;
@@ -389,16 +386,9 @@ Faction *Game::CheckVictory()
                     if (it->first == r->name) {
                         if (!count--) {
                             // report this hex
-                            message = "The ";
-                            message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
-                            message += " of ";
-                            message += r->name;
-                            if (TerrainDefs[r->type].similar_type == R_TUNNELS)
-                                message += " are";
-                            else
-                                message += " is";
-                            message += " only partly explored.";
-                            WriteTimesArticle(message);
+                            message = "The " + TerrainDefs[TerrainDefs[r->type].similar_type].name + " of " + r->name +
+                                (TerrainDefs[r->type].similar_type == R_TUNNELS ? " are" : " is") + " only partly explored.";
+                            write_times_article(message);
                         }
                     }
                 }
@@ -428,14 +418,9 @@ Faction *Game::CheckVictory()
                             // report this hex
                             dir = -1;
                             start = regions.FindNearestStartingCity(r, &dir);
-                            message = "The ";
-                            message += TerrainDefs[TerrainDefs[r->type].similar_type].name;
-                            message += " of ";
-                            message += r->name;
+                            message = "The " + TerrainDefs[TerrainDefs[r->type].similar_type].name + " of " + r->name;
                             if (start == r) {
-                                message += ", containing ";
-                                message += start->town->name;
-                                message += ",";
+                                message += ", containing " + start->town->name + ",";
                             } else if (start && dir != -1) {
                                 message += ", ";
                                 if (r->zloc != start->zloc && dir != MOVE_IN)
@@ -468,7 +453,7 @@ Faction *Game::CheckVictory()
                             else
                                 message += " has";
                             message += " yet to be visited by exiles from the Eternal City.";
-                            WriteTimesArticle(message);
+                            write_times_article(message);
                         }
                     }
                 }
@@ -494,7 +479,7 @@ Faction *Game::CheckVictory()
                                 message += " are still in need of your guidance.";
                                 break;
                         }
-                        WriteTimesArticle(message);
+                        write_times_article(message);
                     }
                 }
             }
@@ -571,9 +556,9 @@ Faction *Game::CheckVictory()
                 temp += ItemDefs[I_RELICOFGRACE].names;
             }
             temp += " and returned to the Eternal City.";
-            message = AString("You") + temp;
-            times = f->name + temp.const_str();
-            f->event(message.const_str(), "gameover");
+            message = "You" + temp;
+            times = f->name + temp;
+            f->event(message, "gameover");
             message = "You";
             times += "\n\nThey";
             temp = " returned after ";
@@ -649,8 +634,8 @@ Faction *Game::CheckVictory()
                 times += "  They";
                 times += temp;
             }
-            f->event(message.const_str(), "gameover");
-            WriteTimesArticle(times);
+            f->event(message, "gameover");
+            write_times_article(times);
 
             string filename = "winner." + to_string(f->num);
             ofstream wf(filename, ios::out | ios::ate);
@@ -695,10 +680,10 @@ Faction *Game::CheckVictory()
                 if (!o->incomplete) {
                     // You didn't think this was a
                     // _win_ condition, did you?
-                    message = "A blasphemous tower has been completed!\n\n"
-                        "The connection between Havilah and the Eternal City has been severed.\n\n"
-                        "The light fails; darkness falls forever, and all life perishes under endless ice.";
-                    WriteTimesArticle(message);
+                    message = "A blasphemous tower has been completed!\n\n";
+                    message += "The connection between Havilah and the Eternal City has been severed.\n\n";
+                    message += "The light fails; darkness falls forever, and all life perishes under endless ice.";
+                    write_times_article(message);
                     return GetFaction(factions, monfaction);
                 }
                 if (o->incomplete <= ObjectDefs[o->type].cost / 2) {
@@ -737,47 +722,29 @@ Faction *Game::CheckVictory()
                     questsWithProblems.push_back(q);
                     if (l) delete l;
                 } else {
-                    message = "In the ";
-                    message += TerrainDefs[TerrainDefs[l->region->type].similar_type].name;
-                    message += " of ";
-                    message += l->region->name;
-                    if (l->obj->type == O_DUMMY)
-                        message += " roams";
-                    else
-                        message += " lurks";
-                    message += " the ";
-                    message += l->unit->name;
-                    message += ".  Free the world from this menace and be rewarded!";
-                    WriteTimesArticle(message);
+                    message = "In the " + TerrainDefs[TerrainDefs[l->region->type].similar_type].name + " of " + l->region->name;
+                    message += (l->obj->type == O_DUMMY) ? " roams" : " lurks";
+                    message += " the " + l->unit->name + ".  Free the world from this menace and be rewarded!";
+                    write_times_article(message);
                     delete l;
                 }
 
                 break;
             case Quest::HARVEST:
                 r = regions.GetRegion(q->regionnum);
-                message = "Seek a token of the Maker's bounty amongst the ";
-                message += ItemDefs[q->objective.type].names;
-                message += " of ";
-                message += r->name;
-                message += ".";
-                WriteTimesArticle(message);
+                message = "Seek a token of the Maker's bounty amongst the " + ItemDefs[q->objective.type].names +
+                    " of " + r->name + ".";
+                write_times_article(message);
                 break;
             case Quest::BUILD:
-                message = "Build a ";
-                message += ObjectDefs[q->building].name;
-                message += " in ";
-                message += q->regionname;
-                message += " for the glory of the Maker.";
-                WriteTimesArticle(message);
+                message = "Build a " + ObjectDefs[q->building].name + " in " + q->regionname +
+                    " for the glory of the Maker.";
+                write_times_article(message);
                 break;
             case Quest::VISIT:
-                message = "Show your devotion by visiting ";
-                message += ObjectDefs[q->building].name;
-                message += "s in ";
+                message = "Show your devotion by visiting " + ObjectDefs[q->building].name + "s in ";
                 ucount = 0;
-                for (it2 = q->destinations.begin();
-                    it2 != q->destinations.end();
-                    it2++) {
+                for (it2 = q->destinations.begin(); it2 != q->destinations.end(); it2++) {
                     ucount++;
                     if (ucount == q->destinations.size()) {
                         message += " and ";
@@ -787,7 +754,7 @@ Faction *Game::CheckVictory()
                     message += it2->c_str();
                 }
                 message += ".";
-                WriteTimesArticle(message);
+                write_times_article(message);
                 break;
             case Quest::DEMOLISH:
                 r = regions.GetRegion(q->regionnum);
@@ -800,14 +767,9 @@ Faction *Game::CheckVictory()
                     // shouldn't ever happen, but...
                     questsWithProblems.push_back(q);
                 } else {
-                    message = "Tear down the blasphemous ";
-                    message += o->name;
-                    message += " : ";
-                    message += ObjectDefs[o->type].name;
-                    message += " in ";
-                    message += r->name;
-                    message += "!";
-                    WriteTimesArticle(message);
+                    message = "Tear down the blasphemous " + o->name + " : " + ObjectDefs[o->type].name +
+                        " in " + r->name + "!";
+                    write_times_article(message);
                 }
                 break;
             default:
