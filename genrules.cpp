@@ -540,8 +540,8 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     f << enclose("li", true) << url("#magic_usingmagic", "Using Magic") << '\n' << enclose("li", false);
     f << enclose("li", true) << url("#magic_incombat", "Mages In Combat") << '\n' << enclose("li", false);
     if (app_exist) {
-        string ref = "#magic_" + string(Globals->APPRENTICE_NAME) + "s";
-        string text = string(Globals->APPRENTICE_NAME) + "s";
+        string ref = "#magic_" + Globals->APPRENTICE_NAME + "s";
+        string text = Globals->APPRENTICE_NAME + "s";
         text[0] = toupper(text[0]);
         f << enclose("li", true) << url(ref, text) << '\n' << enclose("li", false);
     }
@@ -829,7 +829,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
             if (fp == F_MAGIC) {
                 f << enclose("th", true)
                   << "Magic (max mages"
-                  << (app_exist ? " / " + string(Globals->APPRENTICE_NAME) + "s" : "")
+                  << (app_exist ? " / " + Globals->APPRENTICE_NAME + "s" : "")
                   << ")\n"
                   << enclose("th", false);
             }
@@ -1047,7 +1047,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     f << pre(true);
     f << "plain (172,110) in Turia, 500 peasants";
     if (Globals->RACES_EXIST)
-        f << " (" + string(ItemDefs[manidx].names) + ")";
+        f << " (" + ItemDefs[manidx].names + ")";
     int money = (500 * (15 - Globals->MAINTENANCE_COST));
     f << ", $" << money << ".\n";
     f << "------------------------------------------------------\n";
@@ -1707,7 +1707,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
         f << (Globals->SKILL_LIMIT_NONLEADERS
               ? "A unit may only learn one skill. "
               : "A unit may learn as many skills as it requires. ");
-        auto mt = FindRace("MAN");
+        auto mt = find_race("MAN");
         if (mt) {
             f << "Skills can be learned up to a maximum level of " << mt->get().defaultlevel << ".";
         }
@@ -1735,7 +1735,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
         for (int i = 0; i < NITEMS; i++) {
             if (ItemDefs[i].flags & ItemType::DISABLED) continue;
             if (!(ItemDefs[i].type & IT_MAN)) continue;
-            auto mt = FindRace(ItemDefs[i].abr.c_str())->get();
+            auto mt = find_race(ItemDefs[i].abr)->get();
 
             f << enclose("tr", true);
             f << enclose("td align=\"left\" nowrap", true) << ItemDefs[i].names << '\n' << enclose("td", false);
@@ -1743,9 +1743,10 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
             int spec = 0;
             comma = 0;
             for (int j = 0; j < (int)(sizeof(mt.skills) / sizeof(mt.skills[0])); j++) {
-                auto pS = FindSkill(mt.skills[j]);
+                if (!mt.skills[j]) continue;
+                auto pS = FindSkill(mt.skills[j]->c_str());
                 if (!pS) continue;
-                if (string(pS->get().abbr) == "MANI" && Globals->MAGE_NONLEADERS) {
+                if (pS->get().abbr == "MANI" && Globals->MAGE_NONLEADERS) {
                     spec = 1;
                     f << (comma ? ", " : "") << "all magical skills";
                     comma++;
@@ -2225,7 +2226,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
         f << '\n' << enclose("td", false);
         f << enclose("td align=\"left\"", true);
         if (ItemDefs[i].type & IT_WEAPON) {
-            auto weapon_def = FindWeapon(ItemDefs[i].abr.c_str())->get();
+            auto weapon_def = find_weapon(ItemDefs[i].abr)->get();
             if (weapon_def.attackBonus || weapon_def.defenseBonus ||
                     (weapon_def.flags & WeaponType::RANGED) ||
                     (weapon_def.flags & WeaponType::NEEDSKILL)) {
@@ -2252,14 +2253,14 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
             }
         }
         if (ItemDefs[i].type & IT_MOUNT) {
-            auto mount = FindMount(ItemDefs[i].abr.c_str()).value().get();
+            auto mount = find_mount(ItemDefs[i].abr).value().get();
             auto pS = FindSkill(mount.skill);
             if (pS && !(pS->get().flags & SkillType::DISABLED)) {
                 f << "Gives a riding bonus with the " << pS->get().name << " skill.<br />";
             }
         }
         if (ItemDefs[i].type & IT_ARMOR) {
-            auto armor = FindArmor(ItemDefs[i].abr.c_str())->get();
+            auto armor = find_armor(ItemDefs[i].abr)->get();
             f << "Gives a " << armor.saves[SLASHING] << " in " << armor.from
               << " chance to survive a normal hit.<br />"
               << ((armor.flags & ArmorType::USEINASSASSINATE && has_stea) ?
@@ -3211,12 +3212,12 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
                     if (!(item.type & IT_ARMOR)) return false;
                     if (!(item.type & IT_NORMAL)) return false;
                     if (item.flags & ItemType::DISABLED) return false;
-                    auto armor = FindArmor(item.abr.c_str());
+                    auto armor = find_armor(item.abr);
                     if (!armor) return false;
                     if (!(armor->get().flags & ArmorType::USEINASSASSINATE)) return false;
                     return true;
                 }) |
-                std::views::transform([](const auto& item) { return std::string(item.name); });
+                std::views::transform([](const auto& item) { return item.name; });
 
             std::vector<std::string> names(filtered_item_names.begin(), filtered_item_names.end());
 
@@ -3711,7 +3712,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
           << "regions will be destroyed.  The neighboring regions will also be annihilated.  The region to be "
           << "annihilated must be specified by coordinates.";
 
-        auto rt = FindRange("rng_annihilate").value().get();
+        auto rt = find_range("rng_annihilate").value().get();
         if (rt.flags & RangeType::RNG_SURFACE_ONLY) {
             f << " The Z coordinate, if specified, is ignored as this skill may only target the surface.";
         } else {
@@ -4112,7 +4113,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
           ? "normal units who wish to learn a new skill, but already know a different skill. It can also be used for "
           : "")
       << "a mage"
-      << (Globals-> APPRENTICES_EXIST ? (qm_exist ? ", " : ", or ") + string(Globals->APPRENTICE_NAME) : "")
+      << (Globals-> APPRENTICES_EXIST ? (qm_exist ? ", " : ", or ") + Globals->APPRENTICE_NAME : "")
       << (qm_exist ? ", or quartermaster" : "")
       << " who wish to become a normal unit. A common reason for this is to be able to change faction points.\n"
       << enclose("p", false);

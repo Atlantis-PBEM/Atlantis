@@ -9,11 +9,11 @@ const std::string& AGetNameString(int name) {
 
 void Game::CreateWorld() {
     logger::write("Creating world");
-    regions.CreateLevels(1);
+    regions.create_levels(1);
     // because of the way regions are numbered, if you want 4 hexes you need a height of 4 and a width of 2.
-    regions.CreateSurfaceLevel(0, 2, 4, nullptr);
+    regions.create_surface_level(0, 2, 4, "");
     // Make an underworld level
-    regions.CreateUnderworldLevel(1, 1, 2, "underworld");
+    regions.create_underworld_level(1, 1, 2, "underworld");
     // Make a shaft
     regions.MakeShaftLinks(0, 1, 100);
 

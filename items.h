@@ -173,7 +173,7 @@ class ManType
         int terrain;
         int speciallevel;
         int defaultlevel;
-        char const *skills[6];
+        std::optional<std::string> skills[6];
         Ethnicity ethnicity;
 
         bool CanProduce(int);
@@ -412,13 +412,13 @@ extern std::optional<int> parse_item_category(const parser::token& token);
 
 extern int lookup_item(const strings::ci_string& name);
 
-extern std::optional<std::reference_wrapper<BattleItemType>> FindBattleItem(char const *abbr);
-extern std::optional<std::reference_wrapper<ItemType>> FindItem(char const *abbr);
-extern std::optional<std::reference_wrapper<ArmorType>> FindArmor(char const *abbr);
-extern std::optional<std::reference_wrapper<WeaponType>> FindWeapon(char const *abbr);
-extern std::optional<std::reference_wrapper<MountType>> FindMount(char const *abbr);
-extern std::optional<std::reference_wrapper<MonType>> FindMonster(char const *abbr, int illusion);
-extern std::optional<std::reference_wrapper<ManType>> FindRace(char const *abbr);
+extern std::optional<std::reference_wrapper<BattleItemType>> find_battle_item(const strings::ci_string& abbr);
+extern std::optional<std::reference_wrapper<ItemType>> find_item(const strings::ci_string& abbr);
+extern std::optional<std::reference_wrapper<ArmorType>> find_armor(const strings::ci_string& abbr);
+extern std::optional<std::reference_wrapper<WeaponType>> find_weapon(const strings::ci_string& abbr);
+extern std::optional<std::reference_wrapper<MountType>> find_mount(const strings::ci_string& abbr);
+extern std::optional<std::reference_wrapper<MonType>> find_monster(const strings::ci_string& abbr, int illusion);
+extern std::optional<std::reference_wrapper<ManType>> find_race(const strings::ci_string& abbr);
 extern std::string attack_type(int atype);
 
 enum {
@@ -477,6 +477,6 @@ class ItemList
 
 };
 
-extern std::string show_special(char const *special, int level, int expandLevel, int fromItem);
+extern std::string show_special(const std::string& special, int level, int expandLevel, int fromItem);
 
 #endif // ITEMS_H

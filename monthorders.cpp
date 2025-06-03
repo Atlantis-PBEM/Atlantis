@@ -456,7 +456,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
     int type = buildobj->type;
     int sk = lookup_skill(ObjectDefs[type].skill);
     if (sk == -1) {
-        u->error("BUILD: Can't build " + string(ObjectDefs[type].name) + ".");
+        u->error("BUILD: Can't build " + ObjectDefs[type].name + ".");
         delete u->monthorders;
         u->monthorders = nullptr;
         return;
@@ -464,7 +464,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 
     int usk = u->GetSkill(sk);
     if (usk < ObjectDefs[type].level) {
-        u->error("BUILD: Can't build " + string(ObjectDefs[type].name) + ".");
+        u->error("BUILD: Can't build " + ObjectDefs[type].name + ".");
         delete u->monthorders;
         u->monthorders = nullptr;
         return;
@@ -473,7 +473,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
     int needed = buildobj->incomplete;
     // AS
     if (((ObjectDefs[type].flags & ObjectType::NEVERDECAY) || !Globals->DECAY) && needed < 1) {
-        u->error("BUILD: " + string(ObjectDefs[type].name) + " is finished.");
+        u->error("BUILD: " + ObjectDefs[type].name + " is finished.");
         delete u->monthorders;
         u->monthorders = nullptr;
         return;
@@ -481,7 +481,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 
     // AS
     if (needed <= -(ObjectDefs[type].maxMaintenance)) {
-        u->error("BUILD: " + string(ObjectDefs[type].name) + " does not yet require maintenance.");
+        u->error("BUILD: " + ObjectDefs[type].name + " does not yet require maintenance.");
         delete u->monthorders;
         u->monthorders = nullptr;
         return;
@@ -496,7 +496,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
     }
 
     if (itn == 0) {
-        u->error("BUILD: Don't have the required materials to build " + string(ObjectDefs[type].name) + ".");
+        u->error("BUILD: Don't have the required materials to build " + ObjectDefs[type].name + ".");
         delete u->monthorders;
         u->monthorders = nullptr;
         return;
@@ -571,7 +571,7 @@ void Game::RunBuildShipOrder(ARegion *r, Object *obj, Unit *u)
     level = u->GetSkill(skill);
 
     if (skill == -1) {
-        u->error("BUILD: Can't build " + string(ItemDefs[ship].name) + ".");
+        u->error("BUILD: Can't build " + ItemDefs[ship].name + ".");
         return;
     }
 

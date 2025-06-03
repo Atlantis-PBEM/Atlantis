@@ -7,34 +7,34 @@
 int ARegion::CheckSea(int dir, int range, int remainocean) { return 1; }
 
 /// For unit testing just do nothing.
-void ARegionList::CreateAbyssLevel(int level, char const *name) { }
+void ARegionList::create_abyss_level(int level, const std::string& name) { }
 
 /// For unit testing do nothing.
-void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *name) { }
+void ARegionList::create_nexus_level(int level, int xSize, int ySize, const std::string& name) { }
 
-void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const *name) {
+void ARegionList::create_surface_level(int level, int xSize, int ySize, const std::string& name) {
     // For the test world, make a very very small 2x2 world with 1 town in the plains
     // and 1 hex of each of forest, mountains, and desert.
     MakeRegions(level, xSize, ySize);
-    pRegionArrays[level]->set_name(name ? std::string(name) : "");
+    pRegionArrays[level]->set_name(name);
     pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
     AssignTypes(pRegionArrays[level]);
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name) { }
-void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char const *name) {}
-void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, char const *name) {}
+void ARegionList::create_island_level(int level, int nPlayers, const std::string& name) { }
+void ARegionList::create_island_ring_level(int level, int xSize, int ySize, const std::string& name) {}
+void ARegionList::create_underworld_ring_level(int level, int xSize, int ySize, const std::string& name) {}
 
-void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char const *name) {
+void ARegionList::create_underworld_level(int level, int xSize, int ySize, const std::string& name) {
     MakeRegions(level, xSize, ySize);
-    pRegionArrays[level]->set_name(name ? std::string(name) : "");
+    pRegionArrays[level]->set_name(name);
     pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERWORLD;
     AssignTypes(pRegionArrays[level]);
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name) { }
+void ARegionList::create_underdeep_level(int level, int xSize, int ySize, const std::string& name) { }
 
 void ARegionList::MakeRegions(int level, int xSize, int ySize)
 {

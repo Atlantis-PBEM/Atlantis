@@ -239,7 +239,7 @@ void Game::ModifyTablesPerRuleset(void)
     EnableItem(I_JAVELIN);
     EnableItem(I_PIKE);
     // Hmm, shouldn't LBOW be armour piercing?
-    ModifyWeaponAttack("LBOW", ARMORPIERCING, ATTACK_RANGED, 1, 1);
+    modify_weapon_attack("LBOW", ARMORPIERCING, ATTACK_RANGED, 1, 1);
 
     //EnableItem(I_GREYELF);
     //EnableItem(I_MINOTAUR);
@@ -296,11 +296,11 @@ void Game::ModifyTablesPerRuleset(void)
 
     // Modify the various spells which are allowed to cross levels
     if (Globals->EASIER_UNDERWORLD) {
-        ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_portal", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_weather", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_portal", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_weather", RangeType::RNG_CROSS_LEVELS);
     }
 
 
@@ -342,46 +342,46 @@ void Game::ModifyTablesPerRuleset(void)
 
     // And modify some of the monsters...
     // Balrogs - weaker, less loot
-    ModifyMonsterAttacksAndHits("BALR", 100, 100, 0, 1);
-    ModifyMonsterSkills("BALR", 4, 4, 4); // tact, obse, stea
-    ModifyMonsterSpoils("BALR", 20000, IT_MAGIC);
+    modify_monster_attacks_and_hits("BALR", 100, 100, 0, 1);
+    modify_monster_skills("BALR", 4, 4, 4); // tact, obse, stea
+    modify_monster_spoils("BALR", 20000, IT_MAGIC);
 
     // Dragons - tougher, more loot
-    ModifyMonsterSpoils("DRAG", 20000, IT_MAGIC);
-    ModifyMonsterSkills("DRAG", 4, 1, 4); // tact, obse, stea
+    modify_monster_spoils("DRAG", 20000, IT_MAGIC);
+    modify_monster_skills("DRAG", 4, 1, 4); // tact, obse, stea
 
     // Liches - tougher, more loot
-    ModifyMonsterSpoils("LICH", 20000, IT_MAGIC);
-    ModifyMonsterSkills("LICH", 4, 4, 5); // tact, obse, stea
-    ModifyMonsterSpecial("LICH", "black_wind", 1);
-    ModifyMonsterDefense("LICH", 5, 4);
-    ModifyMonsterDefense("LICH", 0, 5);
+    modify_monster_spoils("LICH", 20000, IT_MAGIC);
+    modify_monster_skills("LICH", 4, 4, 5); // tact, obse, stea
+    modify_monster_special("LICH", "black_wind", 1);
+    modify_monster_defense("LICH", 5, 4);
+    modify_monster_defense("LICH", 0, 5);
 
     // Beef up Undead and Skeletons slightly, too...
-    ModifyMonsterSpecial("SKEL", "fear", 1);
-    ModifyMonsterAttacksAndHits("SKEL", 1, 2, 0, 1);
-    ModifyMonsterDefense("SKEL", 5, 2); // skel resist missile attacks
-    ModifyMonsterSpecial("UNDE", "fear", 3);
-    ModifyMonsterAttacksAndHits("UNDE", 5, 10, 0, 1);
-    ModifyMonsterDefense("UNDE", 5, 1); // unde resist missile attacks slightly
+    modify_monster_special("SKEL", "fear", 1);
+    modify_monster_attacks_and_hits("SKEL", 1, 2, 0, 1);
+    modify_monster_defense("SKEL", 5, 2); // skel resist missile attacks
+    modify_monster_special("UNDE", "fear", 3);
+    modify_monster_attacks_and_hits("UNDE", 5, 10, 0, 1);
+    modify_monster_defense("UNDE", 5, 1); // unde resist missile attacks slightly
 
     // Reduce spoils for mermen, pirates,
-    ModifyMonsterSpoils("MERF", 100, IT_NORMAL);
-    ModifyMonsterSpoils("PIRA", 200, IT_NORMAL);
+    modify_monster_spoils("MERF", 100, IT_NORMAL);
+    modify_monster_spoils("PIRA", 200, IT_NORMAL);
 
     // Trolls should regenerate!
-    ModifyMonsterAttacksAndHits("TROL", 32, 32, 4, 1);
+    modify_monster_attacks_and_hits("TROL", 32, 32, 4, 1);
 
     // Living Trees (ie Ents) should resist missile attacks
-    ModifyMonsterDefense("TREN", 5, 3);
-    ModifyMonsterDefense("TREN", 2, 5);
+    modify_monster_defense("TREN", 5, 3);
+    modify_monster_defense("TREN", 2, 5);
 
     // Why doesn't the sphinx have tact?
-    ModifyMonsterSkills("SPHI", 4, 3, 0); // tact, obse, stea
+    modify_monster_skills("SPHI", 4, 3, 0); // tact, obse, stea
 
     // Ogres aren't very tough at all!
-    ModifyMonsterAttacksAndHits("OGRE", 10, 20, 0, 1);
-    ModifyMonsterSkills("OGRE", 1, 0, 0); // tact, obse, stea
+    modify_monster_attacks_and_hits("OGRE", 10, 20, 0, 1);
+    modify_monster_skills("OGRE", 1, 0, 0); // tact, obse, stea
 
     // Cut out some of the crappier trade items.
     // With fewer trade items, the chance of good trade routes goes up.
@@ -415,15 +415,14 @@ void Game::ModifyTablesPerRuleset(void)
     ModifyObjectDefence(O_MFORTRESS, 2,3,3,3,2,2);
 
     // Make IMTH (improved mithril armor) better.
-    // ModifyArmorSaveValue(char *armor, int wclass, int val)
-    ModifyArmorSaveValue("IMTH", 0, 98);
-    ModifyArmorSaveValue("IMTH", 1, 98);
-    ModifyArmorSaveValue("IMTH", 2, 98);
-    ModifyArmorSaveValue("IMTH", 3, 98);
-    ModifyArmorSaveValue("IMTH", 4, 95);
-    ModifyArmorSaveValue("IMTH", 5, 80);
-    ModifyArmorSaveValue("IMTH", 6, 80);
-    ModifyArmorSaveValue("IMTH", 7, 80);
+    modify_armor_save_value("IMTH", 0, 98);
+    modify_armor_save_value("IMTH", 1, 98);
+    modify_armor_save_value("IMTH", 2, 98);
+    modify_armor_save_value("IMTH", 3, 98);
+    modify_armor_save_value("IMTH", 4, 95);
+    modify_armor_save_value("IMTH", 5, 80);
+    modify_armor_save_value("IMTH", 6, 80);
+    modify_armor_save_value("IMTH", 7, 80);
 
     // Redo all of the races for fracas!
     // Tundra has been disabled too!
@@ -498,39 +497,39 @@ void Game::ModifyTablesPerRuleset(void)
     ModifyItemBasePrice(I_CENTAURMAN, 75);
     ModifyItemBasePrice(I_HILLDWARF, 75);
 
-    //ModifyRaceSkillLevels(char *r, int spec, int def);
-    //ModifyRaceSkills(char *r, int i, char *sk);
+    //modify_race_skill_levels(char *r, int spec, int def);
+    //modify_race_skills(char *r, int i, char *sk);
 
-    ModifyRaceSkills("GBLN", 0, "XBOW");
+    modify_race_skills("GBLN", 0, "XBOW");
 
-    ModifyRaceSkills("HELF", 0, "COMB");
-    ModifyRaceSkills("HELF", 1, "LBOW");
-    ModifyRaceSkills("HELF", 2, "LUMB");
-    ModifyRaceSkills("HELF", 3, "WEAP");
-    ModifyRaceSkills("HELF", 4, "HORS");
-    ModifyRaceSkills("HELF", 5, "ARMO");
+    modify_race_skills("HELF", 0, "COMB");
+    modify_race_skills("HELF", 1, "LBOW");
+    modify_race_skills("HELF", 2, "LUMB");
+    modify_race_skills("HELF", 3, "WEAP");
+    modify_race_skills("HELF", 4, "HORS");
+    modify_race_skills("HELF", 5, "ARMO");
 
-    ModifyRaceSkills("HDWA", 0, "COMB");
-    ModifyRaceSkills("HDWA", 1, "MINI");
-    ModifyRaceSkills("HDWA", 2, "ARMO");
-    ModifyRaceSkills("HDWA", 3, "WEAP");
-    ModifyRaceSkills("HDWA", 4, "QUAR");
-    ModifyRaceSkills("HDWA", 5, "BUIL");
+    modify_race_skills("HDWA", 0, "COMB");
+    modify_race_skills("HDWA", 1, "MINI");
+    modify_race_skills("HDWA", 2, "ARMO");
+    modify_race_skills("HDWA", 3, "WEAP");
+    modify_race_skills("HDWA", 4, "QUAR");
+    modify_race_skills("HDWA", 5, "BUIL");
 
-    ModifyRaceSkills("CTAU", 0, "HORS");
-    ModifyRaceSkills("CTAU", 1, "RIDI");
-    ModifyRaceSkills("CTAU", 2, "RANC");
+    modify_race_skills("CTAU", 0, "HORS");
+    modify_race_skills("CTAU", 1, "RIDI");
+    modify_race_skills("CTAU", 2, "RANC");
 
-    ModifyRaceSkills("PLAI", 0, "FARM");
-    ModifyRaceSkills("PLAI", 1, "RANC");
-    ModifyRaceSkills("PLAI", 2, "HORS");
-    ModifyRaceSkills("PLAI", 3, "RIDI");
+    modify_race_skills("PLAI", 0, "FARM");
+    modify_race_skills("PLAI", 1, "RANC");
+    modify_race_skills("PLAI", 2, "HORS");
+    modify_race_skills("PLAI", 3, "RIDI");
 
-    ModifyRaceSkills("VIKI", 0, "COMB");
-    ModifyRaceSkills("VIKI", 1, "SHIP");
-    ModifyRaceSkills("VIKI", 2, "SAIL");
-    ModifyRaceSkills("VIKI", 3, "LUMB");
-    ModifyRaceSkills("VIKI", 4, "CARP");
+    modify_race_skills("VIKI", 0, "COMB");
+    modify_race_skills("VIKI", 1, "SHIP");
+    modify_race_skills("VIKI", 2, "SAIL");
+    modify_race_skills("VIKI", 3, "LUMB");
+    modify_race_skills("VIKI", 4, "CARP");
 
     return;
 }

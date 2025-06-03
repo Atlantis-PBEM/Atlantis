@@ -1647,7 +1647,7 @@ int ARegionList::ReadRegions(std::istream &f, std::list<Faction *>& factions)
     f >> num;
 
     f >> numLevels;
-    CreateLevels(numLevels);
+    create_levels(numLevels);
     int i;
     for (i = 0; i < numLevels; i++) {
         int curX, curY;
@@ -2299,7 +2299,7 @@ ARegionArray *ARegionList::get_first_region_array_of_type(int levelType) {
     return nullptr;
 }
 
-void ARegionList::CreateLevels(int n)
+void ARegionList::create_levels(int n)
 {
     numLevels = n;
     pRegionArrays = new ARegionArray *[n];
@@ -3081,7 +3081,7 @@ struct River {
 Ethnicity getRegionEtnos(ARegion* reg) {
     Ethnicity etnos = Ethnicity::NONE;
     if (reg->race > 0) {
-        auto man = FindRace(ItemDefs[reg->race].abr.c_str())->get();
+        auto man = find_race(ItemDefs[reg->race].abr)->get();
         etnos = man.ethnicity;
     }
 
@@ -3655,7 +3655,7 @@ void assertAllRegionsHaveName(const int w, const int h, ARegionArray* arr) {
     }
 }
 
-void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
+void ARegionList::create_natural_surface_level(Map* map) {
     static const int level = 1;
 
     const int w = map->map.width / 2;

@@ -826,17 +826,11 @@ void Game::ModifyTablesPerRuleset(void)
     EnableItem(I_BAG);
     EnableItem(I_SPINNING);
     EnableItem(I_LEATHERARMOR);
-    ModifyArmorFlags("LARM", ArmorType::USEINASSASSINATE);
-    ModifyWeaponAttack("DBOW",
-            ARMORPIERCING,
-            ATTACK_RANGED,
-            WeaponType::NUM_ATTACKS_HALF_SKILL, 1);
+    modify_armor_flags("LARM", ArmorType::USEINASSASSINATE);
+    modify_weapon_attack("DBOW", ARMORPIERCING, ATTACK_RANGED, WeaponType::NUM_ATTACKS_HALF_SKILL, 1);
     // Make DBOWs require just LBOW, not XBOW?  And downgrade
     // them from ARMORPIERCING to just PIERCING?
-    ModifyWeaponAttack("RUNE",
-            SLASHING,
-            ATTACK_COMBAT,
-            WeaponType::NUM_ATTACKS_HALF_SKILL, 1);
+    modify_weapon_attack("RUNE", SLASHING, ATTACK_COMBAT, WeaponType::NUM_ATTACKS_HALF_SKILL, 1);
     // EnableItem(I_CLOTHARMOR);
     EnableItem(I_BOOTS);
     EnableItem(I_BAXE);
@@ -918,31 +912,31 @@ void Game::ModifyTablesPerRuleset(void)
             ItemType::ESC_LEV_LINEAR | ItemType::LOSE_LINKED,
             "SUBA",
             20);
-    ModifyMonsterSpecial("LICH", "icebreath", 4);
-    ModifyMonsterSpecial("BALR", "fear", 6);
-    ModifyMonsterAttacksAndHits("SKEL", 2, 2, 0, 1);
-    ModifyMonsterAttacksAndHits("UNDE", 10, 10, 0, 1);
-    ModifyMonsterAttacksAndHits("DEMO", 6, 6, 0, 1);
-    ModifyMonsterAttackLevel("EAGL", 4);
-    ModifyMonsterDefense("EAGL", ATTACK_COMBAT, 4);
-    ModifyMonsterDefense("EAGL", ATTACK_WEATHER, 4);
-    ModifyMonsterDefense("WOLF", ATTACK_ENERGY, 2);
-    ModifyMonsterDefense("WOLF", ATTACK_WEATHER, 2);
-    ModifyMonsterAttacksAndHits("EAGL", 3, 3, 0, 1);
-    ModifyMonsterSkills("LICH", 4, 0, 3);
-    ModifyMonsterSkills("BALR", 5, 1, 2);
-    ModifyMonsterSkills("DEMO", 2, 2, 3);
-    ModifyMonsterSkills("WOLF", 1, 2, 3);
-    ModifyMonsterSkills("EAGL", 2, 2, 4);
-    ModifyMonsterSpoils("BALR", 30000, IT_MAGIC);
+    modify_monster_special("LICH", "icebreath", 4);
+    modify_monster_special("BALR", "fear", 6);
+    modify_monster_attacks_and_hits("SKEL", 2, 2, 0, 1);
+    modify_monster_attacks_and_hits("UNDE", 10, 10, 0, 1);
+    modify_monster_attacks_and_hits("DEMO", 6, 6, 0, 1);
+    modify_monster_attack_level("EAGL", 4);
+    modify_monster_defense("EAGL", ATTACK_COMBAT, 4);
+    modify_monster_defense("EAGL", ATTACK_WEATHER, 4);
+    modify_monster_defense("WOLF", ATTACK_ENERGY, 2);
+    modify_monster_defense("WOLF", ATTACK_WEATHER, 2);
+    modify_monster_attacks_and_hits("EAGL", 3, 3, 0, 1);
+    modify_monster_skills("LICH", 4, 0, 3);
+    modify_monster_skills("BALR", 5, 1, 2);
+    modify_monster_skills("DEMO", 2, 2, 3);
+    modify_monster_skills("WOLF", 1, 2, 3);
+    modify_monster_skills("EAGL", 2, 2, 4);
+    modify_monster_spoils("BALR", 30000, IT_MAGIC);
 
     DisableSkill(S_CREATE_STAFF_OF_LIGHTNING);
 
-    ModifyRaceSkills("NOMA", 3, "RIDI");
-    ModifyRaceSkills("DMAN", 3, "WEAP");
-    ModifyRaceSkills("BARB", 0, "RIDI");
-    ModifyRaceSkills("HELF", 0, "MANI");
-    ModifyRaceSkills("HELF", 3, "LBOW");
+    modify_race_skills("NOMA", 3, "RIDI");
+    modify_race_skills("DMAN", 3, "WEAP");
+    modify_race_skills("BARB", 0, "RIDI");
+    modify_race_skills("HELF", 0, "MANI");
+    modify_race_skills("HELF", 3, "LBOW");
 
     EnableObject(O_ROADN);
     EnableObject(O_ROADNE);
@@ -1041,11 +1035,11 @@ void Game::ModifyTablesPerRuleset(void)
 
     // Modify the various spells which are allowed to cross levels
     if (Globals->EASIER_UNDERWORLD) {
-        ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_portal", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_weather", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_portal", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_weather", RangeType::RNG_CROSS_LEVELS);
     }
 
     if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {

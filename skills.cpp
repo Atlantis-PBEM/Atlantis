@@ -6,26 +6,23 @@
 #include "gamedata.h"
 #include "string_parser.hpp"
 
-std::optional<std::reference_wrapper<RangeType>> FindRange(char const *range)
+std::optional<std::reference_wrapper<RangeType>> find_range(strings::ci_string range)
 {
-    if (range == NULL) return std::nullopt;
-    strings::ci_string range_ci(range);
+    if (range.empty()) return std::nullopt;
 
-    auto it = std::find_if(RangeDefs.begin(), RangeDefs.end(), [range_ci](const RangeType& range) {
-        return range_ci == range.key;
+    auto it = std::find_if(RangeDefs.begin(), RangeDefs.end(), [range](const RangeType& r) {
+        return range == r.key;
     });
     if (it != RangeDefs.end()) return std::ref(*it);
 
     return std::nullopt;
 }
 
-std::optional<std::reference_wrapper<SpecialType>> FindSpecial(char const *key)
+std::optional<std::reference_wrapper<SpecialType>> find_special(const strings::ci_string& key)
 {
-    if (key == NULL) return std::nullopt;
-    strings::ci_string key_ci(key);
-
-    auto it = std::find_if(SpecialDefs.begin(), SpecialDefs.end(), [key_ci](const SpecialType& special) {
-        return key_ci == special.key;
+    if (key.empty()) return std::nullopt;
+    auto it = std::find_if(SpecialDefs.begin(), SpecialDefs.end(), [key](const SpecialType& special) {
+        return key == special.key;
     });
     if (it != SpecialDefs.end()) return std::ref(*it);
 
@@ -114,7 +111,7 @@ int SkillMax(char const *skill, int race)
         }
     }
 
-    auto man_def = FindRace(ItemDefs[race].abr.c_str());
+    auto man_def = find_race(ItemDefs[race].abr);
     if (!man_def) return 0;
     auto mt = man_def->get();
 

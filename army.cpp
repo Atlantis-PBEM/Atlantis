@@ -251,7 +251,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 
     /* Is this a monster? */
     if (ItemDefs[r].type & IT_MONSTER) {
-        auto mp = FindMonster(ItemDefs[r].abr.c_str(), (ItemDefs[r].type & IT_ILLUSION))->get();
+        auto mp = find_monster(ItemDefs[r].abr, (ItemDefs[r].type & IT_ILLUSION))->get();
         if((u->type == U_WMON) || (ItemDefs[r].flags & ItemType::MANPRODUCE))
             name = mp.name + " in " + unit->name;
         else
@@ -392,7 +392,7 @@ Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
         // items will be skipped in the battle items setup and handled
         // here.
         if ((ItemDefs[weapon].type & IT_BATTLE) && special == NULL) {
-            auto pBat = FindBattleItem(ItemDefs[weapon].abr.c_str())->get();
+            auto pBat = find_battle_item(ItemDefs[weapon].abr)->get();
             special = pBat.special;
             slevel = pBat.skillLevel;
         }
@@ -431,7 +431,7 @@ void Soldier::SetupSpell()
             return;
         }
 
-        special = pST->special;
+        special = pST->special ? pST->special.value().c_str() : nullptr;
         unit->Practice(unit->combat);
     }
 }
@@ -494,7 +494,7 @@ void Soldier::SetupCombatItems()
             }
 
             if (pBat.flags & BattleItemType::SHIELD) {
-                auto sp = FindSpecial(pBat.special).value().get();
+                auto sp = find_special(pBat.special ? pBat.special : "").value().get();
                 for (int i = 0; i < 4; i++) {
                     if (sp.shield[i] == NUM_ATTACK_TYPES) {
                         for (int j = 0; j < NUM_ATTACK_TYPES; j++) {
@@ -572,7 +572,7 @@ void Soldier::clear_one_time_effects(void)
 
 bool Soldier::armor_protect(int weaponClass)
 {
-    auto armor_type = (armor > 0) ? FindArmor(ItemDefs[armor].abr.c_str()) : std::nullopt;
+    auto armor_type = (armor > 0) ? find_armor(ItemDefs[armor].abr) : std::nullopt;
     if (!armor_type) return false;
     int chance = armor_type->get().saves[weaponClass];
 
@@ -788,7 +788,7 @@ void Army::GetMonSpoils(ItemList& spoils, int monitem, int free)
     }
 
     /* First, silver */
-    auto mp = FindMonster(ItemDefs[monitem].abr.c_str(), (ItemDefs[monitem].type & IT_ILLUSION))->get();
+    auto mp = find_monster(ItemDefs[monitem].abr, (ItemDefs[monitem].type & IT_ILLUSION))->get();
     int silv = mp.silver;
     if ((Globals->MONSTER_NO_SPOILS > 0) && (free > 0)) {
         // Adjust the spoils for length of freedom.
@@ -1150,7 +1150,7 @@ int Army::GetTargetNum(char const *special, bool canAttackBehind)
         if (tars == 0) return -1;
     }
 
-    auto sp = FindSpecial(special);
+    auto sp = find_special(special ? special : "");
 
     if (sp && sp->get().targflags) {
         int validtargs = 0;
@@ -1288,9 +1288,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
         int attackLevel, int flags, int weaponClass, char const *effect,
         int mountBonus, Soldier *attacker, Army *attackers, bool attackbehind, int attackDamage)
 {
-    auto sp = special != NULL
-        ? FindSpecial(special)
-        : std::nullopt;
+    auto sp = special != NULL ? find_special(special) : std::nullopt;
 
     // if special is defined then it is magical attack and not attack by the physical weapon soldier has
     int weaponIndex = !sp ? attacker->weapon : -1;
@@ -1348,7 +1346,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
         Soldier * tar = GetTarget(tarnum);
         int tarFlags = 0;
         if (tar->weapon != -1) {
-            auto weapon = FindWeapon(ItemDefs[tar->weapon].abr.c_str())->get();
+            auto weapon = find_weapon(ItemDefs[tar->weapon].abr)->get();
             tarFlags = weapon.flags;
         }
 
@@ -1381,8 +1379,8 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 
         // 4.4 Check for weapon inflicted bonuses
         if (weaponIndex != -1 && tar->weapon != -1) {
-            auto attackerWeapon = FindWeapon(ItemDefs[weaponIndex].abr.c_str())->get();
-            auto targetWeapon = FindWeapon(ItemDefs[tar->weapon].abr.c_str())->get();
+            auto attackerWeapon = find_weapon(ItemDefs[weaponIndex].abr)->get();
+            auto targetWeapon = find_weapon(ItemDefs[tar->weapon].abr)->get();
 
             const WeaponBonusMalus *attackerBm = GetWeaponBonusMalus(attackerWeapon, targetWeapon);
             const WeaponBonusMalus *defenderBm = GetWeaponBonusMalus(targetWeapon, attackerWeapon);
@@ -1480,7 +1478,7 @@ void Army::Kill(int killed, int damage)
     temp->unit->losses++;
     if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_FIGURE) {
         if (ItemDefs[temp->race].type & IT_MONSTER) {
-            auto mp = FindMonster(ItemDefs[temp->race].abr.c_str(), (ItemDefs[temp->race].type & IT_ILLUSION))->get();
+            auto mp = find_monster(ItemDefs[temp->race].abr, (ItemDefs[temp->race].type & IT_ILLUSION))->get();
             hitsalive -= mp.hits;
         } else {
             // Assume everything that is a solder and isn't a monster is a

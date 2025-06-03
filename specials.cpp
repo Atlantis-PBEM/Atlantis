@@ -60,7 +60,7 @@ void Soldier::SetupHealing()
 
 int Army::CheckSpecialTarget(char const *special,int tar)
 {
-    auto spd = FindSpecial(special).value().get();
+    auto spd = find_special(special).value().get();
     int i;
     int match = 0;
 
@@ -157,7 +157,7 @@ void Battle::UpdateShields(Army *a)
         int shtype = -1;
 
         if (a->soldiers[i]->special == NULL) continue;
-        auto spd = FindSpecial(a->soldiers[i]->special).value().get();
+        auto spd = find_special(a->soldiers[i]->special).value().get();
 
         if (!(spd.effectflags & SpecialType::FX_SHIELD) && !(spd.effectflags & SpecialType::FX_DEFBONUS)) continue;
 
@@ -190,7 +190,7 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 
     if (a->special == NULL) return;
 
-    auto spd = FindSpecial(a->special).value().get();
+    auto spd = find_special(a->special).value().get();
 
     if (!(spd.effectflags & SpecialType::FX_DAMAGE)) return;
 

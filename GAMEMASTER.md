@@ -31,12 +31,12 @@ valuable feedback.
 
 5.      Altering game rules
 
-6.	World Creation Guide
-6.1	Basics: world size, land mass and levels
-6.2.	Land Mass Distribution
-6.3.	Terrain Distribution
-6.4.	Towns and Races
-6.5	Special: Fractal Generation
+6.  World Creation Guide
+6.1 Basics: world size, land mass and levels
+6.2.    Land Mass Distribution
+6.3.    Terrain Distribution
+6.4.    Towns and Races
+6.5 Special: Fractal Generation
 
 
 ## 1. Obtaining a copy of Atlantis
@@ -290,32 +290,32 @@ that you want to run a havilah variant, and you're in the havilah
 directory:
 
 ```
-	bash-2.04$ mkdir ../../mygame
-	bash-2.04$ cp havilah ../../mygame
-	bash-2.04$ cd ../../mygame
-	bash-2.04$ ./havilah new
+    bash-2.04$ mkdir ../../mygame
+    bash-2.04$ cp havilah ../../mygame
+    bash-2.04$ cd ../../mygame
+    bash-2.04$ ./havilah new
 ```
 
 At this point, you'll be asked how big the map should be. For a first
 test game, you'll probably want a 16x16 world:
 
-	Atlantis Engine Version: 5.1.0 (beta)
-	Havilah, Version: 1.0.0 (beta)
+    Atlantis Engine Version: 5.1.0 (beta)
+    Havilah, Version: 1.0.0 (beta)
 
-	How wide should the map be?
-	80
-	How tall should the map be?
-	80
-	Making a level...
+    How wide should the map be?
+    80
+    How tall should the map be?
+    80
+    Making a level...
 
-	...Lots of other stuff about the world
+    ...Lots of other stuff about the world
 
 So, what have you got now? You should have the game info for your new
 game, stored in game.out, and the player info, stored in players.out.
 
 ```
-	bash-2.04$ ls
-	game.out  havilah  names.out  players.out`
+    bash-2.04$ ls
+    game.out  havilah  names.out  players.out`
 ```
 
 In order to run our first turn, we need to do two things: feed havilah
@@ -323,39 +323,39 @@ the game and players file, and add ourselves as a player. First, the
 easy part:
 
 ```
-	mv game.out game.in
-	mv players.out players.in
+    mv game.out game.in
+    mv players.out players.in
 ```
 
 Atlantis will automatically read game.in and players.in when it runs.
 Now for the second bit. Edit the players.in file with your favorite text
 editor, and make it look like this:
 
-	AtlantisPlayerStatus
-	Version: 327936
-	TurnNumber: 0
-	GameStatus: New
+    AtlantisPlayerStatus
+    Version: 327936
+    TurnNumber: 0
+    GameStatus: New
 
-	Faction: 1
-	Name: The Guardsmen (1)
-	Email: NoAddress
-	Password: none
-	LastOrders: 0
-	FirstTurn: 0
-	SendTimes: 1
-	Template: long
-	Faction: 2
-	Name: Creatures (2)
-	Email: NoAddress
-	Password: none
-	LastOrders: 0
-	FirstTurn: 0
-	SendTimes: 1
-	Template: long
-	Faction: new
-	Name: Anthony
-	Email: anthony@beastie.house
-	Password: Test
+    Faction: 1
+    Name: The Guardsmen (1)
+    Email: NoAddress
+    Password: none
+    LastOrders: 0
+    FirstTurn: 0
+    SendTimes: 1
+    Template: long
+    Faction: 2
+    Name: Creatures (2)
+    Email: NoAddress
+    Password: none
+    LastOrders: 0
+    FirstTurn: 0
+    SendTimes: 1
+    Template: long
+    Faction: new
+    Name: Anthony
+    Email: anthony@beastie.house
+    Password: Test
 
 Note: The first two factions are reserved for town guards and monsters,
 which can cause some confusion. The first player faction will start as
@@ -369,39 +369,39 @@ Now when the game runs, it'll add you (well, me in this example) to the
 game. Let's run it and see what happens:
 
 ```
-	bash-2.04$ ./havilah run
-	Atlantis Engine Version: 5.1.0
-	Havilah, Version: 1.0.0 (beta)
+    bash-2.04$ ./havilah run
+    Atlantis Engine Version: 5.1.0
+    Havilah, Version: 1.0.0 (beta)
 
-	Saved Game Engine Version: 5.1.0
-	Saved Rule-Set Version: 1.0.0 (beta)
-	Reading the regions...
-	Setting up the neighbors...
-	Setting Up Turn...
-	Reading the Gamemaster File...
-	Reading the Orders File...
-	QUITting Inactive Factions...
-	Running the Turn...
-	Running FIND Orders...
-	Etcetera...
+    Saved Game Engine Version: 5.1.0
+    Saved Rule-Set Version: 1.0.0 (beta)
+    Reading the regions...
+    Setting up the neighbors...
+    Setting Up Turn...
+    Reading the Gamemaster File...
+    Reading the Orders File...
+    QUITting Inactive Factions...
+    Running the Turn...
+    Running FIND Orders...
+    Etcetera...
 ```
 
 Now if you look in the directory, you should see the following:
 
 ```
-	bash-2.04$ ls
-	game.in   havilah    players.in   report.1  template.3
-	game.out  names.out  players.out  report.3  times.<some number>
+    bash-2.04$ ls
+    game.in   havilah    players.in   report.1  template.3
+    game.out  names.out  players.out  report.3  times.<some number>
 ```
 
 The game has updated the world, and stored it in game.out and players.
 out. If you look at report.3, you should see your turn:
 
 ```
-	bash-2.04$ more report.3
-	Atlantis Report For:
-	Anthony (3) (War 1, Trade 1, Magic 1)
-	January, Year 1
+    bash-2.04$ more report.3
+    Atlantis Report For:
+    Anthony (3) (War 1, Trade 1, Magic 1)
+    January, Year 1
 ```
 
 If you want to submit orders for your first turn, you'd leave your
@@ -410,16 +410,16 @@ steps to the ones you just did to run your first turn. Move game.in,
 players.in and any report files out of the way:
 
 ```
-	mkdir 0
-	mv game.in players.in report.* 0
+    mkdir 0
+    mv game.in players.in report.* 0
 ```
 
 And then do exactly what you did previously:
 
 ```
-	mv game.out game.in
-	mv players.out players.in
-	./havilah run
+    mv game.out game.in
+    mv players.out players.in
+    ./havilah run
 ```
 
 In later turns, you'll want to move old orders out of the way too.
@@ -437,18 +437,18 @@ more than four or five people. There are a number of scripts that can
 help you out. In it's simplest form, a script will look like this:
 
 ```
-	#!/bin/bash
-	#The argument tells you what turn is running
-	gameturn=$1
+    #!/bin/bash
+    #The argument tells you what turn is running
+    gameturn=$1
 
-	mkdir $gameturn
-	mv game.in players.in report.* times.* $gameturn
+    mkdir $gameturn
+    mv game.in players.in report.* times.* $gameturn
 
-	mv players.out players.in
-	mv game.out game.in
+    mv players.out players.in
+    mv game.out game.in
 
-	./havilah run
-	mv orders.* $gameturn
+    ./havilah run
+    mv orders.* $gameturn
 ```
 
 under windows, this script will look more like:
@@ -456,17 +456,17 @@ under windows, this script will look more like:
 ```
 set ARGUMENT=%1
 
-	mkdir %ARGUMENT%
-	move game.in %ARGUMENT%
+    mkdir %ARGUMENT%
+    move game.in %ARGUMENT%
     move players.in %ARGUMENT%
     move report.* %ARGUMENT%
     move times.* %ARGUMENT%
 
-	move players.out players.in
-	move game.out game.in
+    move players.out players.in
+    move game.out game.in
 
-	./havilah run
-	move orders.* %ARGUMENT%
+    ./havilah run
+    move orders.* %ARGUMENT%
 ```
 
 These scripts will help you run turns by hand, by automating the tedious
@@ -614,19 +614,19 @@ Hah! That'll learn those pesky war factions!
 Balrogs are a little more tricky. You could add the following line to
 the end of the ModifyTablesPerRuleset function in extra.cpp:
 
-	DisableItem(I_BALROG);
+    DisableItem(I_BALROG);
 
 This will disable Balrogs. Of course, none of the mages in your game
 will be very amused by your little joke when they finally reach SUBA,
 so we'd better do something a little more sensible. How about:
 
-	ModifyMonsterAttacksAndHits(MONSTER_BALROG, 100, 100, 0);
+    modify_monster_attacks_and_hits(MONSTER_BALROG, 100, 100, 0);
 
 Now any balrogs will have 100 hits, and do 100 melee attacks, instead of
 200. That's pretty cool, but now they're just easier to harvest. D'oh!
 Well, we can do something about that, too. Just add the following line:
 
-	ModifyMonsterSpoils(MONSTER_BALROG, 20000, IT_ADVANCED);
+    modify_monster_spoils(MONSTER_BALROG, 20000, IT_ADVANCED);
 
 Cool - now Balrogs will only give out advanced spoils, in addition to
 being wussier. It's important to balance these sorts of things out. A
@@ -634,7 +634,7 @@ wussy creature that explodes with treasure is just asking for some sort
 of abuse ;)
 
 Note also that we're using different 'values' for these functions -
-DisableItem uses I_BALROG, but ModifyMonster uses MONSTER_BALROG instead.
+DisableItem uses I_BALROG, but modify_monster uses MONSTER_BALROG instead.
 The difference is which table it's indexing into.  The I_ values affect
 things in the ItemDefs table. The spoils and treasure type of the
 monster are in the MonDefs table. Enable/DisableItem work on Items
@@ -650,18 +650,18 @@ integer values, but some will be enum types. What this means is that you
 can set individual bits of a value. A good example is the new TRANSPORT
 variable, used to set the behaviour of quartermasters:
 
-	enum {
-		ALLOW_TRANSPORT = 0x01, // Do we allow transport/distribute?
-		QM_AFFECT_COST = 0x02, // QM level affect shipping cost?
-		QM_AFFECT_DIST = 0x04, // QM level affect longrange dist?
-	};
-	int TRANSPORT;
+    enum {
+        ALLOW_TRANSPORT = 0x01, // Do we allow transport/distribute?
+        QM_AFFECT_COST = 0x02, // QM level affect shipping cost?
+        QM_AFFECT_DIST = 0x04, // QM level affect longrange dist?
+    };
+    int TRANSPORT;
 
 If you wanted to switch on quartermasters, and have their level affect
 shipping costs, but not distance, you would set the variable in rules.cpp
 like so:
 
-	GameDefs::ALLOW_TRANSPORT | GameDefs::QM_AFFECT_COST, // TRANSPORT
+    GameDefs::ALLOW_TRANSPORT | GameDefs::QM_AFFECT_COST, // TRANSPORT
 
 Note that the different values are set using a boolean OR |, not a
 logical OR ||.
@@ -902,12 +902,12 @@ polar caps (within 9 hexes of the map border). The town chance is
 reduced by approximately the LESS_ARCTIC_TOWNS setting x 3% times
 9 minus the distance from the polar cap. For instance, depending on the
 distance from the polar caps, the chances are reduced as follows:
-Setting	Chance at six hexes	Chance at three hexes
-1		- 22%					- 53%
-2		- 36%					- 69%
-3		- 46%					- 77%
-4		- 53%					- 82%
-5		- 58%					- 85%
+Setting Chance at six hexes Chance at three hexes
+1       - 22%                   - 53%
+2       - 36%                   - 69%
+3       - 46%                   - 77%
+4       - 53%                   - 82%
+5       - 58%                   - 85%
 Towns that are created will also be considerably smaller than usual.
 
 GROW_RACES: in standard Atlantis, a random race is allocated per hex.

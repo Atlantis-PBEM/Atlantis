@@ -1276,128 +1276,128 @@ void Game::ModifyTablesPerRuleset(void)
 
     EnableItem(I_MAN);
     ModifyItemBasePrice(I_MAN, 40);
-    ModifyRaceSkillLevels("HUMN", 4, 2);
-    ModifyRaceSkills("HUMN", 0, "BUIL");
-    ModifyRaceSkills("HUMN", 1, "RIDI");
-    ModifyRaceSkills("HUMN", 2, "COMB");
-    ModifyRaceSkills("HUMN", 3, "MINI");
-    ModifyRaceSkills("HUMN", 4, "FARM");
-    ModifyRaceSkills("HUMN", 5, "COOK");
+    modify_race_skill_levels("HUMN", 4, 2);
+    modify_race_skills("HUMN", 0, "BUIL");
+    modify_race_skills("HUMN", 1, "RIDI");
+    modify_race_skills("HUMN", 2, "COMB");
+    modify_race_skills("HUMN", 3, "MINI");
+    modify_race_skills("HUMN", 4, "FARM");
+    modify_race_skills("HUMN", 5, "COOK");
 
     EnableItem(I_HILLDWARF);
     ModifyItemBasePrice(I_HILLDWARF, 40);
-    ModifyRaceSkillLevels("HDWA", 5, 2);
-    ModifyRaceSkills("HDWA", 0, "ARMO");
-    ModifyRaceSkills("HDWA", 1, "WEAP");
-    ModifyRaceSkills("HDWA", 2, "QUAR");
-    ModifyRaceSkills("HDWA", 3, "MINI");
-    ModifyRaceSkills("HDWA", 4, "BUIL");
+    modify_race_skill_levels("HDWA", 5, 2);
+    modify_race_skills("HDWA", 0, "ARMO");
+    modify_race_skills("HDWA", 1, "WEAP");
+    modify_race_skills("HDWA", 2, "QUAR");
+    modify_race_skills("HDWA", 3, "MINI");
+    modify_race_skills("HDWA", 4, "BUIL");
 
     EnableItem(I_ICEDWARF);
     ModifyItemBasePrice(I_ICEDWARF, 40);
-    ModifyRaceSkillLevels("IDWA", 5, 2);
-    ModifyRaceSkills("IDWA", 0, "COMB");
-    ModifyRaceSkills("IDWA", 1, "WEAP");
-    ModifyRaceSkills("IDWA", 2, "MINI");
-    ModifyRaceSkills("IDWA", 3, "FISH");
-    ModifyRaceSkills("IDWA", 4, "ARMO");
+    modify_race_skill_levels("IDWA", 5, 2);
+    modify_race_skills("IDWA", 0, "COMB");
+    modify_race_skills("IDWA", 1, "WEAP");
+    modify_race_skills("IDWA", 2, "MINI");
+    modify_race_skills("IDWA", 3, "FISH");
+    modify_race_skills("IDWA", 4, "ARMO");
 
     EnableItem(I_HIGHELF);
     ModifyItemBasePrice(I_HIGHELF, 40);
-    ModifyRaceSkillLevels("HELF", 5, 2);
-    ModifyRaceSkills("HELF", 0, "HORS");
-    ModifyRaceSkills("HELF", 1, "FISH");
-    ModifyRaceSkills("HELF", 2, "LBOW");
-    ModifyRaceSkills("HELF", 3, "SHIP");
-    ModifyRaceSkills("HELF", 4, "SAIL");
+    modify_race_skill_levels("HELF", 5, 2);
+    modify_race_skills("HELF", 0, "HORS");
+    modify_race_skills("HELF", 1, "FISH");
+    modify_race_skills("HELF", 2, "LBOW");
+    modify_race_skills("HELF", 3, "SHIP");
+    modify_race_skills("HELF", 4, "SAIL");
 
     EnableItem(I_WOODELF);
     ModifyItemBasePrice(I_WOODELF, 40);
-    ModifyRaceSkillLevels("WELF", 5, 2);
-    ModifyRaceSkills("WELF", 0, "LUMB");
-    ModifyRaceSkills("WELF", 1, "LBOW");
-    ModifyRaceSkills("WELF", 2, "ENTE");
-    ModifyRaceSkills("WELF", 3, "CARP");
-    ModifyRaceSkills("WELF", 4, "FISH");
-    ModifyRaceSkills("WELF", 5, "COOK");
+    modify_race_skill_levels("WELF", 5, 2);
+    modify_race_skills("WELF", 0, "LUMB");
+    modify_race_skills("WELF", 1, "LBOW");
+    modify_race_skills("WELF", 2, "ENTE");
+    modify_race_skills("WELF", 3, "CARP");
+    modify_race_skills("WELF", 4, "FISH");
+    modify_race_skills("WELF", 5, "COOK");
 
     EnableItem(I_GNOME);
     ModifyItemBasePrice(I_GNOME, 30);
-    ModifyRaceSkillLevels("GNOM", 5, 2);
-    ModifyRaceSkills("GNOM", 0, "HERB");
-    ModifyRaceSkills("GNOM", 1, "QUAR");
-    ModifyRaceSkills("GNOM", 2, "ENTE");
-    ModifyRaceSkills("GNOM", 3, "XBOW");
-    ModifyRaceSkills("GNOM", 4, "HEAL");
+    modify_race_skill_levels("GNOM", 5, 2);
+    modify_race_skills("GNOM", 0, "HERB");
+    modify_race_skills("GNOM", 1, "QUAR");
+    modify_race_skills("GNOM", 2, "ENTE");
+    modify_race_skills("GNOM", 3, "XBOW");
+    modify_race_skills("GNOM", 4, "HEAL");
     ModifyItemCapacities(I_GNOME,7,0,0,0);
     ModifyItemWeight(I_GNOME, 5);
 
     EnableItem(I_CENTAURMAN);
     ModifyItemBasePrice(I_CENTAURMAN, 70);
-    ModifyRaceSkillLevels("CTAU", 5, 2);
-    ModifyRaceSkills("CTAU", 0, "LUMB");
-    ModifyRaceSkills("CTAU", 1, "HORS");
-    ModifyRaceSkills("CTAU", 2, "RIDI");
-    ModifyRaceSkills("CTAU", 3, "HEAL");
-    ModifyRaceSkills("CTAU", 4, "FARM");
+    modify_race_skill_levels("CTAU", 5, 2);
+    modify_race_skills("CTAU", 0, "LUMB");
+    modify_race_skills("CTAU", 1, "HORS");
+    modify_race_skills("CTAU", 2, "RIDI");
+    modify_race_skills("CTAU", 3, "HEAL");
+    modify_race_skills("CTAU", 4, "FARM");
 
     EnableItem(I_LIZARDMAN);
     ModifyItemBasePrice(I_LIZARDMAN, 40);
-    ModifyRaceSkillLevels("LIZA", 5, 2);
-    ModifyRaceSkills("LIZA", 0, "HUNT");
-    ModifyRaceSkills("LIZA", 1, "HERB");
-    ModifyRaceSkills("LIZA", 2, "CARP");
-    ModifyRaceSkills("LIZA", 3, "SAIL");
-    ModifyRaceSkills("LIZA", 4, "HEAL");
+    modify_race_skill_levels("LIZA", 5, 2);
+    modify_race_skills("LIZA", 0, "HUNT");
+    modify_race_skills("LIZA", 1, "HERB");
+    modify_race_skills("LIZA", 2, "CARP");
+    modify_race_skills("LIZA", 3, "SAIL");
+    modify_race_skills("LIZA", 4, "HEAL");
 
     EnableItem(I_GOBLINMAN);
     ModifyItemBasePrice(I_GOBLINMAN, 30);
-    ModifyRaceSkillLevels("GBLN", 5, 2);
-    ModifyRaceSkills("GBLN", 0, "QUAR");
-    ModifyRaceSkills("GBLN", 1, "XBOW");
-    ModifyRaceSkills("GBLN", 2, "SHIP");
-    ModifyRaceSkills("GBLN", 3, "WEAP");
-    ModifyRaceSkills("GBLN", 4, "ENTE");
+    modify_race_skill_levels("GBLN", 5, 2);
+    modify_race_skills("GBLN", 0, "QUAR");
+    modify_race_skills("GBLN", 1, "XBOW");
+    modify_race_skills("GBLN", 2, "SHIP");
+    modify_race_skills("GBLN", 3, "WEAP");
+    modify_race_skills("GBLN", 4, "ENTE");
     ModifyItemCapacities(I_GOBLINMAN,7,0,0,0);
     ModifyItemWeight(I_GOBLINMAN, 5);
 
     EnableItem(I_GNOLL);
     ModifyItemBasePrice(I_GNOLL, 40);
-    ModifyRaceSkillLevels("GNOL", 5, 2);
-    ModifyRaceSkills("GNOL", 0, "HORS");
-    ModifyRaceSkills("GNOL", 1, "HUNT");
-    ModifyRaceSkills("GNOL", 2, "COMB");
-    ModifyRaceSkills("GNOL", 3, "ARMO");
-    ModifyRaceSkills("GNOL", 4, "CARP");
-    ModifyRaceSkills("GNOL", 5, "COOK");
+    modify_race_skill_levels("GNOL", 5, 2);
+    modify_race_skills("GNOL", 0, "HORS");
+    modify_race_skills("GNOL", 1, "HUNT");
+    modify_race_skills("GNOL", 2, "COMB");
+    modify_race_skills("GNOL", 3, "ARMO");
+    modify_race_skills("GNOL", 4, "CARP");
+    modify_race_skills("GNOL", 5, "COOK");
 
     EnableItem(I_ORC);
     ModifyItemBasePrice(I_ORC, 40);
-    ModifyRaceSkillLevels("ORC", 5, 2);
-    ModifyRaceSkills("ORC", 0, "MINI");
-    ModifyRaceSkills("ORC", 1, "LUMB");
-    ModifyRaceSkills("ORC", 2, "COMB");
-    ModifyRaceSkills("ORC", 3, "BUIL");
-    ModifyRaceSkills("ORC", 4, "SHIP");
+    modify_race_skill_levels("ORC", 5, 2);
+    modify_race_skills("ORC", 0, "MINI");
+    modify_race_skills("ORC", 1, "LUMB");
+    modify_race_skills("ORC", 2, "COMB");
+    modify_race_skills("ORC", 3, "BUIL");
+    modify_race_skills("ORC", 4, "SHIP");
 
     // Underworld races
     EnableItem(I_DROWMAN);
     ModifyItemBasePrice(I_DROWMAN, 40);
-    ModifyRaceSkillLevels("DRLF", 5, 2);
-    ModifyRaceSkills("DRLF", 0, "COMB");
-    ModifyRaceSkills("DRLF", 1, "HUNT");
-    ModifyRaceSkills("DRLF", 2, "LBOW");
-    ModifyRaceSkills("DRLF", 3, "LUMB");
-    ModifyRaceSkills("DRLF", 4, "COOK");
+    modify_race_skill_levels("DRLF", 5, 2);
+    modify_race_skills("DRLF", 0, "COMB");
+    modify_race_skills("DRLF", 1, "HUNT");
+    modify_race_skills("DRLF", 2, "LBOW");
+    modify_race_skills("DRLF", 3, "LUMB");
+    modify_race_skills("DRLF", 4, "COOK");
 
     EnableItem(I_UNDERDWARF);
     ModifyItemBasePrice(I_UNDERDWARF, 40);
-    ModifyRaceSkillLevels("UDWA", 5, 2);
-    ModifyRaceSkills("UDWA", 0, "WEAP");
-    ModifyRaceSkills("UDWA", 1, "ARMO");
-    ModifyRaceSkills("UDWA", 2, "QUAR");
-    ModifyRaceSkills("UDWA", 3, "MINI");
-    ModifyRaceSkills("UDWA", 4, "BUIL");
+    modify_race_skill_levels("UDWA", 5, 2);
+    modify_race_skills("UDWA", 0, "WEAP");
+    modify_race_skills("UDWA", 1, "ARMO");
+    modify_race_skills("UDWA", 2, "QUAR");
+    modify_race_skills("UDWA", 3, "MINI");
+    modify_race_skills("UDWA", 4, "BUIL");
 
 
     //
@@ -1508,17 +1508,17 @@ void Game::ModifyTablesPerRuleset(void)
 
     // Modify the various spells which are allowed to cross levels
     if (Globals->EASIER_UNDERWORLD) {
-        ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_portal", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_weather", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_portal", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_weather", RangeType::RNG_CROSS_LEVELS);
     }
 
     if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
         EnableSkill(S_QUARTERMASTER);
         EnableObject(O_CARAVANSERAI);
-        if (Globals->EASIER_UNDERWORLD) ModifyRangeLevelPenalty("rng_transport", 4);
+        if (Globals->EASIER_UNDERWORLD) modify_range_level_penalty("rng_transport", 4);
     }
 
     // NO7 - Enable the various parts of the victory conditions
@@ -1529,15 +1529,15 @@ void Game::ModifyTablesPerRuleset(void)
     EnableObject(O_ACTIVE_MONOLITH);
     EnableItem(I_IMPRISONED_ENTITY);
     EnableSkill(S_ANNIHILATION);
-    ModifyRangeFlags("rng_annihilate", RangeType::RNG_SURFACE_ONLY | RangeType::RNG_CROSS_LEVELS);
+    modify_range_flags("rng_annihilate", RangeType::RNG_SURFACE_ONLY | RangeType::RNG_CROSS_LEVELS);
 
     // Weapon BM example
 
     // Make SWOR to have malus of -1 on attack and -2 on defense vs. SPEA
-    // ModifyWeaponBonusMalus("SWOR", 0, "SPEA", -1, -2);
+    // modify_weapon_bonus_malus("SWOR", 0, "SPEA", -1, -2);
 
     // At the same time give SPEA bonus of 2 on attacka and 2 on defense vs. SWOR
-    // ModifyWeaponBonusMalus("SPEA", 0, "SWOR", 2, 2);
+    // modify_weapon_bonus_malus("SPEA", 0, "SWOR", 2, 2);
 
     // set up game specific tracked data
     rulesetSpecificData.clear();

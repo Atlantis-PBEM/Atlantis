@@ -377,32 +377,29 @@ void Game::CreateWorld()
         }
     }
 
-    regions.CreateLevels(2 + Globals->UNDERWORLD_LEVELS +
-            Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL);
+    regions.create_levels(2 + Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL);
 
     SetupNames();
 
-    regions.CreateNexusLevel( 0, nx, ny, "nexus" );
-    regions.CreateSurfaceLevel( 1, xx, yy, 0 );
+    regions.create_nexus_level(0, nx, ny, "nexus");
+    regions.create_surface_level(1, xx, yy, "");
 
     // Create underworld levels
     int i;
     for (i = 2; i < Globals->UNDERWORLD_LEVELS+2; i++) {
         int xs = regions.GetLevelXScale(i);
         int ys = regions.GetLevelYScale(i);
-        regions.CreateUnderworldLevel(i, xx/xs, yy/ys, "underworld");
+        regions.create_underworld_level(i, xx/xs, yy/ys, "underworld");
     }
     // Underdeep levels
-    for (i=Globals->UNDERWORLD_LEVELS+2;
-            i<(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS+2); i++) {
+    for (i = Globals->UNDERWORLD_LEVELS + 2; i < (Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS + 2); i++) {
         int xs = regions.GetLevelXScale(i);
         int ys = regions.GetLevelYScale(i);
-        regions.CreateUnderdeepLevel(i, xx/xs, yy/ys, "underdeep");
+        regions.create_underdeep_level(i, xx/xs, yy/ys, "underdeep");
     }
 
     if (Globals->ABYSS_LEVEL) {
-        regions.CreateAbyssLevel(Globals->UNDERWORLD_LEVELS +
-                Globals->UNDERDEEP_LEVELS + 2, "abyss");
+        regions.create_abyss_level(Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS + 2, "abyss");
     }
 
     CountNames();
