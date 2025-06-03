@@ -152,7 +152,7 @@ int Game::MakeWMon(ARegion *pReg)
     if ((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
         return 0;
 
-    auto monster = FindMonster(ItemDefs[montype].abr.c_str(), (ItemDefs[montype].type & IT_ILLUSION))->get();
+    auto monster = find_monster(ItemDefs[montype].abr, (ItemDefs[montype].type & IT_ILLUSION))->get();
     Faction *monfac = GetFaction(factions, monfaction);
     Unit *u = GetNewUnit(monfac, 0);
     u->MakeWMon(monster.name.c_str(), montype, (monster.number+rng::get_random(monster.number)+1)/2);
@@ -176,32 +176,32 @@ void Game::MakeLMon(Object *pObj)
     if ((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
         return;
 
-    auto monster = FindMonster(ItemDefs[montype].abr.c_str(), (ItemDefs[montype].type & IT_ILLUSION))->get();
+    auto monster = find_monster(ItemDefs[montype].abr, (ItemDefs[montype].type & IT_ILLUSION))->get();
     Faction *monfac = GetFaction(factions, monfaction);
     Unit *u = GetNewUnit(monfac, 0);
     switch(montype) {
         case I_IMP:
             u->MakeWMon("Demons", I_IMP, rng::get_random(monster.number + 1));
 
-            monster = FindMonster(ItemDefs[I_DEMON].abr.c_str(), (ItemDefs[I_DEMON].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_DEMON].abr, (ItemDefs[I_DEMON].type & IT_ILLUSION))->get();
             u->items.SetNum(I_DEMON, rng::get_random(monster.number + 1));
 
-            monster = FindMonster(ItemDefs[I_DEVIL].abr.c_str(), (ItemDefs[I_DEVIL].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_DEVIL].abr, (ItemDefs[I_DEVIL].type & IT_ILLUSION))->get();
             u->items.SetNum(I_DEVIL, rng::get_random(monster.number + 1));
             break;
         case I_SKELETON:
             u->MakeWMon("Undead", I_SKELETON, rng::get_random(monster.number + 1));
 
-            monster = FindMonster(ItemDefs[I_UNDEAD].abr.c_str(), (ItemDefs[I_UNDEAD].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_UNDEAD].abr, (ItemDefs[I_UNDEAD].type & IT_ILLUSION))->get();
             u->items.SetNum(I_UNDEAD, rng::get_random(monster.number + 1));
 
-            monster = FindMonster(ItemDefs[I_LICH].abr.c_str(), (ItemDefs[I_LICH].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_LICH].abr, (ItemDefs[I_LICH].type & IT_ILLUSION))->get();
             u->items.SetNum(I_LICH, rng::get_random(monster.number + 1));
             break;
         case I_MAGICIANS:
             u->MakeWMon("Evil Mages", I_MAGICIANS, (monster.number + rng::get_random(monster.number) + 1) / 2);
 
-            monster = FindMonster(ItemDefs[I_SORCERERS].abr.c_str(), (ItemDefs[I_SORCERERS].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_SORCERERS].abr, (ItemDefs[I_SORCERERS].type & IT_ILLUSION))->get();
             u->items.SetNum(I_SORCERERS, rng::get_random(monster.number + 1));
             u->SetFlag(FLAG_BEHIND, 1);
             u->guard = GUARD_NONE;
@@ -209,7 +209,7 @@ void Game::MakeLMon(Object *pObj)
 
             u = GetNewUnit(monfac, 0);
 
-            monster = FindMonster(ItemDefs[I_WARRIORS].abr.c_str(), (ItemDefs[I_WARRIORS].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_WARRIORS].abr, (ItemDefs[I_WARRIORS].type & IT_ILLUSION))->get();
             u->MakeWMon(monster.name.c_str(), I_WARRIORS, (monster.number + rng::get_random(monster.number) + 1) / 2);
             u->guard = GUARD_NONE;
 
@@ -217,13 +217,13 @@ void Game::MakeLMon(Object *pObj)
         case I_DARKMAGE:
             u->MakeWMon("Dark Mages", I_DARKMAGE, (rng::get_random(monster.number) + 1));
 
-            monster = FindMonster(ItemDefs[I_MAGICIANS].abr.c_str(), (ItemDefs[I_MAGICIANS].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_MAGICIANS].abr, (ItemDefs[I_MAGICIANS].type & IT_ILLUSION))->get();
             u->items.SetNum(I_MAGICIANS, (monster.number + rng::get_random(monster.number) + 1) / 2);
 
-            monster = FindMonster(ItemDefs[I_SORCERERS].abr.c_str(), (ItemDefs[I_SORCERERS].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_SORCERERS].abr, (ItemDefs[I_SORCERERS].type & IT_ILLUSION))->get();
             u->items.SetNum(I_SORCERERS, rng::get_random(monster.number + 1));
 
-            monster = FindMonster(ItemDefs[I_DARKMAGE].abr.c_str(), (ItemDefs[I_DARKMAGE].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_DARKMAGE].abr, (ItemDefs[I_DARKMAGE].type & IT_ILLUSION))->get();
             u->items.SetNum(I_DARKMAGE, rng::get_random(monster.number + 1));
             u->SetFlag(FLAG_BEHIND, 1);
             u->guard = GUARD_NONE;
@@ -231,7 +231,7 @@ void Game::MakeLMon(Object *pObj)
 
             u = GetNewUnit(monfac, 0);
 
-            monster = FindMonster(ItemDefs[I_DROW].abr.c_str(), (ItemDefs[I_DROW].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_DROW].abr, (ItemDefs[I_DROW].type & IT_ILLUSION))->get();
             u->MakeWMon(monster.name.c_str(), I_DROW, (monster.number + rng::get_random(monster.number) + 1) / 2);
             u->guard = GUARD_NONE;
 
@@ -244,17 +244,17 @@ void Game::MakeLMon(Object *pObj)
 
             u = GetNewUnit(monfac, 0);
 
-            monster = FindMonster(ItemDefs[I_SKELETON].abr.c_str(), (ItemDefs[I_SKELETON].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_SKELETON].abr, (ItemDefs[I_SKELETON].type & IT_ILLUSION))->get();
             u->MakeWMon("Undead", I_SKELETON, rng::get_random(monster.number + 1));
 
-            monster = FindMonster(ItemDefs[I_UNDEAD].abr.c_str(), (ItemDefs[I_UNDEAD].type & IT_ILLUSION))->get();
+            monster = find_monster(ItemDefs[I_UNDEAD].abr, (ItemDefs[I_UNDEAD].type & IT_ILLUSION))->get();
             u->items.SetNum(I_UNDEAD, rng::get_random(monster.number + 1));
             u->guard = GUARD_NONE;
             break;
         case I_STORMGIANT:
             if (rng::get_random(3) < 1) {
                 montype = I_CLOUDGIANT;
-                monster = FindMonster(ItemDefs[montype].abr.c_str(), (ItemDefs[montype].type & IT_ILLUSION))->get();
+                monster = find_monster(ItemDefs[montype].abr, (ItemDefs[montype].type & IT_ILLUSION))->get();
             }
             u->MakeWMon(monster.name.c_str(), montype, (monster.number + rng::get_random(monster.number) + 1) / 2);
             break;
@@ -274,14 +274,14 @@ struct SuitableWeapon {
 Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weaponlevel, int armor, int behind)
 {
     Unit *u = GetNewUnit(fac);
-    auto men = FindRace(ItemDefs[mantype].abr.c_str())->get();
+    auto men = find_race(ItemDefs[mantype].abr)->get();
 
     int scomb = men.defaultlevel;
     int sxbow = men.defaultlevel;
     int slbow = men.defaultlevel;
     for (unsigned int i = 0; i < (sizeof(men.skills) / sizeof(men.skills[0])); i++) {
         if (!men.skills[i]) continue;
-        auto pS = FindSkill(men.skills[i])->get();
+        auto pS = FindSkill(men.skills[i]->c_str())->get();
         if (pS == FindSkill("COMB")->get()) scomb = men.speciallevel;
         if (pS == FindSkill("XBOW")->get()) sxbow = men.speciallevel;
         if (pS == FindSkill("LBOW")->get()) slbow = men.speciallevel;
@@ -383,7 +383,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 
     int maxskill = men.defaultlevel;
     for (unsigned int i = 0; i < (sizeof(men.skills) / sizeof(men.skills[0])); i++) {
-        if (men.skills[i] && FindSkill(men.skills[i])->get() == FindSkill(SkillDefs[sk].abbr.c_str())->get()) {
+        if (men.skills[i] && FindSkill(men.skills[i]->c_str())->get() == FindSkill(SkillDefs[sk].abbr.c_str())->get()) {
             maxskill = men.speciallevel;
             break;
         }

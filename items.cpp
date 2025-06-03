@@ -21,75 +21,68 @@ const int MonType::getAggression() {
     return aggression;
 }
 
-std::optional<std::reference_wrapper<BattleItemType>> FindBattleItem(char const *abbr)
+std::optional<std::reference_wrapper<BattleItemType>> find_battle_item(const strings::ci_string& abbr)
 {
-    if (abbr == NULL) return std::nullopt;
-    strings::ci_string tag(abbr);
-
-    auto it = std::find_if(BattleItemDefs.begin(), BattleItemDefs.end(), [tag](const BattleItemType& battleItem) {
-        return tag == battleItem.abbr;
+    auto it = std::find_if(BattleItemDefs.begin(), BattleItemDefs.end(), [abbr](const BattleItemType& battleItem) {
+        return abbr == battleItem.abbr;
     });
     if (it != BattleItemDefs.end()) return std::ref(*it);
 
     return std::nullopt;
 }
 
-std::optional<std::reference_wrapper<ArmorType>> FindArmor(char const *abbr)
+std::optional<std::reference_wrapper<ArmorType>> find_armor(const strings::ci_string& abbr)
 {
-    if (abbr == NULL) return std::nullopt;
-    strings::ci_string tag(abbr);
+    if (abbr.empty()) return std::nullopt;
 
-    auto it = std::find_if(ArmorDefs.begin(), ArmorDefs.end(), [tag](const ArmorType& armor) {
-        return tag == armor.abbr;
+    auto it = std::find_if(ArmorDefs.begin(), ArmorDefs.end(), [abbr](const ArmorType& armor) {
+        return abbr == armor.abbr;
     });
     if (it != ArmorDefs.end()) return std::ref(*it);
 
     return std::nullopt;
 }
 
-std::optional<std::reference_wrapper<WeaponType>> FindWeapon(char const *abbr)
+std::optional<std::reference_wrapper<WeaponType>> find_weapon(const strings::ci_string& abbr)
 {
-    if (abbr == NULL) return std::nullopt;
-    strings::ci_string tag(abbr);
+    if (abbr.empty()) return std::nullopt;
 
-    auto it = std::find_if(WeaponDefs.begin(), WeaponDefs.end(), [tag](const WeaponType& weapon) {
-        return tag == weapon.abbr;
+    auto it = std::find_if(WeaponDefs.begin(), WeaponDefs.end(), [abbr](const WeaponType& weapon) {
+        return abbr == weapon.abbr;
     });
     if (it != WeaponDefs.end()) return std::ref(*it);
 
     return std::nullopt;
 }
 
-std::optional<std::reference_wrapper<ItemType>> FindItem(char const *abbr)
+std::optional<std::reference_wrapper<ItemType>> find_item(const strings::ci_string& abbr)
 {
-    if (abbr == NULL) return std::nullopt;
-    strings::ci_string tag(abbr);
+    if (abbr.empty()) return std::nullopt;
 
-    auto it = std::find_if(ItemDefs.begin(), ItemDefs.end(), [tag](const ItemType& item) {
-        return tag == item.abr;
+    auto it = std::find_if(ItemDefs.begin(), ItemDefs.end(), [abbr](const ItemType& item) {
+        return abbr == item.abr;
     });
     if (it != ItemDefs.end()) return std::ref(*it);
 
     return std::nullopt;
 }
 
-std::optional<std::reference_wrapper<MountType>> FindMount(char const *abbr)
+std::optional<std::reference_wrapper<MountType>> find_mount(const strings::ci_string& abbr)
 {
-    if (abbr == NULL) return std::nullopt;
-    strings::ci_string tag(abbr);
+    if (abbr.empty()) return std::nullopt;
 
-    auto it = std::find_if(MountDefs.begin(), MountDefs.end(), [tag](const MountType& mount) {
-        return tag == mount.abbr;
+    auto it = std::find_if(MountDefs.begin(), MountDefs.end(), [abbr](const MountType& mount) {
+        return abbr == mount.abbr;
     });
     if (it != MountDefs.end()) return std::ref(*it);
 
     return std::nullopt;
 }
 
-std::optional<std::reference_wrapper<MonType>> FindMonster(char const *abbr, int illusion)
+std::optional<std::reference_wrapper<MonType>> find_monster(const strings::ci_string& abbr, int illusion)
 {
-    if (abbr == nullptr) return std::nullopt;
-    strings::ci_string tag = (illusion ? "i" : "") + std::string(abbr);
+    if (abbr.empty()) return std::nullopt;
+    strings::ci_string tag = (illusion ? "i" : "") + abbr;
 
     auto it = std::find_if(MonDefs.begin(), MonDefs.end(), [tag](const MonType& mon) {
         return tag == mon.abbr;
@@ -99,13 +92,12 @@ std::optional<std::reference_wrapper<MonType>> FindMonster(char const *abbr, int
     return std::nullopt;
 }
 
-std::optional<std::reference_wrapper<ManType>> FindRace(char const *abbr)
+std::optional<std::reference_wrapper<ManType>> find_race(const strings::ci_string& abbr)
 {
-    if (abbr == nullptr) return std::nullopt;
-    strings::ci_string tag(abbr);
+    if (abbr.empty()) return std::nullopt;
 
-    auto it = std::find_if(ManDefs.begin(), ManDefs.end(), [tag](const ManType& man) {
-        return tag == man.abbr;
+    auto it = std::find_if(ManDefs.begin(), ManDefs.end(), [abbr](const ManType& man) {
+        return abbr == man.abbr;
     });
     if (it != ManDefs.end()) return std::ref(*it);
 
@@ -135,7 +127,7 @@ static std::string defense_type(int atype)
 int lookup_item(const strings::ci_string& name)
 {
     for (int i = 0; i < NITEMS; i++) {
-        std::string item_name = (ItemDefs[i].type & IT_ILLUSION ? "i" : "") + std::string(ItemDefs[i].abr);
+        std::string item_name = (ItemDefs[i].type & IT_ILLUSION ? "i" : "") + ItemDefs[i].abr;
         if (name == item_name) return i;
     }
     return -1;
@@ -169,7 +161,7 @@ int parse_all_items(const parser::token& token, int flags)
         bool illusion = ItemDefs[i].type & IT_ILLUSION;
         std::string itemName = (illusion ? "i" : "") + ItemDefs[i].name;
         std::string itemNames = (illusion ? "i" : "") + ItemDefs[i].names;
-        std::string itemAbr = (illusion ? "i" : "") + std::string(ItemDefs[i].abr);
+        std::string itemAbr = (illusion ? "i" : "") + ItemDefs[i].abr;
 
         if (token == itemName || token == itemNames || token == itemAbr) return i;
     }
@@ -199,14 +191,13 @@ string item_string(int type, int num, int flags)
     string temp;
     if (num == 1) {
         if (flags & FULLNUM)
-            temp += to_string(num) + " ";
-        temp += string((flags & ALWAYSPLURAL) ? ItemDefs[type].names : ItemDefs[type].name) +
-            " [" + ItemDefs[type].abr + "]";
+            temp += std::to_string(num) + " ";
+        temp += (flags & ALWAYSPLURAL ? ItemDefs[type].names : ItemDefs[type].name) + " [" + ItemDefs[type].abr + "]";
     } else {
         if (num == -1) {
-            temp += string("unlimited ") + ItemDefs[type].names + " [" + ItemDefs[type].abr + "]";
+            temp += "unlimited " + ItemDefs[type].names + " [" + ItemDefs[type].abr + "]";
         } else {
-            temp += to_string(num) + " " + ItemDefs[type].names + " [" + ItemDefs[type].abr + "]";
+            temp += std::to_string(num) + " " + ItemDefs[type].names + " [" + ItemDefs[type].abr + "]";
         }
     }
     return temp;
@@ -268,7 +259,7 @@ static std::string attack_damage_description(const int damage) {
     return "attack deals " + std::to_string(damage) + " damage";
 }
 
-std::string show_special(char const *special, int level, int expandLevel, int fromItem)
+std::string show_special(const std::string& special, int level, int expandLevel, int fromItem)
 {
     std::string temp;
     int comma = 0;
@@ -276,7 +267,7 @@ std::string show_special(char const *special, int level, int expandLevel, int fr
     int last = -1;
     int val;
 
-    auto spd = FindSpecial(special).value().get();
+    auto spd = find_special(special).value().get();
     temp += spd.specialname;
     temp += " in battle";
     if (expandLevel)
@@ -529,7 +520,7 @@ std::string ShowItem::display_name()
 
 std::string ShowItem::display_tag() {
     if (ItemDefs[item].type & IT_ILLUSION) {
-        return "I" + std::string(ItemDefs[item].abr);
+        return "I" + ItemDefs[item].abr;
     }
     return ItemDefs[item].abr;
 
@@ -662,7 +653,7 @@ std::string item_description(int item, int full)
     temp += ".";
 
     if (ItemDefs[item].type & IT_MAN) {
-        auto mt = FindRace(ItemDefs[item].abr.c_str())->get();
+        auto mt = find_race(ItemDefs[item].abr)->get();
         std::string mani = "MANI";
         std::string last = "";
         bool found = false;
@@ -670,7 +661,7 @@ std::string item_description(int item, int full)
         unsigned int c;
         unsigned int len = sizeof(mt.skills) / sizeof(mt.skills[0]);
         for (c = 0; c < len; c++) {
-            auto pS = FindSkill(mt.skills[c]);
+            auto pS = FindSkill(mt.skills[c] ? mt.skills[c]->c_str() : nullptr);
             if (!pS) continue;
             if (mani == pS->get().abbr && Globals->MAGE_NONLEADERS) {
                 if (!(last == "")) {
@@ -707,7 +698,7 @@ std::string item_description(int item, int full)
 
     if ((ItemDefs[item].type & IT_MONSTER) && !(ItemDefs[item].flags & ItemType::MANPRODUCE)) {
         temp += " This is a monster.";
-        auto monster = FindMonster(ItemDefs[item].abr.c_str(), (ItemDefs[item].type & IT_ILLUSION))->get();
+        auto monster = find_monster(ItemDefs[item].abr, (ItemDefs[item].type & IT_ILLUSION))->get();
         temp += " This monster attacks with a combat skill of " + std::to_string(monster.attackLevel);
 
         for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
@@ -715,7 +706,7 @@ std::string item_description(int item, int full)
         }
 
         if (monster.special && monster.special != NULL) {
-            temp += " Monster can cast " + show_special(monster.special, monster.specialLevel, 1, 0);
+            temp += " Monster can cast " + show_special(monster.special ? monster.special : "", monster.specialLevel, 1, 0);
         }
 
         {
@@ -772,7 +763,7 @@ std::string item_description(int item, int full)
 
             bool isNext = false;
             for (auto &terrain : monster.preferredTerrain) {
-                temp += (isNext ? ", " : " ") + std::string(TerrainDefs[terrain].name);
+                temp += (isNext ? ", " : " ") + TerrainDefs[terrain].name;
                 isNext = true;
             }
 
@@ -837,7 +828,7 @@ std::string item_description(int item, int full)
 
     if(ItemDefs[item].flags & ItemType::MANPRODUCE) {
         temp += " This is a free-moving-item (FMI).";
-        auto monster = FindMonster(ItemDefs[item].abr.c_str(), (ItemDefs[item].type & IT_ILLUSION))->get();
+        auto monster = find_monster(ItemDefs[item].abr, (ItemDefs[item].type & IT_ILLUSION))->get();
         temp += " This FMI attacks with a combat skill of " + std::to_string(monster.attackLevel) + ".";
 
         for (int c = 0; c < NUM_ATTACK_TYPES; c++) {
@@ -845,7 +836,7 @@ std::string item_description(int item, int full)
         }
 
         if (monster.special && monster.special != NULL) {
-            temp += " FMI can cast " + show_special(monster.special, monster.specialLevel, 1, 0);
+            temp += " FMI can cast " + show_special(monster.special ? monster.special : "", monster.specialLevel, 1, 0);
         }
 
         if (full) {
@@ -888,7 +879,7 @@ std::string item_description(int item, int full)
     }
 
     if (ItemDefs[item].type & IT_WEAPON) {
-        auto weapon = FindWeapon(ItemDefs[item].abr.c_str())->get();
+        auto weapon = find_weapon(ItemDefs[item].abr)->get();
         temp += " This is a ";
         temp += weapon_type(weapon.flags, weapon.weapClass) + " weapon and each " +
             attack_damage_description(weapon.hitDamage) + ".";
@@ -998,7 +989,7 @@ std::string item_description(int item, int full)
                 if (!bm->weaponAbbr) continue;
                 if (bm->attackModifer == 0 && bm->defenseModifer == 0) continue;
 
-                auto target = FindItem(bm->weaponAbbr)->get();
+                auto target = find_item(bm->weaponAbbr)->get();
 
                 temp += " Wielders of this weapon will get ";
 
@@ -1023,7 +1014,7 @@ std::string item_description(int item, int full)
 
     if (ItemDefs[item].type & IT_ARMOR) {
         temp += " This is a type of armor.";
-        auto armor = FindArmor(ItemDefs[item].abr.c_str())->get();
+        auto armor = find_armor(ItemDefs[item].abr)->get();
         temp += " This armor will protect its wearer ";
         for (i = 0; i < NUM_WEAPON_CLASSES; i++) {
             if (i == NUM_WEAPON_CLASSES - 1) {
@@ -1106,7 +1097,7 @@ std::string item_description(int item, int full)
 
     if (ItemDefs[item].type & IT_MOUNT) {
         temp += " This is a mount.";
-        auto mount = FindMount(ItemDefs[item].abr.c_str()).value().get();
+        auto mount = find_mount(ItemDefs[item].abr).value().get();
         if (mount.skill == NULL) {
             temp += " No skill is required to use this mount.";
         } else {
@@ -1144,7 +1135,7 @@ std::string item_description(int item, int full)
                 temp += "terrain which allows ridden mounts but not flying mounts.";
             }
             if (mount.mountSpecial != NULL) {
-                temp += " When ridden, this mount causes " + show_special(mount.mountSpecial, mount.specialLev, 1, 0);
+                temp += " When ridden, this mount causes " + show_special(mount.mountSpecial ? mount.mountSpecial : "", mount.specialLev, 1, 0);
             }
         }
     } else {
@@ -1292,7 +1283,7 @@ std::string item_description(int item, int full)
 
     if (ItemDefs[item].type & IT_BATTLE) {
         temp += " This item is a miscellaneous combat item.";
-        auto bt = FindBattleItem(ItemDefs[item].abr.c_str());
+        auto bt = find_battle_item(ItemDefs[item].abr);
         if (bt) {
             if (bt->get().flags & BattleItemType::MAGEONLY) {
                 temp += " This item may only be used by a mage";
@@ -1305,7 +1296,7 @@ std::string item_description(int item, int full)
                 temp += " This item provides ";
             else
                 temp += " This item can cast ";
-            temp += show_special(bt->get().special, bt->get().skillLevel, 1, bt->get().flags & BattleItemType::SHIELD);
+            temp += show_special(bt->get().special ? bt->get().special : "", bt->get().skillLevel, 1, bt->get().flags & BattleItemType::SHIELD);
         }
     } else if (ItemDefs[item].type & IT_MAGEONLY) {
         temp += " This item may only be used by a mage";
@@ -1459,7 +1450,7 @@ std::string ItemList::battle_report()
             temp += ", ";
             temp += i->report(false);
             if (ItemDefs[i->type].type & IT_MONSTER) {
-                auto monster = FindMonster(ItemDefs[i->type].abr.c_str(), (ItemDefs[i->type].type & IT_ILLUSION))->get();
+                auto monster = find_monster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
                 temp += " (Combat " + std::to_string(monster.attackLevel) + "/" +
                     std::to_string(monster.defense[ATTACK_COMBAT]) + ", Attacks " + std::to_string(monster.numAttacks) +
                     ", Hits " + std::to_string(monster.hits) + ", Tactics " + std::to_string(monster.tactics) + ")";
@@ -1557,9 +1548,10 @@ void ItemList::SetNum(int t,int n)
 bool ManType::CanProduce(int item)
 {
     if (ItemDefs[item].flags & ItemType::DISABLED) return false;
+    if (!ItemDefs[item].pSkill) return false;
     for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
-        if (skills[i] == NULL) continue;
-        if (ItemDefs[item].pSkill == skills[i]) return true;
+        if (skills[i] == std::nullopt) continue;
+        if (skills[i] == ItemDefs[item].pSkill) return true;
     }
     return false;
 }
@@ -1579,31 +1571,30 @@ bool ManType::CanUse(int item)
 
     // Check if the item is an armor
     if (ItemDefs[item].type & IT_ARMOR) {
-        auto armor = FindArmor(ItemDefs[item].abr.c_str())->get();
+        auto armor = find_armor(ItemDefs[item].abr)->get();
         int p = armor.from / armor.saves[3];
         if (p > 4) {
             // puny armor not used by combative races
             bool mayWearArmor = true;
-            for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
-                if (skills[i] == NULL) continue;
-                auto pS = FindSkill(skills[i]);
+            for (unsigned int i = 0; i < (sizeof(skills) / sizeof(skills[0])); i++) {
+                if (skills[i] == std::nullopt) continue;
+                auto pS = FindSkill(skills[i]->c_str());
                 if (!pS) continue;
-                if (pS->get() == FindSkill("COMB")->get()) mayWearArmor = false;
+                if (pS->get().abbr == "COMB") mayWearArmor = false;
             }
-            if (mayWearArmor) return 1;
-            return 0;
+            if (mayWearArmor) return true;
+            return false;
         }
-        if (p > 3) return 1;
+        if (p > 3) return true;
         // heavy armor not be worn by sailors and sneaky races
         bool mayWearArmor = true;
-        for (unsigned int i=0; i<(sizeof(skills)/sizeof(skills[0])); i++) {
-            if (skills[i] == NULL) continue;
-            auto pS = FindSkill(skills[i]);
+        for (unsigned int i = 0; i<(sizeof(skills) / sizeof(skills[0])); i++) {
+            if (skills[i] == std::nullopt) continue;
+            auto pS = FindSkill(skills[i]->c_str());
             if (!pS) continue;
-            if (
-                (pS->get() == FindSkill("SAIL")->get()) || (pS->get() == FindSkill("HUNT")->get()) ||
-                (pS->get() == FindSkill("STEA")->get()) || (pS->get() == FindSkill("LBOW")->get())
-            ) mayWearArmor = false;
+            std::string skill_tag = pS->get().abbr;
+            if (skill_tag == "SAIL" || skill_tag == "HUNT" || skill_tag == "STEA" || skill_tag == "LBOW")
+                mayWearArmor = false;
         }
         if (mayWearArmor) return true;
         return false;

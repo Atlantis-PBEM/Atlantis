@@ -177,11 +177,11 @@ void Game::ModifyTablesPerRuleset(void)
 
     // Modify the various spells which are allowed to cross levels
     if (Globals->EASIER_UNDERWORLD) {
-        ModifyRangeFlags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_portal", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags("rng_weather", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_teleport", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_portal", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_farsight", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_clearsky", RangeType::RNG_CROSS_LEVELS);
+        modify_range_flags("rng_weather", RangeType::RNG_CROSS_LEVELS);
     }
 
     if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {

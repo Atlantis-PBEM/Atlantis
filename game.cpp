@@ -1539,7 +1539,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                     if (Globals->WANDERING_MONSTERS_EXIST) {
                         Faction *mfac = GetFaction(factions, monfaction);
                         Unit *mon = GetNewUnit(mfac, 0);
-                        auto monster = FindMonster(ItemDefs[i->type].abr.c_str(), (ItemDefs[i->type].type & IT_ILLUSION))->get();
+                        auto monster = find_monster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
                         mon->MakeWMon(monster.name.c_str(), i->type, i->num);
                         mon->MoveUnit(r->GetDummy());
                         // This will be zero unless these are set. (0 means
@@ -1575,7 +1575,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                     if (Globals->WANDERING_MONSTERS_EXIST) {
                         Faction *mfac = GetFaction(factions, monfaction);
                         Unit *mon = GetNewUnit(mfac, 0);
-                        auto monster = FindMonster(ItemDefs[i->type].abr.c_str(), (ItemDefs[i->type].type & IT_ILLUSION))->get();
+                        auto monster = find_monster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
                         mon->MakeWMon(monster.name.c_str(), i->type, i->num);
                         mon->MoveUnit(r->GetDummy());
                         // This will be zero unless these are set. (0 means full spoils)
@@ -1601,7 +1601,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                         if (Globals->WANDERING_MONSTERS_EXIST) {
                             Faction *mfac = GetFaction(factions, monfaction);
                             Unit *mon = GetNewUnit(mfac, 0);
-                            auto monster = FindMonster(ItemDefs[it->type].abr.c_str(), (ItemDefs[it->type].type & IT_ILLUSION))->get();
+                            auto monster = find_monster(ItemDefs[it->type].abr, (ItemDefs[it->type].type & IT_ILLUSION))->get();
                             mon->MakeWMon(monster.name.c_str(), it->type, it->num);
                             mon->MoveUnit(r->GetDummy());
                             // This will be zero unless these are set. (0 means full spoils)
@@ -1843,7 +1843,7 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
     int skill = S_COMBAT;
 
     if (weapon != -1) {
-        auto weapon_def = FindWeapon(ItemDefs[weapon].abr.c_str())->get();
+        auto weapon_def = find_weapon(ItemDefs[weapon].abr)->get();
         auto pS = FindSkill(weapon_def.baseSkill)->get();
         if (pS == FindSkill("XBOW")->get()) skill = S_CROSSBOW;
         if (pS == FindSkill("LBOW")->get()) skill = S_LONGBOW;

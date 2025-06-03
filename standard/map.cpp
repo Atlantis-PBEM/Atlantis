@@ -17,11 +17,10 @@ int ARegion::CheckSea(int dir, int range, int remainocean)
     return remainocean;
 }
 
-
-void ARegionList::CreateAbyssLevel(int level, char const *name)
+void ARegionList::create_abyss_level(int level, const std::string& name)
 {
     MakeRegions(level, 4, 4);
-    pRegionArrays[level]->set_name(name ? std::string(name) : "");
+    pRegionArrays[level]->set_name(name);
     pRegionArrays[level]->levelType = ARegionArray::LEVEL_NEXUS;
 
     ARegion *reg = NULL;
@@ -68,11 +67,11 @@ void ARegionList::CreateAbyssLevel(int level, char const *name)
 }
 
 
-void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *name)
+void ARegionList::create_nexus_level(int level, int xSize, int ySize, const std::string& name)
 {
     MakeRegions(level, xSize, ySize);
 
-    pRegionArrays[level]->set_name(name ? std::string(name) : "");
+    pRegionArrays[level]->set_name(name);
     pRegionArrays[level]->levelType = ARegionArray::LEVEL_NEXUS;
 
     std::string nex_name = Globals->WORLD_NAME;
@@ -104,7 +103,7 @@ void ARegionList::CreateNexusLevel(int level, int xSize, int ySize, char const *
     }
 }
 
-void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const *name)
+void ARegionList::create_surface_level(int level, int xSize, int ySize, const std::string& name)
 {
     if (Globals->ICOSAHEDRAL_WORLD) {
         MakeIcosahedralRegions(level, xSize, ySize);
@@ -112,7 +111,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
         MakeRegions(level, xSize, ySize);
     }
 
-    pRegionArrays[level]->set_name(name ? std::string(name) : "");
+    pRegionArrays[level]->set_name(name);
     pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
     int sea = Globals->OCEAN;
     if (Globals->SEA_LIMIT)
@@ -137,7 +136,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize, char const
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name)
+void ARegionList::create_island_level(int level, int nPlayers, const std::string& name)
 {
     int xSize, ySize;
     xSize = 20 + (nPlayers + 3) / 4 * 6 - 2;
@@ -145,7 +144,7 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name)
 
     MakeRegions(level, xSize, ySize);
 
-    pRegionArrays[level]->set_name(name ? std::string(name) : "");
+    pRegionArrays[level]->set_name(name);
     pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
     MakeCentralLand(pRegionArrays[level]);
@@ -157,17 +156,17 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char const *name)
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateIslandRingLevel(int level, int xSize, int ySize, char const *name)
+void ARegionList::create_island_ring_level(int level, int xSize, int ySize, const std::string& name)
 {
-    throw "CreateIslandRingLevel not implemented for this game ruleset";
+    throw "create_island_ring_level not implemented for this game ruleset";
 }
 
-void ARegionList::CreateUnderworldRingLevel(int level, int xSize, int ySize, char const *name)
+void ARegionList::create_underworld_ring_level(int level, int xSize, int ySize, const std::string& name)
 {
-    throw "CreateUnderworldRingLevel not implemented for this game ruleset";
+    throw "create_underworld_ring_level not implemented for this game ruleset";
 }
 
-void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char const *name)
+void ARegionList::create_underworld_level(int level, int xSize, int ySize, const std::string& name)
 {
     if (Globals->ICOSAHEDRAL_WORLD) {
         MakeIcosahedralRegions(level, xSize, ySize);
@@ -175,7 +174,7 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char co
         MakeRegions(level, xSize, ySize);
     }
 
-    pRegionArrays[level]->set_name(name ? std::string(name) : "");
+    pRegionArrays[level]->set_name(name);
     pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERWORLD;
 
     SetRegTypes(pRegionArrays[level], R_NUM);
@@ -193,7 +192,7 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize, char co
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name)
+void ARegionList::create_underdeep_level(int level, int xSize, int ySize, const std::string& name)
 {
     if (Globals->ICOSAHEDRAL_WORLD) {
         MakeIcosahedralRegions(level, xSize, ySize);
@@ -201,7 +200,7 @@ void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize, char con
         MakeRegions(level, xSize, ySize);
     }
 
-    pRegionArrays[level]->set_name(name ? std::string(name) : "");
+    pRegionArrays[level]->set_name(name);
     pRegionArrays[level]->levelType = ARegionArray::LEVEL_UNDERDEEP;
 
     SetRegTypes(pRegionArrays[level], R_NUM);
@@ -967,7 +966,7 @@ void ARegionList::GrowRaces(ARegionArray *pArr)
                         if (TerrainDefs[nreg->type].similar_type == R_OCEAN)
                             ch += 2;
                     } else {
-                        auto mt = FindRace(ItemDefs[reg->race].abr.c_str())->get();
+                        auto mt = find_race(ItemDefs[reg->race].abr)->get();
                         if (mt.terrain==TerrainDefs[nreg->type].similar_type) ch += 2;
                         int rnum = sizeof(TerrainDefs[nreg->type].races) / sizeof(TerrainDefs[nreg->type].races[0]);
                         for (int i=0; i<rnum; i++) {

@@ -83,6 +83,7 @@ namespace strings {
         ci_string() = default;
         ci_string(const std::string& s) : std::basic_string<char, ci_traits>(s.data(), s.length()) {}
         ci_string(std::string_view sv) : std::basic_string<char, ci_traits>(sv.data(), sv.length()) {}
+        ci_string(const std::basic_string<char, ci_traits>& s) : std::basic_string<char, ci_traits>(s) {}
         ci_string& operator=(const std::string& s) { this->assign(s.data(), s.length()); return *this; }
         ci_string& operator=(std::string_view sv) { this->assign(sv.data(), sv.length()); return *this; }
 

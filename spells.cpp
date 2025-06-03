@@ -85,7 +85,7 @@ void Game::ProcessCastOrder(Unit *u, parser::string_parser& parser, orders_check
             ProcessGenericSpell(u, sk, checker);
             break;
         case S_CLEAR_SKIES:
-            rt = FindRange(SkillDefs[sk].range);
+            rt = find_range(SkillDefs[sk].range.value_or(""));
             if (!rt) ProcessGenericSpell(u, sk, checker);
             else ProcessRegionSpell(u, sk, parser, checker);
             break;
@@ -335,7 +335,7 @@ void Game::ProcessRegionSpell(Unit *u, int spell, parser::string_parser& parser,
     int z = -1;
 
     if (parser.get_token() == "region") {
-        auto range = FindRange(SkillDefs[spell].range);
+        auto range = find_range(SkillDefs[spell].range.value_or(""));
 
         auto xval = parser.get_token().get_number();
         if (!xval) {
@@ -748,7 +748,7 @@ int Game::GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell)
         return 0;
     }
 
-    auto range = FindRange(SkillDefs[spell].range);
+    auto range = find_range(SkillDefs[spell].range.value_or(""));
     if (!range) {
         u->error("CAST: Spell is not castable at range.");
         return 0;
@@ -1428,7 +1428,7 @@ int Game::RunClearSkies(ARegion *r, Unit *u)
 
     CastRegionOrder *order = dynamic_cast<CastRegionOrder *>(u->castorders);
 
-    auto range = FindRange(SkillDefs[S_CLEAR_SKIES].range);
+    auto range = find_range(SkillDefs[S_CLEAR_SKIES].range.value_or(""));
     if (range) {
         tar = regions.GetRegion(order->xloc, order->yloc, order->zloc);
         val = GetRegionInRange(r, tar, u, S_CLEAR_SKIES);

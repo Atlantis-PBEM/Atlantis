@@ -64,10 +64,10 @@ class SkillType
         //
         // special for combat spells only
         //
-        char const *special;
+        std::optional<std::string> special;
 
-        // range class for ranged skills (-1 for all others)
-        char const *range;
+        // range class for ranged skills
+        std::optional<std::string> range;
 
         SkillDepend depends[3];
 
@@ -208,7 +208,7 @@ class SpecialType {
 };
 extern std::vector<SpecialType> SpecialDefs;
 
-extern std::optional<std::reference_wrapper<SpecialType>> FindSpecial(char const *key);
+extern std::optional<std::reference_wrapper<SpecialType>> find_special(const strings::ci_string& key);
 
 class EffectType {
     public:
@@ -253,7 +253,7 @@ class RangeType {
 };
 extern std::vector<RangeType> RangeDefs;
 
-extern std::optional<std::reference_wrapper<RangeType>> FindRange(char const *range);
+extern std::optional<std::reference_wrapper<RangeType>> find_range(strings::ci_string range);
 
 class AttribModItem {
     public:

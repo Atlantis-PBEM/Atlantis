@@ -907,7 +907,7 @@ void Game::ProcessPrepareOrder(Unit *u, parser::string_parser& parser, orders_ch
     }
 
     int it = parse_enabled_item(token);
-    auto bt = FindBattleItem(ItemDefs[it].abr.c_str());
+    auto bt = find_battle_item(ItemDefs[it].abr);
 
     if (checker) return;
 
@@ -926,7 +926,7 @@ void Game::ProcessPrepareOrder(Unit *u, parser::string_parser& parser, orders_ch
 
         std::string err = "PREPARE: Only a mage ";
         if (Globals->APPRENTICES_EXIST)
-            err += "or " + std::string(Globals->APPRENTICE_NAME);
+            err += "or " + Globals->APPRENTICE_NAME;
         err += "may use that item.";
 
         u->error(err);
@@ -2841,7 +2841,7 @@ void Game::ProcessAnnihilateOrder(Unit *unit, parser::string_parser& parser, ord
     }
 
     int z = -1;
-    auto range = FindRange(SkillDefs[S_ANNIHILATION].range).value().get();
+    auto range = find_range(SkillDefs[S_ANNIHILATION].range.value_or("")).value().get();
     if (range.flags & RangeType::RNG_SURFACE_ONLY) {
         z = (Globals->NEXUS_EXISTS ? 1 : 0);
     } else {

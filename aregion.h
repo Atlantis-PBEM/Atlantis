@@ -460,16 +460,16 @@ class ARegionList
         //
         // Public world creation stuff
         //
-        void CreateLevels(int numLevels);
-        void CreateAbyssLevel(int level, char const *name);
-        void CreateNexusLevel(int level, int xSize, int ySize, char const *name);
-        void CreateSurfaceLevel(int level, int xSize, int ySize, char const *name);
-        void CreateNaturalSurfaceLevel(Map* map);
-        void CreateIslandRingLevel(int level, int xSize, int ySize, char const *name);
-        void CreateIslandLevel(int level, int nPlayers, char const *name);
-        void CreateUnderworldLevel(int level, int xSize, int ySize, char const *name);
-        void CreateUnderworldRingLevel(int level, int xSize, int ySize, char const *name);
-        void CreateUnderdeepLevel(int level, int xSize, int ySize, char const *name);
+        void create_levels(int numLevels);
+        void create_abyss_level(int level, const std::string& name);
+        void create_nexus_level(int level, int xSize, int ySize, const std::string& name);
+        void create_surface_level(int level, int xSize, int ySize, const std::string& name);
+        void create_natural_surface_level(Map* map);
+        void create_island_ring_level(int level, int xSize, int ySize, const std::string& name);
+        void create_island_level(int level, int nPlayers, const std::string& name);
+        void create_underworld_level(int level, int xSize, int ySize, const std::string& name);
+        void create_underworld_ring_level(int level, int xSize, int ySize, const std::string& name);
+        void create_underdeep_level(int level, int xSize, int ySize, const std::string& name);
 
         void MakeShaftLinks(int levelFrom, int levelTo, int odds);
         void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);

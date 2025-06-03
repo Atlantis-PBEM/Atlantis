@@ -176,10 +176,10 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
     if (!def->NumAlive()) return;
 
     if (!behind && (a->riding != -1)) {
-        auto mount = FindMount(ItemDefs[a->riding].abr.c_str())->get();
+        auto mount = find_mount(ItemDefs[a->riding].abr).value().get();
         if (mount.mountSpecial != NULL) {
             int i, num, tot = -1;
-            auto spd = FindSpecial(mount.mountSpecial).value().get();
+            auto spd = find_special(mount.mountSpecial ? mount.mountSpecial : "").value().get();
             for (i = 0; i < 4; i++) {
                 int times = spd.damage[i].value;
                 int hitDamage =  spd.damage[i].hitDamage;
@@ -209,7 +209,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
     }
 
     for (int i = 0; i < numAttacks; i++) {
-        auto weapon_def = (a->weapon != -1) ? FindWeapon(ItemDefs[a->weapon].abr.c_str()) : std::nullopt;
+        auto weapon_def = (a->weapon != -1) ? find_weapon(ItemDefs[a->weapon].abr) : std::nullopt;
 
         if (behind && !canAttackFromBehind) {
             if (!weapon_def) break;

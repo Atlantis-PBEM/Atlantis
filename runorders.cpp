@@ -1500,12 +1500,13 @@ void Game::DoBuy(ARegion *r, Market *m)
                         delete sl;
                         /* Setup specialized skill experience */
                         if (Globals->REQUIRED_EXPERIENCE) {
-                            auto mt = FindRace(ItemDefs[o->item].abr.c_str())->get();
+                            auto mt = find_race(ItemDefs[o->item].abr)->get();
                             int exp = mt.speciallevel - mt.defaultlevel;
                             if (exp > 0) {
                                 exp = exp * temp * GetDaysByLevel(1);
                                 for (auto ms : mt.skills) {
-                                    int skill = lookup_skill(ms);
+                                    if (!ms) continue;
+                                    int skill = lookup_skill(ms->c_str());
                                     if (skill == -1) continue;
                                     int curxp = u->skills.GetExp(skill);
                                     u->skills.SetExp(skill,exp+curxp);
@@ -2444,7 +2445,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
             if (Globals->WANDERING_MONSTERS_EXIST) {
                 Faction *mfac = GetFaction(factions, monfaction);
                 Unit *mon = GetNewUnit(mfac, 0);
-                auto mp = FindMonster(ItemDefs[o->item].abr.c_str(), (ItemDefs[o->item].type & IT_ILLUSION))->get();
+                auto mp = find_monster(ItemDefs[o->item].abr, (ItemDefs[o->item].type & IT_ILLUSION))->get();
                 mon->MakeWMon(mp.name.c_str(), o->item, amt);
                 mon->MoveUnit(r->GetDummy());
                 // This will result in 0 unless MONSTER_NO_SPOILS or
@@ -2816,7 +2817,7 @@ void Game::CheckTransportOrders()
 
                     int dist;
                     int penalty = 10000000;
-                    auto rt = FindRange("rng_transport");
+                    auto rt = find_range("rng_transport");
                     if (rt) penalty = rt->get().crossLevelPenalty;
                     o->distance = Globals->LOCAL_TRANSPORT;  // default to local max distance
                     if (maxdist > 0) {
@@ -3182,7 +3183,7 @@ void Game::RunAnnihilateOrders() {
                     }
 
                     // Check if the target is in range
-                    auto rt = FindRange("rng_annihilate").value().get();
+                    auto rt = find_range("rng_annihilate").value().get();
                     int rtype = target->level->levelType;
                     if ((rt.flags & RangeType::RNG_SURFACE_ONLY) && (rtype  != ARegionArray::LEVEL_SURFACE)) {
                         u->error("ANNIHILATE: Target region is not on the surface.");
@@ -3220,7 +3221,7 @@ void Game::RunAnnihilateOrders() {
                     // pick a random region region to annihilate
                     ARegionArray *level = nullptr;
 
-                    auto rt = FindRange("rng_annihilate").value().get();
+                    auto rt = find_range("rng_annihilate").value().get();
                     if (rt.flags & RangeType::RNG_SURFACE_ONLY) {
                         level = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
                     } else {

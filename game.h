@@ -175,8 +175,8 @@ private:
     void ModifySkillDependancy(int sk, int i, char const *dep, int lev);
     void ModifySkillFlags(int sk, int flags);
     void ModifySkillCost(int sk, int cost);
-    void ModifySkillSpecial(int sk, char const *special);
-    void ModifySkillRange(int sk, char const *range);
+    void modify_skill_special(int sk, const std::string& special);
+    void modify_skill_range(int sk, const std::string& range);
 
     void EnableItem(int it);  // Enables a disabled item
     void DisableItem(int it); // Prevents item being generated/produced
@@ -197,30 +197,32 @@ private:
     void ModifyItemMagicInput(int it, int i, int input, int amount);
     void ModifyItemEscape(int it, int escape, char const *skill, int val);
 
-    void ModifyRaceSkillLevels(char const *race, int special, int def);
-    void ModifyRaceSkills(char const *race, int i, char const *sk);
+    void modify_race_skill_levels(const std::string& race, int special, int def);
+    void modify_race_skills(const std::string& race, int i, const std::string& sk);
 
-    void ModifyMonsterAttackLevel(char const *mon, int lev);
-    void ModifyMonsterDefense(char const *mon, int defenseType, int level);
-    void ModifyMonsterAttacksAndHits(char const *mon, int num, int hits, int regen, int hitDamage);
-    void ModifyMonsterSkills(char const *mon, int tact, int stealth, int obs);
-    void ModifyMonsterSpecial(char const *mon, char const *special, int lev);
-    void ModifyMonsterSpoils(char const *mon, int silver, int spoilType);
-    void ModifyMonsterThreat(char const *mon, int num, int hostileChance);
+    void modify_monster_attack_level(const std::string& mon, int lev);
+    void modify_monster_defense(const std::string& mon, int defenseType, int level);
+    void modify_monster_attacks_and_hits(const std::string& mon, int num, int hits, int regen, int hitDamage);
+    void modify_monster_skills(const std::string& mon, int tact, int stealth, int obs);
+    void modify_monster_special(const std::string& mon, const std::string& special, int lev);
+    void modify_monster_spoils(const std::string& mon, int silver, int spoilType);
+    void modify_monster_threat(const std::string& mon, int num, int hostileChance);
 
-    void ModifyWeaponSkills(char const *weap, char *baseSkill, char *orSkill);
-    void ModifyWeaponFlags(char const *weap, int flags);
-    void ModifyWeaponAttack(char const *weap, int wclass, int attackType, int numAtt, int hitDamage);
-    void ModifyWeaponBonuses(char const *weap, int attack, int defense, int vsMount);
-    void ModifyWeaponBonusMalus(char const *weap, int index, char *weaponAbbr, int attackModifer, int defenseModifer);
+    void modify_weapon_skills(const std::string& weap, const std::string& baseSkill, const std::string& orSkill);
+    void modify_weapon_flags(const std::string& weap, int flags);
+    void modify_weapon_attack(const std::string& weap, int wclass, int attackType, int numAtt, int hitDamage);
+    void modify_weapon_bonuses(const std::string& weap, int attack, int defense, int vsMount);
+    void modify_weapon_bonus_malus(
+        const std::string& weap, int index, const std::string& weaponAbbr, int attackModifer, int defenseModifer
+    );
 
-    void ModifyArmorFlags(char const *armor, int flags);
-    void ModifyArmorSaveFrom(char const *armor, int from);
-    void ModifyArmorSaveValue(char const *armor, int wclass, int val);
+    void modify_armor_flags(const std::string& armor, int flags);
+    void modify_armor_save_from(const std::string& armor, int from);
+    void modify_armor_save_value(const std::string& armor, int wclass, int val);
 
-    void ModifyMountSkill(char const *mount, char *skill);
-    void ModifyMountBonuses(char const *mount, int min, int max, int hampered);
-    void ModifyMountSpecial(char const *mount, char const *special, int level);
+    void modify_mount_skill(const std::string& mount, const std::string& skill);
+    void modify_mount_bonuses(const std::string& mount, int min, int max, int hampered);
+    void modify_mount_special(const std::string& mount, const std::string& special, int level);
 
     void EnableObject(int ob);  // Enables a disabled object
     void DisableObject(int ob); // Prevents object being built
@@ -244,8 +246,8 @@ private:
     void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
     void ModifyTerrainFlags(int t, int flags);
 
-    void ModifyBattleItemFlags(char const *item, int flags);
-    void ModifyBattleItemSpecial(char const *item, char const *special, int level);
+    void modify_battle_item_flags(const std::string& item, int flags);
+    void modify_battle_item_special(const std::string& item, const std::string& special, int level);
 
     void ModifySpecialTargetFlags(char const *special, int targetflags);
     void ModifySpecialTargetObjects(char const *special, int index, int obj);
@@ -262,10 +264,10 @@ private:
     void ModifyEffectDefenseMod(char const *effect, int index, int type, int val);
     void ModifyEffectCancelEffect(char const *effect, char *uneffect);
 
-    void ModifyRangeFlags(char const *range, int flags);
-    void ModifyRangeClass(char const *range, int rclass);
-    void ModifyRangeMultiplier(char const *range, int mult);
-    void ModifyRangeLevelPenalty(char const *range, int pen);
+    void modify_range_flags(const std::string& range, int flags);
+    void modify_range_class(const std::string& range, int rclass);
+    void modify_range_multiplier(const std::string& range, int mult);
+    void modify_range_level_penalty(const std::string& range, int pen);
 
     void ModifyAttribMod(char const *mod, int index, int flags, char const *ident,
                          int type, int val);

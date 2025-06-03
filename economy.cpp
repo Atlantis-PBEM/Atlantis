@@ -99,7 +99,7 @@ void ARegion::SetupHabitat(TerrainType* terrain) {
     }
 
     habitat = habitat * 2 / 3 + rng::get_random(habitat / 3);
-    auto mt = FindRace(ItemDefs[race].abr.c_str())->get();
+    auto mt = find_race(ItemDefs[race].abr)->get();
     if (mt.terrain == terrain->similar_type) {
         habitat = (habitat * 9)/8;
     }
@@ -365,8 +365,8 @@ void ARegion::SetupCityMarket()
     int cap;
     int offset = 0;
     int citymax = Globals->CITY_POP;
-    auto localrace = FindRace(ItemDefs[race].abr.c_str());
-    if (!localrace) localrace = FindRace("SELF");
+    auto localrace = find_race(ItemDefs[race].abr);
+    if (!localrace) localrace = find_race("SELF");
     auto locals = localrace->get();
     /* compose array of possible supply & demand items */
     int supply[NITEMS];
@@ -957,7 +957,7 @@ void ARegion::SetupEditRegion()
     }
 
     habitat = habitat * 2/3 + rng::get_random(habitat/3);
-    auto mt = FindRace(ItemDefs[race].abr.c_str())->get();
+    auto mt = find_race(ItemDefs[race].abr)->get();
     if (mt.terrain == typer->similar_type) {
         habitat = (habitat * 9)/8;
     }

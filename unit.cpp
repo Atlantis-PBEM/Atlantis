@@ -792,7 +792,7 @@ void Unit::DefaultOrders(Object *obj)
                     continue;
                 }
 
-                auto monster = FindMonster(itemType.abr.c_str(), (itemType.type & IT_ILLUSION))->get();
+                auto monster = find_monster(itemType.abr, (itemType.type & IT_ILLUSION))->get();
                 aggression = std::max(aggression, monster.getAggression());
 
                 // bad terrain is an union of all bad terrains
@@ -1115,7 +1115,7 @@ int Unit::GetAttackRiding()
         for(auto i : items) {
             int skill, maxBonus;
             if (!(ItemDefs[i->type].type & IT_MOUNT)) continue;
-            auto mountType = FindMount(ItemDefs[i->type].abr.c_str());
+            auto mountType = find_mount(ItemDefs[i->type].abr);
             if (!mountType) continue;
             auto mount = mountType.value().get();
             maxBonus = mount.maxBonus;
@@ -1164,7 +1164,7 @@ int Unit::GetDefenseRiding()
         // Limit riding to the slowest flying mount
         for(auto i : items) {
             if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].fly) {
-                auto mountType = FindMount(ItemDefs[i->type].abr.c_str());
+                auto mountType = find_mount(ItemDefs[i->type].abr);
                 if (mountType) {
                     auto mount = mountType.value().get();
                     // If we wanted to apply terrain restrictions,
@@ -1179,7 +1179,7 @@ int Unit::GetDefenseRiding()
         // Limit riding to the slowest riding mount
         for(auto i : items) {
             if (ItemDefs[i->type].type & IT_MOUNT && ItemDefs[i->type].ride) {
-                auto mountType = FindMount(ItemDefs[i->type].abr.c_str());
+                auto mountType = find_mount(ItemDefs[i->type].abr);
                 if (mountType) {
                     auto mount = mountType.value().get();
                     // If we wanted to apply terrain restrictions, we'd also do it here
@@ -1969,7 +1969,7 @@ int Unit::Hostile()
     int retval = 0;
     for(auto i : items) {
         if (ItemDefs[i->type].type & IT_MONSTER) {
-            auto monster = FindMonster(ItemDefs[i->type].abr.c_str(), (ItemDefs[i->type].type & IT_ILLUSION))->get();
+            auto monster = find_monster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
             int hos = monster.hostile;
             if (hos > retval) retval = hos;
         }
@@ -2015,7 +2015,7 @@ int Unit::Taxers(int numtaxers)
     int numArmor = 0;
 
     for(auto item : items) {
-        auto pBat = FindBattleItem(ItemDefs[item->type].abr.c_str());
+        auto pBat = find_battle_item(ItemDefs[item->type].abr);
 
         if ((ItemDefs[item->type].type & IT_BATTLE) && pBat && (pBat->get().flags & BattleItemType::SPECIAL)) {
             // Only consider offensive items
@@ -2034,7 +2034,7 @@ int Unit::Taxers(int numtaxers)
         }
 
         if (ItemDefs[item->type].type & IT_WEAPON) {
-            auto weapon = FindWeapon(ItemDefs[item->type].abr.c_str())->get();
+            auto weapon = find_weapon(ItemDefs[item->type].abr)->get();
             int num = item->num;
             int basesk = 0;
             int sk = lookup_skill(weapon.baseSkill);
@@ -2069,7 +2069,7 @@ int Unit::Taxers(int numtaxers)
         }
 
         if (ItemDefs[item->type].type & IT_MOUNT) {
-            auto pm = FindMount(ItemDefs[item->type].abr.c_str()).value().get();
+            auto pm = find_mount(ItemDefs[item->type].abr).value().get();
             if (pm.skill) {
                 int sk = lookup_skill(pm.skill);
                 if (pm.minBonus <= GetSkill(sk))
@@ -2314,7 +2314,7 @@ int Unit::get_battle_item(const std::string &item)
 int Unit::get_armor(const std::string &item, int ass)
 {
     int item_num = lookup_item(item);
-    auto armor_type = FindArmor(ItemDefs[item_num].abr.c_str());
+    auto armor_type = find_armor(ItemDefs[item_num].abr);
 
     if (!armor_type) return -1;
     if (ass && !(armor_type->get().flags & ArmorType::USEINASSASSINATE)) return -1;
@@ -2335,7 +2335,7 @@ int Unit::get_mount(const std::string &item, int canFly, int canRide, int &bonus
     if (!canFly && !canRide) return -1;
 
     int item_num = lookup_item(item);
-    auto pMnt = FindMount(ItemDefs[item_num].abr.c_str()).value().get();
+    auto pMnt = find_mount(ItemDefs[item_num].abr).value().get();
 
     int num = items.GetNum(item_num);
     if (num < 1) return -1;
@@ -2384,7 +2384,7 @@ int Unit::get_weapon(
 )
 {
     int item_num = lookup_item(item);
-    auto weapontype = FindWeapon(ItemDefs[item_num].abr.c_str());
+    auto weapontype = find_weapon(ItemDefs[item_num].abr);
 
     if (!weapontype) return -1;
     auto weapon = weapontype->get();
@@ -2488,7 +2488,7 @@ int Unit::GetAttribute(char const *attrib)
     if (ap->get().flags & AttribModType::CHECK_MONSTERS) {
         for(auto i : items) {
             if (ItemDefs[i->type].type & IT_MONSTER) {
-                auto monster = FindMonster(ItemDefs[i->type].abr.c_str(), (ItemDefs[i->type].type & IT_ILLUSION))->get();
+                auto monster = find_monster(ItemDefs[i->type].abr, (ItemDefs[i->type].type & IT_ILLUSION))->get();
                 int val = 0;
                 temp = attrib;
                 if (temp == "observation") val = monster.obs;

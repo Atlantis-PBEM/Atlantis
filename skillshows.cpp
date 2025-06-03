@@ -416,7 +416,7 @@ const std::string ShowSkill::Report(Faction *f) const
                 "Portals, and the caster must be trained in Portal Lore. The "
                 "caster may teleport units weighing up to 800 weight units "
                 "times his skill level, to the target mage's region. ";
-            range = FindRange(SkillDefs[skill].range);
+            range = find_range(SkillDefs[skill].range.value_or(""));
             if (range) {
                 str += " The target region must be within ";
                 str += std::to_string(range->get().rangeMult);
@@ -447,7 +447,7 @@ const std::string ShowSkill::Report(Faction *f) const
             str += "A mage with this skill may obtain region reports on "
                 "distant regions. The report will be as if the mage was in "
                 "the distant region himself.";
-            range = FindRange(SkillDefs[skill].range);
+            range = find_range(SkillDefs[skill].range.value_or(""));
             if (range) {
                 if (range->get().flags & RangeType::RNG_SURFACE_ONLY) {
                     str += " This skill only works on the surface of the "
@@ -530,7 +530,7 @@ const std::string ShowSkill::Report(Faction *f) const
             str += "A mage with this skill may teleport himself across "
                 "great distances, even without the use of a gate. The mage "
                 "may teleport up to 50 weight units per skill level.";
-            range = FindRange(SkillDefs[skill].range);
+            range = find_range(SkillDefs[skill].range.value_or(""));
             if (range) {
                 if (range->get().flags & RangeType::RNG_SURFACE_ONLY) {
                     str += " This skill only works on the surface of the "
@@ -590,7 +590,7 @@ const std::string ShowSkill::Report(Faction *f) const
                 "areas of magic. The weather may be predicted for 3 months "
                 "at level 1, 6 months at level 3 and a full year at level "
                 "5.";
-            range = FindRange(SkillDefs[skill].range);
+            range = find_range(SkillDefs[skill].range.value_or(""));
             if (range) {
                 if (range->get().flags & RangeType::RNG_SURFACE_ONLY) {
                     str += " This skill only works on the surface of the "
@@ -679,7 +679,7 @@ const std::string ShowSkill::Report(Faction *f) const
                     "for a month (this improvement of the economy will "
                     "actually take effect during the turn after the spell "
                     "is cast).";
-                range = FindRange(SkillDefs[skill].range);
+                range = find_range(SkillDefs[skill].range.value_or(""));
                 if (range) {
                     if (range->get().flags & RangeType::RNG_SURFACE_ONLY) {
                         str += " This skill only works on the surface of "
@@ -1410,7 +1410,7 @@ const std::string ShowSkill::Report(Faction *f) const
             break;
         case S_ANNIHILATION:
             if (level > 1) break;
-            range = FindRange(SkillDefs[skill].range);
+            range = find_range(SkillDefs[skill].range.value_or(""));
             str += "A unit with access to the Annihilation skill may destroy a region and all surrounding "
                 "regions.  Regions destroyed in this way will become barren.  All units and structures except for "
                 "shafts and anomalies in the region and the surrounding regions will be destroyed as will production "
@@ -1455,7 +1455,7 @@ const std::string ShowSkill::Report(Faction *f) const
 
     // If this is a combat spell, note it.
     if (level == 1 && (SkillDefs[skill].flags & SkillType::COMBAT)) {
-        str += " A mage with this skill can cast " + show_special(SkillDefs[skill].special, level, 0, 0) +
+        str += " A mage with this skill can cast " + show_special(SkillDefs[skill].special.value_or("").c_str(), level, 0, 0) +
             " In order to use this spell in combat, the mage should use the COMBAT order to set it as his combat spell.";
     }
 
