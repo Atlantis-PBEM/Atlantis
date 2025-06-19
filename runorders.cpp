@@ -3157,6 +3157,7 @@ void Game::RunAnnihilateOrders() {
     // Annihilate will destroy the target hex and all surrounding hexes.  Already annihilated regions cannot be
     // annihilated again.
     int max_annihilates = rulesetSpecificData.value("allowed_annihilates", 1);
+    bool random_annihilates = rulesetSpecificData.value("random_annihilates", false);
 
     for(const auto r : regions) {
         for(const auto obj : r->objects) {
@@ -3217,7 +3218,7 @@ void Game::RunAnnihilateOrders() {
                 }
 
                 // If the unit didn't use all their annihilates, and we should do random ones, do them.
-                while(allowed_annihilates > 0) {
+                while(random_annihilates && allowed_annihilates > 0) {
                     // pick a random region region to annihilate
                     ARegionArray *level = nullptr;
 

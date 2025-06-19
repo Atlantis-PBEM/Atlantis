@@ -1074,6 +1074,19 @@ void Game::ModifyTablesPerRuleset(void)
         ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
     }
 
+    // set up game specific tracked data
+    rulesetSpecificData.clear();
+
+    // this set is for the NO7 annihilation win condition, and is active for NO7
+    rulesetSpecificData["victory_type"] = "annihilation";
+    rulesetSpecificData["allowed_annihilates"] = 3;
+    rulesetSpecificData["allied_percent"] = 50;
+    rulesetSpecificData["annihilate_percent"] = 10;
+    rulesetSpecificData["random_annihilates"] = true;
+
+    // this set is for the city vote win condition, and was not active for NO7
+    // rulesetSpecificData["victory_type"] = "city_vote";
+
     EnableItem(I_CAMEL);
     EnableItem(I_MCROSSBOW);
     EnableItem(I_MWAGON);
@@ -1522,14 +1535,16 @@ void Game::ModifyTablesPerRuleset(void)
     }
 
     // NO7 - Enable the various parts of the victory conditions
-    EnableObject(O_RITUAL_ALTAR);
-    EnableObject(O_EMPOWERED_ALTAR);
-    EnableObject(O_ENTITY_CAGE);
-    EnableObject(O_DORMANT_MONOLITH);
-    EnableObject(O_ACTIVE_MONOLITH);
-    EnableItem(I_IMPRISONED_ENTITY);
-    EnableSkill(S_ANNIHILATION);
-    modify_range_flags("rng_annihilate", RangeType::RNG_SURFACE_ONLY | RangeType::RNG_CROSS_LEVELS);
+    if (rulesetSpecificData["victory_type"] == "annihilation") {
+        EnableObject(O_RITUAL_ALTAR);
+        EnableObject(O_EMPOWERED_ALTAR);
+        EnableObject(O_ENTITY_CAGE);
+        EnableObject(O_DORMANT_MONOLITH);
+        EnableObject(O_ACTIVE_MONOLITH);
+        EnableItem(I_IMPRISONED_ENTITY);
+        EnableSkill(S_ANNIHILATION);
+        modify_range_flags("rng_annihilate", RangeType::RNG_SURFACE_ONLY | RangeType::RNG_CROSS_LEVELS);
+    }
 
     // Weapon BM example
 
@@ -1538,44 +1553,40 @@ void Game::ModifyTablesPerRuleset(void)
 
     // At the same time give SPEA bonus of 2 on attacka and 2 on defense vs. SWOR
     // modify_weapon_bonus_malus("SPEA", 0, "SWOR", 2, 2);
-
-    // set up game specific tracked data
-    rulesetSpecificData.clear();
-
-    // this set is for the NO7 annihilation win condition
-    rulesetSpecificData["victory_type"] = "annihilation";
-    rulesetSpecificData["allowed_annihilates"] = 3;
-    rulesetSpecificData["allied_percent"] = 50;
-    rulesetSpecificData["annihilate_percent"] = 10;
-    rulesetSpecificData["random_annihilates"] = true;
-
-    // this set is for the city vote win condition, not active for NO7
-    // rulesetSpecificData["victory_type"] = "city_vote";
     return;
 }
 
 const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList& regions) {
-    ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
-    ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
 
-    ARegionArray *this_level = this->level;
-    ARegion *this_center = this_level->GetRegion(this_level->x / 2, this_level->y / 2);
+    // If Empowered Altars are active, we should check for them.  This is only used for the NO7 victory condition.
+    if (!(ObjectDefs[O_EMPOWERED_ALTAR].flags & ObjectType::DISABLED)) {
+        ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
+        ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
 
-    if (this == this_center || this == surface_center) {
-        // This is a center region.  You can only enter here if all the altars have been empowered.
+        // If we don't have a barrens in the center, then this is not an N07 ring map and thus we won't have altars.
+        if (surface_center->type != R_BARREN) {
+            return std::nullopt;
+        }
 
-        int count = 0;
-        for (int i = 0; i < 6; i++) {
-            ARegion *r = surface_center->neighbors[i];
-            // search that region for an altar
-            for(const auto o : r->objects) {
-                if (o->type == O_EMPOWERED_ALTAR) {
-                    count++;
+        ARegionArray *this_level = this->level;
+        ARegion *this_center = this_level->GetRegion(this_level->x / 2, this_level->y / 2);
+
+        if (this == this_center || this == surface_center) {
+            // This is a center region.  You can only enter here if all the altars have been empowered.
+
+            int count = 0;
+            for (int i = 0; i < 6; i++) {
+                ARegion *r = surface_center->neighbors[i];
+                // search that region for an altar
+                for(const auto o : r->objects) {
+                    if (o->type == O_EMPOWERED_ALTAR) {
+                        count++;
+                    }
                 }
             }
-        }
-        if (count < 6) {
-            return "A mystical barrier";
+            if (count < 6) {
+                return "A mystical barrier";
+            }
         }
     }
     return std::nullopt;
