@@ -12,6 +12,8 @@
 #include <ranges>
 #include <string_view>
 #include "strings_util.hpp"
+#include <sstream>
+#include <iostream>
 
 namespace filter {
 
@@ -124,6 +126,7 @@ inline constexpr lowercase_t lowercase{};
  */
 struct canonicalize_t {
     std::string process(const std::string& str) const {
+#ifdef _MSC_VER
         auto parts_view = str
             | std::views::split(std::string_view{" "}) // Split by space
             | std::views::transform([](auto&& subrange) {
@@ -136,6 +139,25 @@ struct canonicalize_t {
         std::ranges::copy(parts_view, std::back_inserter(processed_words));
         // Join the processed words with an underscore
         return strings::join(processed_words, "_");
+#else
+        /** FIXME: gcc doesn't like the range solution, ergo this hack */
+        std::vector<std::string> words;
+        std::istringstream f(str);
+        std::string s;
+        while (std::getline(f, s, ' ')) {
+            words.push_back(s);
+        }
+        s.clear();
+        for(const std::string& w : words) {
+            if (!s.empty()) {
+                s.append(1, '_');
+            }
+            // s += w | capitalize;
+            s.append(1, (char) std::toupper(w[0]));
+            s.append(w.begin() + 1, w.end());
+        }
+        return str; // WRONG!
+#endif
     }
 
     std::string operator()(const std::string& str) const { return process(str); }

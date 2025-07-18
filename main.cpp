@@ -4,6 +4,7 @@
 #include "skills.h"
 #include "gamedata.h"
 #include "strings_util.hpp"
+#include "string_filters.hpp"
 
 void usage()
 {
