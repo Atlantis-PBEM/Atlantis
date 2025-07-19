@@ -1099,14 +1099,16 @@ int ARegion::TownHabitat()
     int fort = 0;
     for(const auto obj : objects) {
         if (ObjectDefs[obj->type].protect > fort) fort = ObjectDefs[obj->type].protect;
-        if (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_FOOD) farm++;
-        if (ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
-        if (ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
-        if (
-            (ObjectDefs[obj->type].flags & ObjectType::TRANSPORT) &&
-            (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_MOUNT)
-        ) {
-            caravan++;
+        if (ObjectDefs[obj->type].productionAided >= 0) {
+            if (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_FOOD) farm++;
+            if (ObjectDefs[obj->type].productionAided == I_SILVER) inn++;
+            if (ObjectDefs[obj->type].productionAided == I_HERBS) temple++;
+            if (
+                (ObjectDefs[obj->type].flags & ObjectType::TRANSPORT) &&
+                (ItemDefs[ObjectDefs[obj->type].productionAided].type & IT_MOUNT)
+                ) {
+                caravan++;
+            }
         }
     }
     int hab = 2;
