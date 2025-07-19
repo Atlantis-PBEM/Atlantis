@@ -36,3 +36,4 @@ map_viewer/.parcel-cache
 map_viewer/dist
 !*.[ch]
 !*.[ch]pp
+/build/

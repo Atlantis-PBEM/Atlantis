@@ -12,7 +12,6 @@
 #include <iostream>
 
 #include "strings_util.hpp"
-#include "string_filters.hpp"
 
 namespace parser {
 
@@ -55,7 +54,7 @@ std::istream& operator>>(std::istream& is, string_parser& parser);
 
 class string_parser {
 public:
-    constexpr string_parser() noexcept : data_{}, pos_{0} {}
+    string_parser() noexcept : data_{}, pos_{0} {}
     explicit string_parser(const std::string& input) noexcept : data_{input}, pos_{0} {}
     explicit string_parser(std::string&& input) noexcept : data_{std::move(input)}, pos_{0} {}
     explicit string_parser(const char* input) noexcept : data_{input ? input : ""}, pos_{0} {}
@@ -71,11 +70,11 @@ public:
 
     // Utility methods
     void strip_white() noexcept;
-    constexpr void reset() noexcept { pos_ = 0; }
+    void reset() noexcept { pos_ = 0; }
     [[nodiscard]] std::string str() const noexcept { return data_.substr(pos_); }
     [[nodiscard]] const std::string& original() const noexcept { return data_; }
-    [[nodiscard]] constexpr bool empty() const noexcept { return pos_ >= data_.length(); }
-    [[nodiscard]] constexpr size_t length() const noexcept { return pos_ < data_.length() ? data_.length() - pos_ : 0; }
+    [[nodiscard]] bool empty() const noexcept { return pos_ >= data_.length(); }
+    [[nodiscard]] size_t length() const noexcept { return pos_ < data_.length() ? data_.length() - pos_ : 0; }
 
     void set_data(const std::string& input) noexcept { data_ = input; pos_ = 0; }
 
