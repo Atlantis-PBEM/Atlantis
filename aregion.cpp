@@ -2570,12 +2570,9 @@ void makeRivers(
     logger::write("Distances from water body to water body");
 
     size_t sz = waterBodies.size();
-    int distances[sz][sz];
-    for (size_t i = 0; i < sz; i++) {
-        for (size_t j = 0; j < sz; j++) {
-            distances[i][j] = INT32_MAX;
-        }
-    }
+    std::vector<int> distances;
+    distances.resize(sz * sz);
+    std::fill(distances.begin(), distances.end(), INT_MAX);
 
     for (const auto& water : waterBodies) {
         logger::write("WATER BODY " + std::to_string(water->name));
@@ -2599,9 +2596,9 @@ void makeRivers(
                     continue;
                 }
 
-                int currentDist = distances[water->name][otherWater];
+                int currentDist = distances[water->name * sz + otherWater];
                 if (newDist < currentDist ) {
-                    distances[water->name][otherWater] = newDist;
+                    distances[water->name * sz + otherWater] = newDist;
                 }
             }
         }
@@ -2641,7 +2638,7 @@ void makeRivers(
                 continue;
             }
 
-            int distance = distances[i][j];
+            int distance = distances[i * sz + j];
             if (distance <= maxRiverReach) {
                 candidates.push_back(std::make_pair(j, distance));
             }
@@ -3521,11 +3518,12 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
     });
 
     size_t sz = cities.size();
-    int distances[sz][sz];
+    std::vector<int> distances;
+    distances.resize(sz * sz);
     for (size_t i = 0; i < sz; i++) {
         for (size_t j = i + 1; j < sz; j++) {
             if (i == j) {
-                distances[i][j] = 0;
+                distances[i * sz + j] = 0;
                 continue;
             }
 
@@ -3546,12 +3544,12 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
             }
 
             if (dist) {
-                distances[i][j] = dist;
-                distances[j][i] = dist;
+                distances[i * sz + j] = dist;
+                distances[j * sz + i] = dist;
             }
             else {
-                distances[i][j] = 0;
-                distances[j][i] = 0;
+                distances[i * sz + j] = 0;
+                distances[j * sz + i] = 0;
             }
         }
     }
@@ -3565,7 +3563,7 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
         }
 
         for (size_t j = 0; j < sz; j++) {
-            auto dist = distances[i][j];
+            int dist = distances[i * sz + j];
             if (!dist || dist > 8) {
                 continue;
             }
