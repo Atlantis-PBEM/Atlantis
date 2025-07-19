@@ -149,11 +149,9 @@ struct canonicalize_t {
             if (!s.empty()) {
                 s.append(1, '_');
             }
-            // s += w | capitalize;
-            s.append(1, (char) std::toupper(w[0]));
-            s.append(w.begin() + 1, w.end());
+            s += w | capitalize;
         }
-        return str; // WRONG!
+        return str;
 #else
         auto parts_view = str
             | std::views::split(std::string_view{" "}) // Split by space
