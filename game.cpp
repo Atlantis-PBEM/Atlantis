@@ -393,7 +393,8 @@ int Game::OpenGame()
     }
 
     std::string gameName;
-    f >> std::ws >> gameName;
+    f >> std::ws;
+    std::getline(f, gameName);
     if (f.eof()) return(0);
 
     if (!(gameName == Globals->RULESET_NAME)) {
