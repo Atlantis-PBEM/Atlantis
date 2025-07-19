@@ -2,11 +2,8 @@
 #ifndef STRING_FILTERS_HPP
 #define STRING_FILTERS_HPP
 #ifndef WITHOUT_VIEWS
-#ifdef __GNUC__
-#if __GNUC_PREREQ(12,0)
-#else
+#if !((defined __GNUC__ && __GNUC__ >= 12) || defined __clang__)
 #define WITHOUT_VIEWS
-#endif
 #endif
 #endif
 #include "strings_util.hpp"
