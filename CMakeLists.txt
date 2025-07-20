@@ -54,12 +54,23 @@ add_library(engine
     indenter.cpp
     text_report_generator.cpp
 )
-add_executable(basic
-    basic/extra.cpp
-    basic/map.cpp
-    basic/monsters.cpp
-    basic/rules.cpp
-    basic/world.cpp
+
+macro(add_game GAME)
+add_executable(${GAME}
+    ${GAME}/extra.cpp
+    ${GAME}/map.cpp
+    ${GAME}/monsters.cpp
+    ${GAME}/rules.cpp
+    ${GAME}/world.cpp
 )
-target_link_libraries(basic engine)
-target_include_directories(basic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${GAME} engine)
+target_include_directories(${GAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+endmacro()
+
+add_game(basic)
+add_game(fracas)
+add_game(havilah)
+add_game(kingdoms)
+add_game(neworigins)
+add_game(standard)
+add_game(unittest)
