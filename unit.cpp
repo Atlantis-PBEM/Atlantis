@@ -230,19 +230,19 @@ void Unit::Readin(istream& f, std::list<Faction *>& facs)
     }
 }
 
-AString Unit::MageReport()
+std::string Unit::MageReport()
 {
-    AString temp;
+    std::string temp;
 
     if (combat != -1) {
-        temp = AString(". Combat spell: ") + SkillStrs(combat);
+        temp = std::string(". Combat spell: ") + SkillStrs(combat);
     }
     return temp;
 }
 
-AString Unit::ReadyItem()
+std::string Unit::ReadyItem()
 {
-    AString temp, weaponstr, armorstr, battlestr;
+    std::string temp, weaponstr, armorstr, battlestr;
     int weapon, armor, item, i, ready;
 
     item = 0;
@@ -255,8 +255,10 @@ AString Unit::ReadyItem()
         }
     }
     if (item > 0)
-        weaponstr = AString("Ready weapon") + (item == 1?"":"s") + ": " +
-            weaponstr;
+    {
+        weaponstr = std::string("Ready weapon")
+            + (item == 1 ? "" : "s") + ": " + weaponstr;
+    }
     weapon = item;
 
     item = 0;
@@ -269,17 +271,17 @@ AString Unit::ReadyItem()
         }
     }
     if (item > 0)
-        armorstr = AString("Ready armor: ") + armorstr;
+        armorstr = std::string("Ready armor: ") + armorstr;
     armor = item;
 
     if (readyItem != -1) {
-        battlestr = AString("Ready item: ") + item_string(readyItem, 1);
+        battlestr = std::string("Ready item: ") + item_string(readyItem, 1);
         item = 1;
     } else
         item = 0;
 
     if (weapon || armor || item) {
-        temp += AString(". ");
+        temp += ". ";
         if (weapon) temp += weaponstr;
         if (armor) {
             if (weapon) temp += ". ";
@@ -293,9 +295,9 @@ AString Unit::ReadyItem()
     return temp;
 }
 
-AString Unit::StudyableSkills()
+std::string Unit::StudyableSkills()
 {
-    AString temp;
+    std::string temp;
     int j=0;
 
     for (int i=0; i<NSKILLS; i++) {
@@ -382,8 +384,8 @@ int Unit::CanGetSpoil(Item *i)
     return 1; // all spoils
 }
 
-AString Unit::SpoilsReport() {
-    AString temp;
+std::string Unit::SpoilsReport() {
+    std::string temp;
     if (GetFlag(FLAG_NOSPOILS)) temp = ", weightless battle spoils";
     else if (GetFlag(FLAG_FLYSPOILS)) temp = ", flying battle spoils";
     else if (GetFlag(FLAG_WALKSPOILS)) temp = ", walking battle spoils";
@@ -1106,7 +1108,6 @@ int Unit::GetAttackRiding()
     } else {
         int attackriding = 0;
         int minweight = 10000;
-        AString skname;
         for(auto i : items) {
             if (ItemDefs[i->type].type & IT_MAN)
                 if (ItemDefs[i->type].weight < minweight)
@@ -1215,7 +1216,6 @@ void Unit::SetSkill(int sk, int level)
 
 int Unit::GetAvailSkill(int sk)
 {
-    AString str;
     int retval = GetRealSkill(sk);
 
     for(auto i : items) {
@@ -1401,8 +1401,6 @@ int Unit::Practice(int sk)
     if (GetAvailSkill(sk) > GetRealSkill(sk)) {
         // This is a skill granted by an item, so try to practice
         // the skills it depends on (if any)
-        AString str;
-
         reqlev = 0;
 
         for(auto it : items) {
@@ -2479,7 +2477,7 @@ int Unit::GetAttribute(char const *attrib)
 {
     auto ap = FindAttrib(attrib);
     if (!ap) return 0;
-    AString temp;
+    std::string temp;
     int base = 0;
     int bonus = 0;
     int monbase = -1;
@@ -2639,7 +2637,7 @@ void Unit::SkillStarvation()
             int dependancy_level = 0;
             unsigned int c;
             for (c=0;c < sizeof(SkillDefs[i].depends)/sizeof(SkillDefs[i].depends[0]);c++) {
-                AString skname = SkillDefs[i].depends[c].skill;
+                std::string skname = SkillDefs[i].depends[c].skill;
                 if (skname == SkillDefs[j].abbr) {
                     dependancy_level = SkillDefs[i].depends[c].level;
                     break;
@@ -2703,7 +2701,6 @@ int Unit::CanUseWeapon(const WeaponType& weapon, int riding)
     int tempSkillLevel = 0;
 
     int bsk, orsk;
-    AString skname;
     if (weapon.baseSkill != NULL) {
         bsk = lookup_skill(weapon.baseSkill);
         if (bsk != -1) baseSkillLevel = GetSkill(bsk);

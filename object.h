@@ -120,7 +120,7 @@ class Object
         int GetNumShips(int);
         void SetNumShips(int, int);
         void AddShip(int);
-        AString FleetDefinition();
+        std::string FleetDefinition();
         int FleetCapacity();
         int FleetLoad();
         int SailThroughCheck(int dir);

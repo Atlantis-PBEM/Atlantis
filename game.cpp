@@ -9,7 +9,6 @@
 #include <filesystem>
 #include <string.h>
 
-#include "astring.h"
 #include "game.h"
 #include "gamedata.h"
 #include "indenter.hpp"

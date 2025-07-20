@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "game.h"
 #include "gamedata.h"
 #include "indenter.hpp"

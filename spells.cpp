@@ -1178,10 +1178,10 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
     int type = regions.GetRegionArray(r->zloc)->levelType;
 
     if (type != ARegionArray::LEVEL_SURFACE) {
-        AString error = "CAST: Bird Lore may only be cast on the surface of ";
+        std::string error("CAST: Bird Lore may only be cast on the surface of ");
         error += Globals->WORLD_NAME;
         error += ".";
-        u->error(error.Str());
+        u->error(error);
         return 0;
     }
 

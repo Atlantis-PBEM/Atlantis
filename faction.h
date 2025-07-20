@@ -12,7 +12,6 @@ struct ShowObject;
 #include "battle.h"
 #include "skills.h"
 #include "items.h"
-#include "astring.h"
 #include "string_parser.hpp"
 
 #include "external/nlohmann/json.hpp"

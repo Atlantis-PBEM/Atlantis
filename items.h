@@ -6,7 +6,6 @@ class Item;
 class ItemType;
 
 #include "gamedefs.h"
-#include "astring.h"
 #include "strings_util.hpp"
 #include "string_parser.hpp"
 #include <vector>

@@ -2,7 +2,6 @@
 #ifndef ORDERS_H
 #define ORDERS_H
 
-#include "astring.h"
 #include "gamedefs.h"
 #include <list>
 #include "string_parser.hpp"

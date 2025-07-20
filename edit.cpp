@@ -7,7 +7,6 @@
 
 #include "game.h"
 #include "unit.h"
-#include "astring.h"
 #include "gamedata.h"
 #include "string_filters.hpp"
 #include "string_parser.hpp"

@@ -113,7 +113,7 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 {
     int d, count, temple, i, j, clash, reward_count;
     ARegion *r;
-    AString rname;
+    std::string rname;
     map <string, int> temples;
     map <string, int>::iterator it;
     string stlstr;
