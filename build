@@ -1,2 +1,1 @@
-cd out ; make "$@"
-
+(cd out && make "$@")
