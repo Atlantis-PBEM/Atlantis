@@ -1,1 +1,1 @@
-(cd out && make "$@")
+(cd build && make "$@")
