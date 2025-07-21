@@ -96,4 +96,5 @@ add_executable(unittest
 target_link_libraries(unittest engine)
 target_include_directories(unittest PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
+enable_testing()
 add_test(NAME unittest COMMAND unittest)
