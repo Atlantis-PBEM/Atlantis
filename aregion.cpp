@@ -2570,11 +2570,11 @@ void makeRivers(
     logger::write("Distances from water body to water body");
 
     size_t sz = waterBodies.size();
-    int distances[sz][sz];
-    for (size_t i = 0; i < sz; i++) {
-        for (size_t j = 0; j < sz; j++) {
-            distances[i][j] = INT32_MAX;
-        }
+    std::vector<std::vector<int>> distances;
+    distances.resize(sz);
+    for (auto &row : distances) {
+        row.resize(sz);
+        std::fill(row.begin(), row.end(), INT32_MAX);
     }
 
     for (const auto& water : waterBodies) {
@@ -3521,7 +3521,11 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
     });
 
     size_t sz = cities.size();
-    int distances[sz][sz];
+
+    std::vector<std::vector<int>> distances;
+    distances.resize(sz);
+    for (auto &row : distances) { row.resize(sz); }
+
     for (size_t i = 0; i < sz; i++) {
         for (size_t j = i + 1; j < sz; j++) {
             if (i == j) {
