@@ -12,7 +12,8 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-pedantic -Wsign-compare -Wextra -Werror -Wno-switch -Wno-unknown-pragmas -Wstrict-prototypes -Wpointer-arith -Wno-char-subscripts -Wno-long-long)
     #add_compile_options(-g -Wall -Werror -pedantic)
 elseif(MSVC)
-    add_compile_options(/WX /MP /FC)
+    #add_compile_options(/WX /MP /FC /D_CRT_SECURE_NO_WARNINGS)
+    add_compile_options(/MP /FC /D_CRT_SECURE_NO_WARNINGS)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG
         "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrt.lib")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE
@@ -35,7 +36,6 @@ add_library(engine
     gamedefs.cpp
     genrules.cpp
     items.cpp
-    main.cpp
     market.cpp
     modify.cpp
     monthorders.cpp
@@ -63,6 +63,7 @@ add_library(engine
 
 macro(add_game GAME)
 add_executable(${GAME}
+    main.cpp
     ${GAME}/extra.cpp
     ${GAME}/map.cpp
     ${GAME}/monsters.cpp
@@ -79,4 +80,20 @@ add_game(havilah)
 add_game(kingdoms)
 add_game(neworigins)
 add_game(standard)
-add_game(unittest)
+
+file(GLOB TEST_SOURCES unittest/*_test.cpp)
+
+add_executable(unittest
+    unittest/main.cpp
+    unittest/extra.cpp
+    unittest/map.cpp
+    unittest/monsters.cpp
+    unittest/rules.cpp
+    unittest/world.cpp
+    unittest/testhelper.cpp
+    ${TEST_SOURCES}
+)
+target_link_libraries(unittest engine)
+target_include_directories(unittest PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_test(NAME unittest COMMAND unittest)
