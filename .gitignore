@@ -39,4 +39,5 @@ map_viewer/dist
 .gdb_history
 /out
 /build
+/out
 /.vs
