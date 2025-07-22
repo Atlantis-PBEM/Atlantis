@@ -1,3 +1,5 @@
+#include "string_filters.hpp"
+
 #include "external/boost/ut.hpp"
 #include "external/nlohmann/json.hpp"
 
@@ -5,7 +7,6 @@ using json = nlohmann::json;
 
 #include <string>
 #include "testhelper.hpp"
-#include "string_filters.hpp"
 
 // Because boost::ut has it's own concept of events, as does Game, we cannot just use
 // using namespace boost::ut; here. Instead, we alias it, and then use the alias inside the
@@ -18,6 +19,22 @@ using namespace std;
 ut::suite<"StringFilters"> string_filters_suite = []
 {
   using namespace ut;
+
+  "canonicalize adds underscores"_test = []
+  {
+    string input = "Hello Beautiful World";
+    string expected = "Hello_Beautiful_World";
+    string actual = filter::canonicalize(input);
+    expect(actual == expected);
+  };
+
+  "canonicalize adds capitals"_test = []
+  {
+    string input = "hello world";
+    string expected = "Hello_World";
+    string actual = filter::canonicalize(input);
+    expect(actual == expected);
+  };
 
   "legal_characters removes illegal characters"_test = []
   {

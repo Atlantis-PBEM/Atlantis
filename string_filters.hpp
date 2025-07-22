@@ -1,11 +1,6 @@
 #pragma once
 #ifndef STRING_FILTERS_HPP
 #define STRING_FILTERS_HPP
-#ifndef WITHOUT_VIEWS
-#if !((defined __GNUC__ && __GNUC__ >= 12) || defined __clang__)
-#define WITHOUT_VIEWS
-#endif
-#endif
 #include "strings_util.hpp"
 
 #include <algorithm>
@@ -16,7 +11,7 @@
 #include <unordered_set>
 #include <vector>
 #include <string_view>
-#ifdef WITHOUT_VIEWS
+#ifdef CPP20_RANGES_ARE_BROKEN
 #include <sstream>
 #include <iostream>
 #else
@@ -133,22 +128,15 @@ inline constexpr lowercase_t lowercase{};
  */
 struct canonicalize_t {
     std::string process(const std::string& str) const {
-#ifdef WITHOUT_VIEWS
-        /** FIXME: gcc 11 doesn't like the range solution, ergo this hack */
+#ifdef CPP20_RANGES_ARE_BROKEN
+        /** gcc 11 doesn't like the range solution, ergo this hack */
         std::vector<std::string> words;
         std::istringstream f(str);
         std::string s;
         while (std::getline(f, s, ' ')) {
-            words.push_back(s);
+            words.push_back(s | capitalize);
         }
-        s.clear();
-        for(const std::string& w : words) {
-            if (!s.empty()) {
-                s.append(1, '_');
-            }
-            s += w | capitalize;
-        }
-        return str;
+        return strings::join(words, "_");
 #else
         auto parts_view = str
             | std::views::split(std::string_view{" "}) // Split by space
