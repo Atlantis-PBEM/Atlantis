@@ -710,7 +710,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     expect(event["category"] == "annihilate");
     expect(event["unit"]["number"] == 3_i);
     event = events[5];
-    expect(event["message"] == "desert (1,3) in Testing Wilds has been utterly annihilated.");
+    expect(event["message"] == "cavern (0,0,underworld) in Testing Wilds has been utterly annihilated.");
     expect(event["category"] == "annihilate");
 
 
