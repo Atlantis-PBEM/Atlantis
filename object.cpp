@@ -753,16 +753,22 @@ std::string object_description(int obj)
         }
         temp += " to study above level 2.";
     }
-    int buildable = 1;
+    bool buildable;
     auto pS = FindSkill(o->skill);
-    if (o->item == -1 || o->skill == nullptr || !pS || pS->get().flags & SkillType::DISABLED) buildable = 0;
-    if (o->item >= 0 && o->item != I_WOOD_OR_STONE && (ItemDefs[o->item].flags & ItemType::DISABLED)) buildable = 0;
-    if (
-        o->item == I_WOOD_OR_STONE && (ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
-        (ItemDefs[I_STONE].flags & ItemType::DISABLED)
-    ) {
-        buildable = 0;
+    if (o->item == -1 || o->skill == nullptr || !pS || pS->get().flags & SkillType::DISABLED)
+    {
+        buildable = false;
     }
+    else if (o->item >= 0 && (ItemDefs[o->item].flags & ItemType::DISABLED))
+    {
+        buildable = false;
+    }
+    else {
+        buildable = (o->item == I_WOOD_OR_STONE
+            && (ItemDefs[I_WOOD].flags & ItemType::DISABLED)
+            && (ItemDefs[I_STONE].flags & ItemType::DISABLED));
+    }
+
     if (!buildable && !(ObjectDefs[obj].flags & ObjectType::GROUP)) {
         temp += " This structure cannot be built by players.";
     }
