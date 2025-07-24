@@ -756,7 +756,7 @@ std::string object_description(int obj)
     int buildable = 1;
     auto pS = FindSkill(o->skill);
     if (o->item == -1 || o->skill == nullptr || !pS || pS->get().flags & SkillType::DISABLED) buildable = 0;
-    if (o->item != I_WOOD_OR_STONE && (ItemDefs[o->item].flags & ItemType::DISABLED)) buildable = 0;
+    if (o->item >= 0 && o->item != I_WOOD_OR_STONE && (ItemDefs[o->item].flags & ItemType::DISABLED)) buildable = 0;
     if (
         o->item == I_WOOD_OR_STONE && (ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
         (ItemDefs[I_STONE].flags & ItemType::DISABLED)
