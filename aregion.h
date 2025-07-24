@@ -288,11 +288,11 @@ class ARegion
         int habitat;
         int development;
         int maxdevelopment;
-        int elevation;
-        int humidity;
-        int temperature;
-        int vegetation;
-        int culture;
+        int elevation = -1;
+        int humidity = -1;
+        int temperature = -1;
+        int vegetation = -1;
+        int culture = -1;
         // migration origins
         std::list<ARegion *> migfrom;
         // mid-way migration development

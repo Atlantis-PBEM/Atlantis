@@ -338,7 +338,6 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
                 reg->race = -1; //
                 reg->wages = -1; // initially store: name
                 reg->population = -1; // initially used as flag
-                reg->elevation = -1;
 
                 regions.push_back(reg);
                 arr->SetRegion(x, y, reg);
