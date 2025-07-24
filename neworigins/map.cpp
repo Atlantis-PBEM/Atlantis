@@ -2599,9 +2599,9 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
             if (!reg) continue;
             if (reg->type == R_BARREN) continue;
 
-            for (int i=D_NORTH; i<= NDIRS; i++) {
+            for (int i=D_NORTH; i != NDIRS; ++i) {
                 int count = 0;
-                for (int j=D_NORTH; j< NDIRS; j++)
+                for (int j=D_NORTH; j != NDIRS; ++j)
                     if (reg->neighbors[j]) count++;
                 if (count <= 1) break;
 
@@ -2612,7 +2612,7 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
                         continue;
                     if (!CheckRegionExit(reg, n)) {
                         count = 0;
-                        for (int k = D_NORTH; k<NDIRS; k++) {
+                        for (int k = D_NORTH; k != NDIRS; ++k) {
                             if (n->neighbors[k]) count++;
                         }
                         if (count <= 1) break;

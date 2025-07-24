@@ -45,7 +45,7 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
     // initialize the game which will generate a small bit of output
     helper.initialize_game();
     auto seed = helper.get_seed();
-    expect(seed == 3901_i);
+    expect(seed == 108_i);
   };
 
   "UnitTestHelper can set basic skills"_test = []
