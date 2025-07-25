@@ -116,7 +116,7 @@ int SkillMax(char const *skill, int race)
     auto mt = man_def->get();
 
     std::string skname = pS->get().abbr;
-    std::string mani("MANI");
+    strings::ci_string mani = "MANI";
     for (unsigned int c=0; c < (sizeof(mt.skills)/sizeof(mt.skills[0])); c++) {
         if (skname == mt.skills[c])
             return mt.speciallevel;

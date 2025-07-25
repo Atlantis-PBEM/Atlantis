@@ -455,9 +455,9 @@ std::string Object::FleetDefinition()
             num = GetNumShips(item);
             if (num > 0) {
                 if (num > 1) {
-                    fleet += std::string(", ") + std::to_string(num) + " " + ItemDefs[item].names;
+                    fleet += ", " + std::to_string(num) + " " + ItemDefs[item].names;
                 } else {
-                    fleet += std::string(", ") + std::to_string(num) + " " +ItemDefs[item].name;
+                    fleet += ", " + std::to_string(num) + " " +ItemDefs[item].name;
                 }
             }
         }

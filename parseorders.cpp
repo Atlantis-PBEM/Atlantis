@@ -12,8 +12,6 @@
 
 #include <string>
 
-using namespace std;
-
 void orders_check::error(const std::string& err)
 {
     check_file << indent::push_indent(0) <<  "\n\n*** Error: " << err << " ***\n" << indent::pop_indent();
@@ -136,7 +134,8 @@ void Game::parse_error(orders_check *checker, Unit *unit, Faction *faction, cons
 }
 
 void Game::overwrite_month_warning(std::string type, Unit *u, orders_check * checker) {
-    string err = type + ": Overwriting previous " + string(u->inTurnBlock ? "DELAYED " : "") + "month-long order.";
+    std::string err = type + ": Overwriting previous " + std::string(u->inTurnBlock ? "DELAYED " : "") +
+        "month-long order.";
     parse_error(checker, u, 0, err);
 }
 
@@ -1062,7 +1061,7 @@ void Game::ProcessClaimOrder(Unit *u, parser::string_parser& parser, orders_chec
     u->faction->unclaimed -= value;
     u->SetMoney(u->GetMoney() + value);
     u->faction->DiscoverItem(I_SILVER, 0, 1);
-    u->event("Claims $" + to_string(value) + ".", "claim");
+    u->event("Claims $" + std::to_string(value) + ".", "claim");
 }
 
 void Game::ProcessFactionOrder(Unit *u, parser::string_parser& parser, orders_check *checker)
@@ -1100,7 +1099,7 @@ void Game::ProcessFactionOrder(Unit *u, parser::string_parser& parser, orders_ch
     }
 
     if (a > AllowedApprentices(u->faction)) {
-        u->error(string("FACTION: Too many ") + Globals->APPRENTICE_NAME + "s to change to that faction type.");
+        u->error(std::string("FACTION: Too many ") + Globals->APPRENTICE_NAME + "s to change to that faction type.");
         u->faction->type = oldfactype;
         return;
     }
@@ -1213,7 +1212,7 @@ void Game::ProcessRestartOrder(Unit *u, parser::string_parser& parser, orders_ch
         Faction *pFac = AddFaction(0, NULL);
         pFac->set_address(u->faction->address);
         pFac->password = u->faction->password;
-        string facstr = "Restarting " + pFac->address + ".";
+        std::string facstr = "Restarting " + pFac->address + ".";
     }
 }
 
@@ -1866,7 +1865,7 @@ void Game::ProcessWithdrawOrder(Unit *unit, parser::string_parser& parser, order
     unit->withdraworders.push_back(order);
 }
 
-std::string Game::ProcessTurnOrder(Unit *unit, istream& f, orders_check *checker, bool repeat)
+std::string Game::ProcessTurnOrder(Unit *unit, std::istream& f, orders_check *checker, bool repeat)
 {
     int turnDepth = 1;
     int turnLast = 1;
@@ -2264,7 +2263,7 @@ void Game::ProcessNameOrder(Unit *unit, parser::string_parser& parser, orders_ch
     }
 
     int towntype = unit->object->region->town->TownType();
-    string tstring = (towntype == TOWN_VILLAGE) ? "village" : (towntype == TOWN_TOWN) ? "town" : "city";
+    std::string tstring = (towntype == TOWN_VILLAGE) ? "village" : (towntype == TOWN_TOWN) ? "town" : "city";
 
     // Calculate rename cost if applicable
     int cost = 0;

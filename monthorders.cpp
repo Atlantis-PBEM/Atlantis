@@ -6,8 +6,6 @@
 #include "quests.h"
 #include "rng.hpp"
 
-using namespace std;
-
 void Game::RunMovementOrders()
 {
     int phase, error;
@@ -107,8 +105,8 @@ void Game::RunMovementOrders()
                         u->savedmovedir = d->dir;
                     }
 
-                    string tOrder = (mo->advancing ? "ADVANCE" : "MOVE");
-                    string temp = tOrder + ": Unit has insufficient movement points; remaining moves queued.";
+                    std::string tOrder = (mo->advancing ? "ADVANCE" : "MOVE");
+                    std::string temp = tOrder + ": Unit has insufficient movement points; remaining moves queued.";
                     u->event(temp, "movement");
 
                     for (const auto d : mo->dirs) {
@@ -124,7 +122,7 @@ void Game::RunMovementOrders()
                         else if (d->dir == MOVE_PAUSE)
                             tOrder += "P";
                         else
-                            tOrder += to_string(d->dir - MOVE_ENTER);
+                            tOrder += std::to_string(d->dir - MOVE_ENTER);
                     }
                     u->oldorders.push_front(tOrder);
                 }
@@ -134,7 +132,7 @@ void Game::RunMovementOrders()
                 SailOrder *so = dynamic_cast<SailOrder *>(u->monthorders);
                 if (so->dirs.size() > 0) {
                     u->event("SAIL: Can't sail that far; remaining moves queued.", "movement");
-                    string tOrder = "SAIL";
+                    std::string tOrder = "SAIL";
                     for (const auto d : so->dirs) {
                         tOrder += " ";
                         if (d->dir == MOVE_PAUSE)
@@ -273,7 +271,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
             }
 
             for (const auto f : facs) {
-                string temp = fleet->name;
+                std::string temp = fleet->name;
                 temp += (x->dir == MOVE_PAUSE ? " performs maneuvers in " : " sails from ") + reg->short_print();
                 if (x->dir != MOVE_PAUSE) temp += " to " + newreg->short_print();
                 f->event(temp, "sail");
@@ -300,7 +298,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
             }
             reg = newreg;
             if (newreg->ForbiddenShip(fleet)) {
-                string temp = fleet->name + " is stopped by guards in " + newreg->short_print() + ".";
+                std::string temp = fleet->name + " is stopped by guards in " + newreg->short_print() + ".";
                 cap->faction->event(temp, "sail");
                 stop = 1;
             }
@@ -432,7 +430,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 {
     Object *buildobj;
     int questcomplete = 0;
-    string quest_rewards;
+    std::string quest_rewards;
 
     if (!Globals->BUILD_NO_TRADE && !ActivityCheck(r, u->faction, FactionActivity::TRADE)) {
         u->error("BUILD: Faction can't produce in that many regions.");
@@ -504,7 +502,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
     int num = u->GetMen() * usk;
 
     // AS
-    string job;
+    std::string job;
     if (needed < 1) {
         // This looks wrong, but isn't.
         // If a building has a maxMaintenance of 75 and the road is at
@@ -615,7 +613,7 @@ void Game::RunBuildShipOrder(ARegion *r, Object *obj, Unit *u)
     } else {
         percent = 100 * output / ItemDefs[ship].pMonths;
         u->event(
-            "Performs construction work on a " + ItemDefs[ship].name + " (" + to_string(percent) + "%) in " +
+            "Performs construction work on a " + ItemDefs[ship].name + " (" + std::to_string(percent) + "%) in " +
                 r->short_print() + ".",
             "build", r
         );
@@ -1041,7 +1039,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
     if (o->target > 0) {
         TurnOrder *tOrder = new TurnOrder;
         tOrder->repeating = 0;
-        std::string order = "PRODUCE " + to_string(o->target) + " " + ItemDefs[o->item].abr;
+        std::string order = "PRODUCE " + std::to_string(o->target) + " " + ItemDefs[o->item].abr;
         tOrder->turnOrders.push_back(order);
         u->turnorders.push_front(tOrder);
     }
@@ -1073,12 +1071,12 @@ void Game::RunProduceOrders(ARegion *r)
                 BuildOrder *o = dynamic_cast<BuildOrder *>(u->monthorders);
                 if (o->until_complete) {
                     if ((u->build > 0 || o->target) && u->object->incomplete > 0) {
-                        string order = "BUILD ";
+                        std::string order = "BUILD ";
                         if (o->target) {
                             Unit *t = r->GetUnitId(o->target, u->faction->num);
-                            order += "HELP " + to_string(t->num);
+                            order += "HELP " + std::to_string(t->num);
                         } else {
-                            string name = ObjectDefs[u->object->type].name;
+                            std::string name = ObjectDefs[u->object->type].name;
                             if (name.find(" ") != std::string::npos) {
                                 // If the name has spaces, we need to quote it
                                 order += "\"" + name + "\"";
@@ -1089,7 +1087,7 @@ void Game::RunProduceOrders(ARegion *r)
                         order += " COMPLETE";
                         u->oldorders.push_front(order);
                     } else if (u->build < 0 || o->target) {
-                        string order = "BUILD ";
+                        std::string order = "BUILD ";
                         BuildOrder *border = nullptr;
                         Unit *t;
                         if (o->target) {
@@ -1102,7 +1100,7 @@ void Game::RunProduceOrders(ARegion *r)
                         }
                         if (border && border->needtocomplete > 0) {
                             if (o->target) {
-                                order += "HELP " + to_string(t->num);
+                                order += "HELP " + std::to_string(t->num);
                             } else {
                                 order += ItemDefs[-(u->build)].abr;
                             }
@@ -1174,7 +1172,7 @@ int Game::FindAttemptedProd(ARegion *r, Production *p)
 void Game::RunAProduction(ARegion *r, Production *p)
 {
     int questcomplete;
-    string quest_rewards;
+    std::string quest_rewards;
 
     p->activity = 0;
     if (p->amount == 0) return;
@@ -1212,7 +1210,7 @@ void Game::RunAProduction(ARegion *r, Production *p)
             if (po->target > 0) {
                 TurnOrder *tOrder = new TurnOrder;
                 tOrder->repeating = 0;
-                std::string order = "PRODUCE " + to_string(po->target) + " " + ItemDefs[po->item].abr;
+                std::string order = "PRODUCE " + std::to_string(po->target) + " " + ItemDefs[po->item].abr;
                 tOrder->turnOrders.push_back(order);
                 u->turnorders.push_front(tOrder);
             }
@@ -1224,7 +1222,7 @@ void Game::RunAProduction(ARegion *r, Production *p)
                 //
                 if (po->skill == -1) {
                     u->event(
-                        "Earns " + to_string(ubucks) + " silver working in " + r->short_print() + ".",
+                        "Earns " + std::to_string(ubucks) + " silver working in " + r->short_print() + ".",
                         "work", r
                     );
                 } else {
@@ -1310,12 +1308,12 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
         if (skmax < o->level) {
             o->level = skmax;
             if (u->GetRealSkill(sk) >= o->level) {
-                u->error("STUDY: Cannot study " + SkillDefs[sk].name + " beyond level " + to_string(o->level) + ".");
+                u->error("STUDY: Cannot study " + SkillDefs[sk].name + " beyond level " + std::to_string(o->level) + ".");
                 return;
             } else {
                 u->error(
                     "STUDY: set study goal for " + SkillDefs[sk].name + " to the maximum achievable level (" +
-                    to_string(o->level) + ")."
+                    std::to_string(o->level) + ")."
                 );
             }
         }
@@ -1333,7 +1331,7 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
 
     if ((SkillDefs[sk].flags & SkillType::MAGIC) && u->type != U_MAGE) {
         if (u->type == U_APPRENTICE) {
-            u->error(string("STUDY: An ") + Globals->APPRENTICE_NAME + " cannot be made into a mage.");
+            u->error(std::string("STUDY: An ") + Globals->APPRENTICE_NAME + " cannot be made into a mage.");
             return;
         }
         if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
@@ -1358,23 +1356,23 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
 
     if ((SkillDefs[sk].flags & SkillType::APPRENTICE) && u->type != U_APPRENTICE) {
         if (u->type == U_MAGE) {
-            u->error(string("STUDY: A mage cannot be made into an ") + Globals->APPRENTICE_NAME + ".");
+            u->error(std::string("STUDY: A mage cannot be made into an ") + Globals->APPRENTICE_NAME + ".");
             return;
         }
 
         if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
             if (CountApprentices(u->faction) >= AllowedApprentices(u->faction)) {
-                u->error(string("STUDY: Can't have another ") + Globals->APPRENTICE_NAME + ".");
+                u->error(std::string("STUDY: Can't have another ") + Globals->APPRENTICE_NAME + ".");
                 return;
             }
         }
         if (u->GetMen() != 1) {
-            u->error(string("STUDY: Only 1-man units can be ") + Globals->APPRENTICE_NAME + "s.");
+            u->error(std::string("STUDY: Only 1-man units can be ") + Globals->APPRENTICE_NAME + "s.");
             return;
         }
         if (!(Globals->MAGE_NONLEADERS)) {
             if (u->GetLeaders() != 1) {
-                u->error(string("STUDY: Only leaders may be ") + Globals->APPRENTICE_NAME + "s.");
+                u->error(std::string("STUDY: Only leaders may be ") + Globals->APPRENTICE_NAME + "s.");
                 return;
             }
         }
@@ -1436,9 +1434,9 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
 
     if (u->Study(sk, days)) {
         u->ConsumeSharedMoney(cost);
-        string str = "Studies " + SkillDefs[sk].name;
+        std::string str = "Studies " + SkillDefs[sk].name;
         taughtdays = taughtdays / u->GetMen();
-        if (taughtdays) { str += " and was taught for " + to_string(taughtdays) + " days"; }
+        if (taughtdays) { str += " and was taught for " + std::to_string(taughtdays) + " days"; }
         str += " at a cost of " + item_string(I_SILVER, cost) + ".";
         u->event(str, "study");
         // study to level order
@@ -1446,11 +1444,12 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
             if (u->GetRealSkill(sk) < o->level) {
                 TurnOrder *tOrder = new TurnOrder;
                 tOrder->repeating = 0;
-                std::string order = "STUDY " + string(SkillDefs[sk].abbr) + " " + to_string(o->level);
+                std::string order = "STUDY " + std::string(SkillDefs[sk].abbr) + " " + std::to_string(o->level);
                 tOrder->turnOrders.push_back(order);
                 u->turnorders.push_front(tOrder);
             } else {
-                string msg = "Completes study to level " + to_string(o->level) + " in " + SkillDefs[sk].name + ".";
+                std::string msg = "Completes study to level " + std::to_string(o->level) + " in " +
+                    SkillDefs[sk].name + ".";
                 u->event(msg, "study");
             }
         }
@@ -1537,7 +1536,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 {
     MoveOrder *o = dynamic_cast<MoveOrder *>(unit->monthorders);
     ARegion *newreg;
-    string road, temp;
+    std::string road, temp;
 
     int movetype, cost, startmove, weight;
     Unit *ally, *forbid;

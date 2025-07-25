@@ -9,8 +9,6 @@
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
-// using namespace std;
-
 const int TextReportGenerator::line_width = 70;
 const int TextReportGenerator::map_width = 23;
 const size_t TextReportGenerator::template_fill_size = 6;
@@ -346,7 +344,7 @@ void TextReportGenerator::output_unit_summary(std::ostream& f, const json& unit,
     }
 
     if (unit.contains("description")) f << "; " << to_s(unit["description"]);
-	f << ".\n";
+    f << ".\n";
 }
 
 void TextReportGenerator::output_unit(std::ostream& f, const json& unit, bool show_unit_attitudes) {
@@ -412,14 +410,14 @@ void TextReportGenerator::output_structure(std::ostream& f, const json& structur
         }
         f << ".\n";
     }
-	f << indent::incr;
+    f << indent::incr;
     if (structure.contains("units") && !structure["units"].empty()) {
         for(const auto& unit : structure["units"]) {
             output_unit(f, unit, show_unit_attitudes);
         }
     }
     f << indent::decr;
-	f << '\n';
+    f << '\n';
 }
 
 void TextReportGenerator::output_region(
@@ -536,7 +534,7 @@ void TextReportGenerator::output(std::ostream& f, const json& report, bool show_
         if (report.contains("type")) {
             f << " (";
             bool comma = false;
-            // std::right now there are 4 possible faction types.
+            // right now there are 4 possible faction types.
             // martial, war, trade, magic.
             // while it's not legal to have martial along with war and trade, for now we will just check and output
             // all of them.
