@@ -5,8 +5,6 @@
 #include <iostream>
 #include <fstream>
 
-using namespace std;
-
 typedef struct
 {
     const std::string word;
@@ -204,7 +202,7 @@ void CountNames()
     // Dump all the names we created to a file so the GM can scan
     // them easily (to check for randomly generated rude words,
     // for example)
-    ofstream names("names.out", ios::out|ios::ate);
+    std::ofstream names("names.out", std::ios::out|std::ios::ate);
     for(const auto& name: regionnames) {
         names << name << '\n';
     }

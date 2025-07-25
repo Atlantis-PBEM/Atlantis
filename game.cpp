@@ -22,8 +22,6 @@
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
-using namespace std;
-
 Game::Game()
 {
     gameStatus = GAME_STATUS_UNINIT;
@@ -106,7 +104,7 @@ std::string Game::GetXtraMap(ARegion *reg, int type)
     return " ";
 }
 
-void Game::WriteSurfaceMap(ostream& f, ARegionArray *pArr, int type)
+void Game::WriteSurfaceMap(std::ostream& f, ARegionArray *pArr, int type)
 {
     ARegion *reg;
     int yy = 0;
@@ -135,7 +133,7 @@ void Game::WriteSurfaceMap(ostream& f, ARegionArray *pArr, int type)
     f << "\n";
 }
 
-void Game::WriteUnderworldMap(ostream& f, ARegionArray *pArr, int type)
+void Game::WriteUnderworldMap(std::ostream& f, ARegionArray *pArr, int type)
 {
     ARegion *reg, *reg2;
     int xx = 0;
@@ -252,7 +250,7 @@ int Game::view_map(const std::string& typestr,const std::string& mapfile)
                 }
                 continue;
             };
-            string label = (pArr->strName.empty() ? "surface" : (pArr->strName + to_string(i-1)));
+            std::string label = (pArr->strName.empty() ? "surface" : (pArr->strName + std::to_string(i-1)));
             worldmap[label] = json::array();
 
             for (int y = 0; y < pArr->y; y++) {
@@ -364,7 +362,7 @@ int Game::OpenGame()
     //
     // The order here must match the order in SaveGame
     //
-    ifstream f("game.in", ios::in);
+    std::ifstream f("game.in", std::ios::in);
     if (!f.is_open()) return(0);
     //
     // Read in Globals
@@ -474,7 +472,7 @@ int Game::OpenGame()
 
 int Game::SaveGame()
 {
-    ofstream f("game.out", ios::out|ios::ate);
+    std::ofstream f("game.out", std::ios::out|std::ios::ate);
     if (!f.is_open()) return(0);
 
     //
@@ -523,7 +521,7 @@ void Game::DummyGame()
 
 int Game::WritePlayers()
 {
-    ofstream f("players.out", ios::out|ios::ate);
+    std::ofstream f("players.out", std::ios::out|std::ios::ate);
     if (!f.is_open()) return(0);
 
     f << PLAYERS_FIRST_LINE << "\n";
@@ -548,7 +546,7 @@ int Game::WritePlayers()
 
 bool Game::ReadPlayers()
 {
-    ifstream f("players.in", ios::in);
+    std::ifstream f("players.in", std::ios::in);
     if (!f.is_open()) return(0);
 
     parser::string_parser parser;
@@ -715,7 +713,7 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
     if (token == "Name:") {
         std::string name = parser.str();
         if (!name.empty()) {
-            if (new_player) name += " (" + to_string(fac->num) + ")";
+            if (new_player) name += " (" + std::to_string(fac->num) + ")";
             fac->set_name(name, false);
         }
         return true;
@@ -755,7 +753,7 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
 
     if (token == "Reward:") {
         int amt = parser.get_token().get_number().value_or(0);
-        fac->event("Reward of " + to_string(amt) + " silver.", "reward");
+        fac->event("Reward of " + std::to_string(amt) + " silver.", "reward");
         fac->unclaimed += amt;
         return true;
     }
@@ -790,10 +788,10 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
         }
         if (!reg) {
             std::string str = "Invalid Loc: ";
-            str += x ? to_string(x.value()) + ", " : "missing x-coord, ";
-            str += y ? to_string(y.value()) + ", " : "missing y-coord, ";
-            str += z ? to_string(z.value()) : "missing z-coord";
-            str += " in faction " + to_string(fac->num);
+            str += x ? std::to_string(x.value()) + ", " : "missing x-coord, ";
+            str += y ? std::to_string(y.value()) + ", " : "missing y-coord, ";
+            str += z ? std::to_string(z.value()) : "missing z-coord";
+            str += " in faction " + std::to_string(fac->num);
             logger::write(str);
         }
         fac->pReg = reg;
@@ -804,12 +802,12 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
         // Creates a new unit in the location specified by a Loc: line
         // with a gm_alias of whatever is after the NewUnit: tag.
         if (!fac->pReg) {
-            logger::write("NewUnit is not valid without a Loc: for faction "+ to_string(fac->num));
+            logger::write("NewUnit is not valid without a Loc: for faction "+ std::to_string(fac->num));
             return true;
         }
         int val = parser.get_token().get_number().value_or(0);
         if (!val) {
-            logger::write("NewUnit: must be followed by an alias in faction " + to_string(fac->num));
+            logger::write("NewUnit: must be followed by an alias in faction " + std::to_string(fac->num));
             return true;
         }
         Unit *u = GetNewUnit(fac);
@@ -822,29 +820,30 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
     if (token == "Item:") {
         std::string alias = parser.get_token().get_string();
         if (alias.empty()) {
-            logger::write("Item: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Item: needs to specify a unit in faction " + std::to_string(fac->num));
             return true;
         }
         Unit *u = parse_gm_unit(alias, fac);
         if (!u) {
-            logger::write("Item: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Item: needs to specify a unit in faction " + std::to_string(fac->num));
             return true;
         }
         if (u->faction->num != fac->num) {
-            logger::write("Item: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
+            logger::write("Item: unit "+ std::to_string(u->num) + " doesn't belong to faction " +
+                std::to_string(fac->num));
             return true;
         }
 
         auto val = parser.get_token().get_number();
         if (!val) {
-            logger::write("Must specify a number of items to give for Item: in faction " + to_string(fac->num));
+            logger::write("Must specify a number of items to give for Item: in faction " + std::to_string(fac->num));
             return true;
         }
 
         token = parser.get_token();
         int it = parse_all_items(token);
         if (it == -1) {
-            logger::write("Must specify a valid item to give for Item: in faction " + to_string(fac->num));
+            logger::write("Must specify a valid item to give for Item: in faction " + std::to_string(fac->num));
             return true;
         }
 
@@ -860,29 +859,30 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
     if (token == "Skill:") {
         std::string alias = parser.get_token().get_string();
         if (alias.empty()) {
-            logger::write("Skill: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Skill: needs to specify a unit in faction " + std::to_string(fac->num));
             return true;
         }
         Unit *u = parse_gm_unit(alias, fac);
         if (!u) {
-            logger::write("Skill: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Skill: needs to specify a unit in faction " + std::to_string(fac->num));
             return true;
         }
         if (u->faction->num != fac->num) {
-            logger::write("Item: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
+            logger::write("Item: unit "+ std::to_string(u->num) + " doesn't belong to faction " +
+                std::to_string(fac->num));
             return true;
         }
 
         token = parser.get_token();
         int sk = parse_skill(token);
         if (sk == -1) {
-            logger::write("Must specify a valid skill for Skill: in faction " + to_string(fac->num));
+            logger::write("Must specify a valid skill for Skill: in faction " + std::to_string(fac->num));
             return true;
         }
 
         int days = parser.get_token().get_number().value_or(0) * u->GetMen();
         if (!days) {
-            logger::write("Must specify a days for Skill: in faction " + to_string(fac->num));
+            logger::write("Must specify a days for Skill: in faction " + std::to_string(fac->num));
             return true;
         }
 
@@ -895,7 +895,7 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
             fac->shows.push_back({ .skill = sk, .level = lvl });
         }
         if (!u->gm_alias) {
-            u->event("Is taught " + to_string(days) + " days of " + SkillStrs(sk) + " by the gods.", "gm_gift");
+            u->event("Is taught " + std::to_string(days) + " days of " + SkillStrs(sk) + " by the gods.", "gm_gift");
         }
         /* This is NOT quite the same, but the gods are more powerful than mere mortals */
         int mage = (SkillDefs[sk].flags & SkillType::MAGIC);
@@ -914,11 +914,12 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
         //Not quit so, handle it as a unit order
         Unit *u = parse_gm_unit(alias, fac);
         if (!u) {
-            logger::write("Order: needs to specify a unit in faction " + to_string(fac->num));
+            logger::write("Order: needs to specify a unit in faction " + std::to_string(fac->num));
             return true;
         }
         if (u->faction->num != fac->num) {
-            logger::write("Order: unit "+ to_string(u->num) + " doesn't belong to faction " + to_string(fac->num));
+            logger::write("Order: unit "+ std::to_string(u->num) + " doesn't belong to faction " +
+                std::to_string(fac->num));
             return true;
         }
 
@@ -926,12 +927,12 @@ bool Game::ReadPlayersLine(parser::token& token, parser::string_parser& parser, 
         bool repeating = parser.get_at();
         token = parser.get_token();
         if (!token) {
-            logger::write("Order: must provide unit order for faction "+ to_string(fac->num));
+            logger::write("Order: must provide unit order for faction "+ std::to_string(fac->num));
             return true;
         }
         int o = Parse1Order(token);
         if (o == -1 || o == O_ATLANTIS || o == O_END || o == O_UNIT || o == O_FORM || o == O_ENDFORM) {
-            logger::write("Order: invalid order given for faction "+ to_string(fac->num));
+            logger::write("Order: invalid order given for faction "+ std::to_string(fac->num));
             return true;
         }
         if (repeating) {
@@ -1067,7 +1068,7 @@ void Game::ReadOrders()
             std::string str = "orders.";
             str += std::to_string(fac->num);
 
-            ifstream file(str, ios::in);
+            std::ifstream file(str, std::ios::in);
             if(file.is_open()) {
                 ParseOrders(fac->num, file, nullptr);
                 file.close();
@@ -1124,8 +1125,8 @@ void Game::WriteReport()
     }
 
     for(const auto fac : factions) {
-        string report_file = "report." + to_string(fac->num);
-        string template_file = "template." + to_string(fac->num);
+        std::string report_file = "report." + std::to_string(fac->num);
+        std::string template_file = "template." + std::to_string(fac->num);
 
         if (!fac->is_npc || fac->gets_gm_report(this)) {
             // Generate the report in JSON format and then write it to whatever formats we want
@@ -1135,7 +1136,7 @@ void Game::WriteReport()
             fac->build_json_report(json_report, this, citems);
 
             if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_JSON) {
-                ofstream jsonf(report_file + ".json", ios::out | ios::ate);
+                std::ofstream jsonf(report_file + ".json", std::ios::out | std::ios::ate);
                 if (jsonf.is_open()) {
                     jsonf << json_report.dump(2);
                 }
@@ -1143,13 +1144,13 @@ void Game::WriteReport()
 
             if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_TEXT) {
                 TextReportGenerator text_report;
-                ofstream f(report_file, ios::out | ios::ate);
+                std::ofstream f(report_file, std::ios::out | std::ios::ate);
                 if (f.is_open()) {
                     text_report.output(f, json_report, show_region_depth);
                 }
                 if (!fac->is_npc && fac->temformat != TEMPLATE_OFF) {
                     // even factions which get a gm report do not get a template.
-                    ofstream f(template_file, ios::out | ios::ate);
+                    std::ofstream f(template_file, std::ios::out | std::ios::ate);
                     if (f.is_open()) {
                         text_report.output_template(f, json_report, fac->temformat, show_region_depth);
                     }
@@ -1318,7 +1319,7 @@ void Game::UnitFactionMap()
     Unit *u;
 
     logger::write("Opening units.txt");
-    ofstream f("units.txt", ios::out|ios::ate);
+    std::ofstream f("units.txt", std::ios::out|std::ios::ate);
     if (!f.is_open()) {
         logger::write("Couldn't open file!");
         return;
@@ -1330,7 +1331,7 @@ void Game::UnitFactionMap()
             logger::write("doesn't exist");
         } else {
             logger::write(std::to_string(i) + ":" + std::to_string(u->faction->num));
-            f << i << ":" << u->faction->num << endl;
+            f << i << ":" << u->faction->num << std::endl;
         }
     }
 }
@@ -1504,7 +1505,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
     std::string tmp;
     int skill;
     int linked = 0;
-    map< int, int > chances;
+    std::map< int, int > chances;
 
     if (u->type != U_WMON) {
 
@@ -1528,7 +1529,7 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
                     if (u->GetSkill(skill) >= ItemDefs[i->type].esc_val) losses = 0;
                 }
                 if (losses) {
-                    string temp = item_string(i->type, losses) + strings::plural(losses, " decay", " decays") +
+                    std::string temp = item_string(i->type, losses) + strings::plural(losses, " decay", " decays") +
                         " into nothingness.";
                     u->event(temp, "decay");
                     u->items.SetNum(i->type,i->num - losses);
@@ -1922,7 +1923,7 @@ void Game::write_times_article(std::string article)
 {
     std::string fname;
 
-    do { fname = "times." + std::to_string(rng::get_random(10000)); } while (filesystem::exists(fname));
+    do { fname = "times." + std::to_string(rng::get_random(10000)); } while (std::filesystem::exists(fname));
     std::ofstream f(fname, std::ios::out | std::ios::trunc);
     if (f.is_open()) {
         f << indent::wrap(78,70,0) << article << '\n';

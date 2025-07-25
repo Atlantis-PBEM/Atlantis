@@ -6,8 +6,6 @@
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
-using namespace std;
-
 UnitId::UnitId()
 {
 }
@@ -16,15 +14,15 @@ UnitId::~UnitId()
 {
 }
 
-string UnitId::Print()
+std::string UnitId::Print()
 {
     if (unitnum) {
-        return to_string(unitnum);
+        return std::to_string(unitnum);
     } else {
         if (faction) {
-            return string("faction ") + to_string(faction) + " new " + to_string(alias);
+            return std::string("faction ") + std::to_string(faction) + " new " + std::to_string(alias);
         } else {
-            return string("new ") + to_string(alias);
+            return std::string("new ") + std::to_string(alias);
         }
     }
 }
@@ -138,9 +136,9 @@ void Unit::MakeWMon(char const *monname, int mon, int num)
     SetMonFlags();
 }
 
-void Unit::Writeout(ostream& f)
+void Unit::Writeout(std::ostream& f)
 {
-    set<string>::iterator it;
+    std::set<std::string>::iterator it;
 
     f << name << '\n';
     f << (describe.empty() ? "none" : describe) << '\n';
@@ -169,13 +167,13 @@ void Unit::Writeout(ostream& f)
     }
 }
 
-void Unit::Readin(istream& f, std::list<Faction *>& facs)
+void Unit::Readin(std::istream& f, std::list<Faction *>& facs)
 {
     std::string str;
-    std::getline(f >> ws, str);
+    std::getline(f >> std::ws, str);
     name = str | filter::strip_number;
 
-    std::getline(f >> ws, str);
+    std::getline(f >> std::ws, str);
     describe = str | filter::legal_characters;
     if (describe == "none") describe.clear();
 
@@ -203,12 +201,12 @@ void Unit::Readin(istream& f, std::list<Faction *>& facs)
 
     f >> free;
 
-    f >> ws >> str;
+    f >> std::ws >> str;
     readyItem = lookup_item(str);
     for (i = 0; i < MAX_READY; i++) {
-        f >> ws >> str;
+        f >> std::ws >> str;
         readyWeapon[i] = lookup_item(str);
-        f >> ws >> str;
+        f >> std::ws >> str;
         readyArmor[i] = lookup_item(str);
     }
 
@@ -217,7 +215,7 @@ void Unit::Readin(istream& f, std::list<Faction *>& facs)
     items.Readin(f);
     skills.Readin(f);
 
-    f >> ws >> str;
+    f >> std::ws >> str;
     combat = lookup_skill(str);
 
     f >> savedmovement;
@@ -225,7 +223,7 @@ void Unit::Readin(istream& f, std::list<Faction *>& facs)
 
     f >> i;
     while (i-- > 0) {
-        std::getline(f >> ws, str);
+        std::getline(f >> std::ws, str);
         visited.insert(str);
     }
 }
@@ -235,7 +233,7 @@ std::string Unit::MageReport()
     std::string temp;
 
     if (combat != -1) {
-        temp = std::string(". Combat spell: ") + SkillStrs(combat);
+        temp = ". Combat spell: " + SkillStrs(combat);
     }
     return temp;
 }
@@ -254,11 +252,7 @@ std::string Unit::ReadyItem()
             ++item;
         }
     }
-    if (item > 0)
-    {
-        weaponstr = std::string("Ready weapon")
-            + (item == 1 ? "" : "s") + ": " + weaponstr;
-    }
+    if (item > 0) weaponstr = "Ready weapon" + strings::plural(item, "", "s") + ": " + weaponstr;
     weapon = item;
 
     item = 0;
@@ -270,12 +264,11 @@ std::string Unit::ReadyItem()
             ++item;
         }
     }
-    if (item > 0)
-        armorstr = std::string("Ready armor: ") + armorstr;
+    if (item > 0) armorstr = "Ready armor: " + armorstr;
     armor = item;
 
     if (readyItem != -1) {
-        battlestr = std::string("Ready item: ") + item_string(readyItem, 1);
+        battlestr = "Ready item: " + item_string(readyItem, 1);
         item = 1;
     } else
         item = 0;
@@ -396,14 +389,14 @@ std::string Unit::SpoilsReport() {
 }
 
 // TODO: Move this somewhere more global.  For now it's only used here.
-static inline void trim(string& s) {
-    s.erase(s.begin(), find_if_not(s.begin(), s.end(), [](char c){ return isspace(c); }));
-    s.erase(find_if_not(s.rbegin(), s.rend(), [](char c){ return isspace(c); }).base(), s.end());
+static inline void trim(std::string& s) {
+    s.erase(s.begin(), std::find_if_not(s.begin(), s.end(), [](char c){ return std::isspace(c); }));
+    s.erase(std::find_if_not(s.rbegin(), s.rend(), [](char c){ return std::isspace(c); }).base(), s.end());
 }
 
 json Unit::write_json_orders()
 {
-    stack<json> parent_stack;
+    std::stack<json> parent_stack;
     json container = json::array();
     parser::string_parser temp;
     parser::token token(std::nullopt);
@@ -416,7 +409,7 @@ json Unit::write_json_orders()
         token = temp.get_token();
         int order_val = token ? Parse1Order(token) : NORDERS;
 
-        set<int> month_orders = { O_MOVE, O_SAIL, O_TEACH, O_STUDY, O_BUILD, O_PRODUCE, O_ENTERTAIN, O_WORK };
+        std::set<int> month_orders = { O_MOVE, O_SAIL, O_TEACH, O_STUDY, O_BUILD, O_PRODUCE, O_ENTERTAIN, O_WORK };
         if (Globals->TAX_PILLAGE_MONTH_LONG) {
             month_orders.emplace(O_TAX);
             month_orders.emplace(O_PILLAGE);
@@ -551,8 +544,8 @@ void Unit::build_json_report(
     j = build_json_descriptor();
 
     if (!my_unit) {
-        string att = AttitudeStrs[static_cast<int>(attitude)];
-        transform(att.begin(), att.end(), att.begin(), ::tolower);
+        std::string att = AttitudeStrs[static_cast<int>(attitude)];
+        std::transform(att.begin(), att.end(), att.begin(), [](char c){ return std::tolower(c); });
         j["attitude"] = att;
     } else {
         j["own_unit"] = true;
@@ -945,7 +938,7 @@ void Unit::set_name(const std::string& newname)
     std::string temp = newname | filter::legal_characters;
     if (temp.empty()) return;
 
-    name = temp + " (" + to_string(num) + ")";
+    name = temp + " (" + std::to_string(num) + ")";
 }
 
 void Unit::set_description(const std::string& newdescription)
@@ -1058,7 +1051,7 @@ void Unit::ConsumeShared(int item, int needed)
 {
     // Use up items carried by the using unit first
     int amount = items.GetNum(item);
-    int used = min(amount, needed);
+    int used = std::min(amount, needed);
     needed -= used;
     items.SetNum(item, amount - used);
     // If we had enough, we are done
@@ -1070,10 +1063,10 @@ void Unit::ConsumeShared(int item, int needed)
             if (u->faction == faction && u->GetFlag(FLAG_SHARING)) {
                 amount = u->items.GetNum(item);
                 if (amount < 1) continue;
-                used = min(needed, amount);
+                used = std::min(needed, amount);
                 u->items.SetNum(item, amount - used);
                 needed -= used;
-                string temp = u->name + " shares " + item_string(item, used) + " with " + name + ".";
+                std::string temp = u->name + " shares " + item_string(item, used) + " with " + name + ".";
                 u->event(temp, "share");
                 // If the need has been filled, then we are done
                 if (needed == 0) return;
@@ -1475,7 +1468,7 @@ int Unit::Practice(int sk)
             skills.SetExp(sk, exp);
         }
         practiced = 1;
-        event("Gets " + to_string(bonus) + " days of practice with " + SkillStrs(sk) + ".", "practice");
+        event("Gets " + std::to_string(bonus) + " days of practice with " + SkillStrs(sk) + ".", "practice");
     }
 
     return bonus;
@@ -1653,7 +1646,7 @@ void Unit::Short(int needed, int hunger)
                 needed -= Globals->MAINTENANCE_COST;
             hunger -= Globals->UPKEEP_MINIMUM_FOOD;
             if (needed < 1 && hunger < 1) {
-                if (n) error(to_string(n) + " starve to death.");
+                if (n) error(std::to_string(n) + " starve to death.");
                 return;
             }
         }
@@ -1686,7 +1679,7 @@ void Unit::Short(int needed, int hunger)
                 needed -= Globals->LEADER_COST;
             hunger -= Globals->UPKEEP_MINIMUM_FOOD;
             if (needed < 1 && hunger < 1) {
-                if (n) error(to_string(n) + " starve to death.");
+                if (n) error(std::to_string(n) + " starve to death.");
                 return;
             }
         }
@@ -2464,12 +2457,12 @@ void Unit::DiscardUnfinishedShips() {
     if (discard > 0) event("discards all unfinished ships.", "discard");
 }
 
-void Unit::event(const string& message, const string& category, ARegion *r)
+void Unit::event(const std::string& message, const std::string& category, ARegion *r)
 {
     faction->event(message, category, r, this);
 }
 
-void Unit::error(const string& s) {
+void Unit::error(const std::string& s) {
     faction->error(s, this);
 }
 
@@ -2658,7 +2651,7 @@ void Unit::SkillStarvation()
                 items.SetNum(i->type, 0);
             }
         }
-        error(to_string(count) + " starve to death.");
+        error(std::to_string(count) + " starve to death.");
         return;
     }
     count = rng::get_random(count)+1;
@@ -2666,7 +2659,7 @@ void Unit::SkillStarvation()
         if (can_forget[i]) {
             if (--count == 0) {
                 Skill *s = GetSkillObject(i);
-                error(string("Starves and forgets one level of ") + SkillDefs[i].name + ".");
+                error(std::string("Starves and forgets one level of ") + SkillDefs[i].name + ".");
                 switch(GetLevelByDays(s->days)) {
                     case 1:
                         s->days -= 30;

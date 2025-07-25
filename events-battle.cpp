@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <sstream>
 #include "strings_util.hpp"
-using namespace std;
 
 BattleFact::BattleFact() {
     this->attacker = BattleSide();
@@ -19,7 +18,7 @@ BattleFact::~BattleFact() {
 
 }
 
-const vector<string> ADJECTIVE = {
+const std::vector<std::string> ADJECTIVE = {
     "A few",
     "Handful",
     "Some",
@@ -30,7 +29,7 @@ const vector<string> ADJECTIVE = {
     "Dozen"
 };
 
-const vector<string> REPORTING = {
+const std::vector<std::string> REPORTING = {
     "traders",
     "merchants",
     "pilgrims",
@@ -47,7 +46,7 @@ const vector<string> REPORTING = {
     "commoners"
 };
 
-const vector<string> CHANNEL = {
+const std::vector<std::string> CHANNEL = {
     "are talking",
     "are rumoring",
     "are worried",
@@ -56,7 +55,7 @@ const vector<string> CHANNEL = {
     "are discussing"
 };
 
-const vector<string> BATTLE = {
+const std::vector<std::string> BATTLE = {
     "an encounter",
     "a fight",
     "a conflict",
@@ -65,7 +64,7 @@ const vector<string> BATTLE = {
     "the battle"
 };
 
-const vector<string> ONE_SIDE = {
+const std::vector<std::string> ONE_SIDE = {
     "a faction",
     "a rebels",
     "a villans",
@@ -73,14 +72,14 @@ const vector<string> ONE_SIDE = {
     "a partisans"
 };
 
-const vector<string> TWO_SIDES = {
+const std::vector<std::string> TWO_SIDES = {
     "hostile forces",
     "enemies",
     "two armies",
     "combatants"
 };
 
-const vector<string> HUNTERS = {
+const std::vector<std::string> HUNTERS = {
     "adventurers",
     "hunters",
     "daredevils",
@@ -88,14 +87,14 @@ const vector<string> HUNTERS = {
     "rangers"
 };
 
-const vector<string> SIZES = {
+const std::vector<std::string> SIZES = {
     "couple",
     "few",
     "several",
     "many"
 };
 
-const vector<string> ACTION_SUCCESS = {
+const std::vector<std::string> ACTION_SUCCESS = {
     "slew",
     "murdered",
     "killed",
@@ -108,14 +107,14 @@ const vector<string> ACTION_SUCCESS = {
     "expelled"
 };
 
-const vector<string> ACTION_ATTEMPT = {
+const std::vector<std::string> ACTION_ATTEMPT = {
     "attacked",
     "ambushed",
     "tried to cast out",
     "tried to expel"
 };
 
-const vector<string> FEAR_NOUN = {
+const std::vector<std::string> FEAR_NOUN = {
     "terror",
     "fear",
     "anxiety",
@@ -123,7 +122,7 @@ const vector<string> FEAR_NOUN = {
     "dread"
 };
 
-string relativeSize(int size) {
+std::string relativeSize(int size) {
     if (size < 3) return SIZES[0];
     if (size < 12) return SIZES[1];
     if (size < 24) return SIZES[2];

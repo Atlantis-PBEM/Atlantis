@@ -11,13 +11,11 @@
 #include <ranges>
 #include <vector>
 
-using namespace std;
-
-struct tag_data { string tag; bool open;};
-static inline tag_data enclose(string tag, bool open) { return { tag, open }; }
+struct tag_data { std::string tag; bool open;};
+static inline tag_data enclose(std::string tag, bool open) { return { tag, open }; }
 
 template<typename _CharT, typename _Traits>
-static inline basic_ostream<_CharT, _Traits>& operator<<(basic_ostream<_CharT, _Traits>& os, tag_data data) {
+static inline std::basic_ostream<_CharT, _Traits>& operator<<(std::basic_ostream<_CharT, _Traits>& os, tag_data data) {
     if (!data.open) os << indent::decr;
     os << "<" << (data.open ? "" : "/") << data.tag << ">" << '\n';
     if (data.open) os << indent::incr;
@@ -28,7 +26,7 @@ struct pre_data { bool open;};
 static inline pre_data pre(bool open) { return { open }; }
 
 template<typename _CharT, typename _Traits>
-static inline basic_ostream<_CharT, _Traits>& operator<<(basic_ostream<_CharT, _Traits>& os, pre_data data) {
+static inline std::basic_ostream<_CharT, _Traits>& operator<<(std::basic_ostream<_CharT, _Traits>& os, pre_data data) {
     if (!data.open) {
         os << indent::pop_indent();
         os << indent::wrap(78, 70, 0);
@@ -41,16 +39,16 @@ static inline basic_ostream<_CharT, _Traits>& operator<<(basic_ostream<_CharT, _
     return os;
 }
 
-static inline string class_tag(string tag, string css_class) { return tag + " class=\"" + css_class + "\""; }
-static inline string anchor(string name) { return "<a name=\"" + name + "\"></a>"; }
-static inline string url(string href, string text) { return "<a href=\"" + href + "\">" + text + "</a>"; }
+static inline std::string class_tag(std::string tag, std::string css_class) { return tag + " class=\"" + css_class + "\""; }
+static inline std::string anchor(std::string name) { return "<a name=\"" + name + "\"></a>"; }
+static inline std::string url(std::string href, std::string text) { return "<a href=\"" + href + "\">" + text + "</a>"; }
 
-struct example_data { string header; bool start; };
-static inline example_data example_start(string header) { return { header, true }; }
+struct example_data { std::string header; bool start; };
+static inline example_data example_start(std::string header) { return { header, true }; }
 static inline example_data example_end() { return { "", false }; }
 
 template<typename _CharT, typename _Traits>
-static inline basic_ostream<_CharT, _Traits>& operator<<(basic_ostream<_CharT, _Traits>& os, example_data data) {
+static inline std::basic_ostream<_CharT, _Traits>& operator<<(std::basic_ostream<_CharT, _Traits>& os, example_data data) {
     if (data.start) {
         os << enclose("p", true) << data.header << '\n' << enclose("p", false);
         os << enclose("p", true) << '\n' << enclose("p", false);
@@ -63,13 +61,13 @@ static inline basic_ostream<_CharT, _Traits>& operator<<(basic_ostream<_CharT, _
     return os;
 }
 
-static string inline num_to_word(int n) {
-    static string vals [] = {
+static std::string inline num_to_word(int n) {
+    static std::string vals [] = {
         "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
         "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
         "seventeen", "eighteen", "nineteen", "twenty"
     };
-    if (n > 20 || n < 0) return to_string(n);
+    if (n > 20 || n < 0) return std::to_string(n);
     return vals[n];
 }
 
@@ -80,15 +78,15 @@ static int study_rate(int days, int exp) {
     return sl.GetStudyRate(1, 1);
 }
 
-inline string faction_point_usage(Faction& fac, bool verbose=true) {
-    string seperator;
-    stringstream ss;
+inline std::string faction_point_usage(Faction& fac, bool verbose=true) {
+    std::string seperator;
+    std::stringstream ss;
     for (const auto& [key, value] : fac.type) {
         if (value <= 0) continue;
         if (verbose) {
-            ss << seperator << to_string(value) << " " << strings::plural(value, "point", "points") << " on " << key;
+            ss << seperator << std::to_string(value) << " " << strings::plural(value, "point", "points") << " on " << key;
         } else {
-            ss << seperator << key << " " << to_string(value);
+            ss << seperator << key << " " << std::to_string(value);
         }
         seperator = (verbose ? ", " : " ");
     }
@@ -97,8 +95,8 @@ inline string faction_point_usage(Faction& fac, bool verbose=true) {
 
 // This function is an utter abomination capable of summoning eldritch horrors from beyond.   This needs to
 // be cleaned up, but that can wait until after this pass.  It's just too messy to fix right now.
-inline string unit_tax_description() {
-    string temp, temp2, temp3;
+inline std::string unit_tax_description() {
+    std::string temp, temp2, temp3;
     int prev = 0, hold = 0;
 
     if (Globals->WHO_CAN_TAX &
@@ -166,7 +164,7 @@ inline string unit_tax_description() {
         else if (Globals->WHO_CAN_TAX &
                 (GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL |
                     GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON)) {
-            string temp3;
+            std::string temp3;
             int prev2 = 0, hold2 = 0;
             if (Globals->WHO_CAN_TAX &
                     GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL) {
@@ -225,7 +223,7 @@ inline string unit_tax_description() {
                 temp2 += "who knows a combat spell";
         } else {
             int hold2 = 0, prev2 = 0;
-            string temp3;
+            std::string temp3;
             if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_COMBAT_SPELL)
                 temp2 += "whose combat spell ";
             else
@@ -277,8 +275,8 @@ inline string unit_tax_description() {
     return temp;
 }
 
-string Game::FactionTypeDescription(Faction &fac) {
-    stringstream buffer;
+std::string Game::FactionTypeDescription(Faction &fac) {
+    std::stringstream buffer;
     std::vector<std::string> missingTypes;
     std::vector<std::string> types;
 
@@ -338,10 +336,10 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     Faction fac;
     bool found;
 
-    ofstream f(rules, ios::out|ios::trunc);
+    std::ofstream f(rules, std::ios::out|std::ios::trunc);
     if (!f.is_open()) return 0;
 
-    ifstream introf(intro, ios::in);
+    std::ifstream introf(intro, std::ios::in);
     if (!introf.is_open()) return 0;
 
     // Perform a number of ruleset sanity checks to make sure we don't output rules for something which is not truly
@@ -400,7 +398,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     f << indent::wrap(78, 70, 0);
 
     f << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">"
-      << endl;
+      << std::endl;
     f << enclose("html", true);
 
     f << enclose("head", true);
@@ -421,7 +419,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     f << enclose("h2", true) << "Copyright 1993 by Russell Wallace\n" << enclose("h2", false);
     auto t = time(nullptr);
     auto tm = *localtime(&t);
-    f << enclose("h3", true) << "Last Change: " << put_time(&tm, "%B %d, %Y") << '\n' << enclose("h3", false);
+    f << enclose("h3", true) << "Last Change: " << std::put_time(&tm, "%B %d, %Y") << '\n' << enclose("h3", false);
     f << enclose("center", false);
 
     f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
@@ -540,9 +538,9 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     f << enclose("li", true) << url("#magic_usingmagic", "Using Magic") << '\n' << enclose("li", false);
     f << enclose("li", true) << url("#magic_incombat", "Mages In Combat") << '\n' << enclose("li", false);
     if (app_exist) {
-        string ref = "#magic_" + Globals->APPRENTICE_NAME + "s";
-        string text = Globals->APPRENTICE_NAME + "s";
-        text[0] = toupper(text[0]);
+        std::string ref = "#magic_" + Globals->APPRENTICE_NAME + "s";
+        std::string text = Globals->APPRENTICE_NAME + "s";
+        text[0] = std::toupper(text[0]);
         f << enclose("li", true) << url(ref, text) << '\n' << enclose("li", false);
     }
     f << enclose("ul", false);
@@ -708,8 +706,8 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
     f << enclose("h2", true) << "Introduction\n" << enclose("h2", false);
     while (!introf.eof()) {
-        string in;
-        getline(introf >> ws, in);
+        std::string in;
+        std::getline(introf >> std::ws, in);
         f << in << '\n';
     }
 
@@ -846,27 +844,27 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
 
             for (auto &fp : *FactionTypes) {
                 if (fp == F_WAR) {
-                    f << enclose("td align=\"center\" nowrap", true) << to_string(AllowedTaxes(&fac))
-                      << (Globals->TACTICS_NEEDS_WAR ? " / " + to_string(AllowedTacticians(&fac)) : "")
+                    f << enclose("td align=\"center\" nowrap", true) << std::to_string(AllowedTaxes(&fac))
+                      << (Globals->TACTICS_NEEDS_WAR ? " / " + std::to_string(AllowedTacticians(&fac)) : "")
                       << '\n' << enclose("td", false);
                 }
 
                 if (fp == F_TRADE) {
-                    f << enclose("td align=\"center\" nowrap", true) << to_string(AllowedTrades(&fac))
-                      << (qm_exist ? " / " + to_string(AllowedQuarterMasters(&fac)) : "")
+                    f << enclose("td align=\"center\" nowrap", true) << std::to_string(AllowedTrades(&fac))
+                      << (qm_exist ? " / " + std::to_string(AllowedQuarterMasters(&fac)) : "")
                       << '\n' << enclose("td", false);
                 }
 
                 if (fp == F_MARTIAL) {
-                    f << enclose("td align=\"center\" nowrap", true) << to_string(AllowedMartial(&fac))
-                      << (qm_exist ? " / " + to_string(AllowedQuarterMasters(&fac)) : "")
-                      << (Globals->TACTICS_NEEDS_WAR ? " / " + to_string(AllowedTacticians(&fac)) : "")
+                    f << enclose("td align=\"center\" nowrap", true) << std::to_string(AllowedMartial(&fac))
+                      << (qm_exist ? " / " + std::to_string(AllowedQuarterMasters(&fac)) : "")
+                      << (Globals->TACTICS_NEEDS_WAR ? " / " + std::to_string(AllowedTacticians(&fac)) : "")
                       << '\n' << enclose("td", false);
                 }
 
                 if (fp == F_MAGIC) {
-                    f << enclose("td align=\"center\" nowrap", true) << to_string(AllowedMages(&fac))
-                      << (app_exist ? " / " + to_string(AllowedApprentices(&fac)) : "")
+                    f << enclose("td align=\"center\" nowrap", true) << std::to_string(AllowedMages(&fac))
+                      << (app_exist ? " / " + std::to_string(AllowedApprentices(&fac)) : "")
                       << '\n' << enclose("td", false);
                 }
             }
@@ -1295,7 +1293,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
               << '\n' << enclose("p", false);
 
             int num_methods = 1 + (Globals->GATES_EXIST ? 1 : 0) + (may_sail ? 1 : 0);
-            string methods[] = {"You must go ", "The first is ", "The second is "};
+            std::string methods[] = {"You must go ", "The first is ", "The second is "};
             int method = 1;
             if (num_methods == 1) method = 0;
             f << enclose("p", true);
@@ -1628,7 +1626,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     f << enclose("table border=\"1\"", true);
     f << enclose("tr", true);
     f << enclose("td colspan=\"2\" rowspan=\"2\"", true) << enclose("td", false);
-    f << enclose("td colspan=\"" + to_string(Globals->MAX_SPEED) + "\"", true) << "Movement Phase\n"
+    f << enclose("td colspan=\"" + std::to_string(Globals->MAX_SPEED) + "\"", true) << "Movement Phase\n"
       << enclose("td", false);
     f << enclose("tr", false);
     f << enclose("tr", true);
@@ -1639,7 +1637,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     for (int i = 0; i < Globals->MAX_SPEED; i++) {
         f << enclose("tr", true);
         if (!i) {
-            f << enclose("td rowspan=\"" + to_string(Globals->MAX_SPEED) + "\"", true) << "Speed\n"
+            f << enclose("td rowspan=\"" + std::to_string(Globals->MAX_SPEED) + "\"", true) << "Speed\n"
               << enclose("td", false);
         }
         f << enclose("th", true) << i + 1 << '\n' << enclose("th", false);
@@ -1759,7 +1757,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
             }
             f << (spec ? "" : "None.") << "\n";
             f << enclose("td", false);
-            f << enclose("td align=\"left\" nowrap", true) << (spec ? to_string(mt.speciallevel) : "--") << '\n'
+            f << enclose("td align=\"left\" nowrap", true) << (spec ? std::to_string(mt.speciallevel) : "--") << '\n'
               << enclose("td", false);
             f << enclose("td align=\"left\" nowrap", true) << mt.defaultlevel << '\n' << enclose("td", false);
             f << enclose("tr", false);
@@ -3442,10 +3440,10 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
         << enclose("p", false);
 
     if (app_exist) {
-        string app_name(Globals->APPRENTICE_NAME);
+        std::string app_name(Globals->APPRENTICE_NAME);
         app_name.append("s");
         f << anchor("magic_"+app_name) << '\n';
-        app_name[0] = toupper(app_name[0]);
+        app_name[0] = std::toupper(app_name[0]);
         f << enclose("h3", true) << app_name << ":\n" << enclose("h3", false);
         f << enclose("p", true) << app_name << " may be created by having a unit study ";
         comma = 0;
@@ -4556,7 +4554,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
         f << enclose("p", true) << "Example:\n" << enclose("p", false);
         f << example_start(
             "Select a staff of fire as the "
-            + string(!(Globals->USE_PREPARE_COMMAND == GameDefs::PREPARE_STRICT) ? "preferred " : "")
+            + std::string(Globals->USE_PREPARE_COMMAND != GameDefs::PREPARE_STRICT ? "preferred " : "")
             + "battle item.")
           << "PREPARE STAF\n"
           << example_end();

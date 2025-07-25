@@ -8,7 +8,6 @@
 // using namespace boost::ut; here. Instead, we alias it, and then use the alias inside the
 // closure to make the user defined literals and all the other niceness available.
 namespace ut = boost::ut;
-using namespace std;
 
 // This suite will test various aspects of the Faction class in isolation.
 ut::suite<"Safe List"> safe_list_suite = []
@@ -104,7 +103,7 @@ ut::suite<"Safe List"> safe_list_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
@@ -126,7 +125,7 @@ ut::suite<"Safe List"> safe_list_suite = []
     helper.create_fleet(region, fourth, I_CLOUDSHIP, 1); // this fleet won't sail and should get an error
     helper.create_fleet(region, fifth, I_CLOUDSHIP, 1);
 
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 3\n";
     ss << "SAIL S\n";
@@ -170,7 +169,7 @@ ut::suite<"Safe List"> safe_list_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
@@ -191,7 +190,7 @@ ut::suite<"Safe List"> safe_list_suite = []
     helper.create_building(region, nullptr, O_FORT);
     helper.create_building(region, nullptr, O_FORT);
 
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 3\n";
     ss << "ENTER 2\n";

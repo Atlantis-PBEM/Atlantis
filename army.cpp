@@ -1276,19 +1276,19 @@ const WeaponBonusMalus* GetWeaponBonusMalus(const WeaponType& attacker, const We
         const WeaponBonusMalus *bm = &attacker.bonusMalus[i];
         if (!bm->weaponAbbr) continue;
 
-        if (std::string(bm->weaponAbbr) == target.abbr) {
+        if (target.abbr == bm->weaponAbbr) {
             return bm;
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attackType,
         int attackLevel, int flags, int weaponClass, char const *effect,
         int mountBonus, Soldier *attacker, Army *attackers, bool attackbehind, int attackDamage)
 {
-    auto sp = special != NULL ? find_special(special) : std::nullopt;
+    auto sp = special != nullptr ? find_special(special) : std::nullopt;
 
     // if special is defined then it is magical attack and not attack by the physical weapon soldier has
     int weaponIndex = !sp ? attacker->weapon : -1;
@@ -1328,7 +1328,7 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
                 return -1;
             }
 
-            if (effect != NULL && !combat) {
+            if (effect != nullptr && !combat) {
                 /* We got through shield... if killing spell, destroy shield */
                 std::erase(shields, hi);
             }
