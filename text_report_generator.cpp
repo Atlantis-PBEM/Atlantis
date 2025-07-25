@@ -1,6 +1,6 @@
 #include <iostream>
+#include <string>
 
-#include "astring.h"
 #include "faction.h"
 #include "gamedefs.h"
 #include "indenter.hpp"
@@ -9,7 +9,7 @@
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
-using namespace std;
+// using namespace std;
 
 const int TextReportGenerator::line_width = 70;
 const int TextReportGenerator::map_width = 23;
@@ -18,7 +18,7 @@ const int TextReportGenerator::template_max_lines = 13;
 
 
 // Initialize the string constants
-const string TextReportGenerator::template_map[] = {
+const std::string TextReportGenerator::template_map[] = {
 //   01234567890123456789012
     "         ____          ",   // 1
     " nw     /    \\     ne  ",  // 2
@@ -35,7 +35,7 @@ const string TextReportGenerator::template_map[] = {
     " sw     \\____/     se  "   // 13
 };
 
-const map<const string, const array<int, 2>> TextReportGenerator::direction_offsets = {
+const std::map<const std::string, const std::array<int, 2>> TextReportGenerator::direction_offsets = {
     {"center",    {  8,   7-1 }},
     {"north",     {  8,   3-1 }},
     {"northeast", { 14,   5-1 }},
@@ -45,7 +45,7 @@ const map<const string, const array<int, 2>> TextReportGenerator::direction_offs
     {"northwest", {  2,   5-1 }}
 };
 
-const map<const string, const array<string, 2>> TextReportGenerator::terrain_fill = {
+const std::map<const std::string, const std::array<std::string, 2>> TextReportGenerator::terrain_fill = {
     { "block", {
         "####",
         "####" }
@@ -140,14 +140,14 @@ const map<const string, const array<string, 2>> TextReportGenerator::terrain_fil
     }
 };
 
-string TextReportGenerator::to_s(const json& j) {
-    string s;
-    if (j.is_string()) return j.template get<string>();
-    // If we somehow get something that isn't a string, just dump it as json.
+std::string TextReportGenerator::to_s(const json& j) {
+    std::string s;
+    if (j.is_string()) return j.template get<std::string>();
+    // If we somehow get something that isn't a std::string, just dump it as json.
     return j.dump();
 }
 
-void TextReportGenerator::output_region_header(ostream&f, const json& region, bool show_region_depth) {
+void TextReportGenerator::output_region_header(std::ostream&f, const json& region, bool show_region_depth) {
     f << to_s(region["terrain"]) << " (" << region["coordinates"]["x"] << "," << region["coordinates"]["y"];
     if (region["coordinates"]["label"] != "surface") {
         int z = region["coordinates"]["z"];
@@ -167,13 +167,13 @@ void TextReportGenerator::output_region_header(ostream&f, const json& region, bo
 }
 
 std::string TextReportGenerator::item_to_string(const json& item, bool assume_singular, bool show_single_amt) {
-    string result;
+    std::string result;
     if (item.contains("unlimited")) {
         result = "unlimited " + to_s(item["plural"]);
     } else {
         int amount = item.value("amount", 0);
         if ((amount > 1) || (show_single_amt && (amount == 1))) {
-            result += to_string(amount) + " ";
+            result += std::to_string(amount) + " ";
         }
         if (item.contains("unfinished")) {
             result += "unfinished ";
@@ -189,15 +189,15 @@ std::string TextReportGenerator::item_to_string(const json& item, bool assume_si
     result += " [" + to_s(item["tag"]) + "]";
     if (item.contains("needs")) result += " (needs " + to_s(item["needs"]) + ")";
     if (item.contains("illusion")) result += " (illusion)";
-    if (item.contains("price")) result += " at $" + to_string(item["price"]);
+    if (item.contains("price")) result += " at $" + to_s(item["price"]);
     return result;
 }
 
-void TextReportGenerator::output_item(ostream& f, const json& item, bool assume_singular, bool show_single_amt) {
+void TextReportGenerator::output_item(std::ostream& f, const json& item, bool assume_singular, bool show_single_amt) {
     f << item_to_string(item, assume_singular, show_single_amt);
 }
 
-void TextReportGenerator::output_items(ostream& f, const json& item_list, bool assume_singular, bool show_single_amt) {
+void TextReportGenerator::output_items(std::ostream& f, const json& item_list, bool assume_singular, bool show_single_amt) {
     if (item_list.empty()) return;
     bool comma = false;
     for(const auto& item : item_list) {
@@ -207,7 +207,7 @@ void TextReportGenerator::output_items(ostream& f, const json& item_list, bool a
     }
 }
 
-void TextReportGenerator::output_item_list(ostream& f, const json& item_list, string header) {
+void TextReportGenerator::output_item_list(std::ostream& f, const json& item_list, std::string header) {
     f << header << ": ";
     if (item_list.empty()) {
         f << "none.\n";
@@ -217,7 +217,7 @@ void TextReportGenerator::output_item_list(ostream& f, const json& item_list, st
     f << ".\n";
 }
 
-void TextReportGenerator::output_ships(ostream& f, const json& ships) {
+void TextReportGenerator::output_ships(std::ostream& f, const json& ships) {
     if (ships.empty()) return;
     int count = ships.size();
     bool comma = false;
@@ -230,21 +230,21 @@ void TextReportGenerator::output_ships(ostream& f, const json& ships) {
     }
 }
 
-void TextReportGenerator::output_error(ostream& f, const json& error) {
+void TextReportGenerator::output_error(std::ostream& f, const json& error) {
     if (error.contains("unit")) {
         f << to_s(error["unit"]["name"]) << " (" << error["unit"]["number"] << "): ";
     }
     f << to_s(error["message"]) << '\n';
 }
 
-void TextReportGenerator::output_event(ostream& f, const json& event) {
+void TextReportGenerator::output_event(std::ostream& f, const json& event) {
     if (event.contains("unit")) {
         f << to_s(event["unit"]["name"]) << " (" << event["unit"]["number"] << "): ";
     }
     f << to_s(event["message"]) << '\n';
 }
 
-void TextReportGenerator::output_unit_summary(ostream& f, const json& unit, bool show_faction) {
+void TextReportGenerator::output_unit_summary(std::ostream& f, const json& unit, bool show_faction) {
     f << to_s(unit["name"]) << " (" << unit["number"] << ")";
     // display guard flag *before* the faction
     if (unit.contains("flags") && unit["flags"]["guard"]) f << ", on guard";
@@ -349,7 +349,7 @@ void TextReportGenerator::output_unit_summary(ostream& f, const json& unit, bool
 	f << ".\n";
 }
 
-void TextReportGenerator::output_unit(ostream& f, const json& unit, bool show_unit_attitudes) {
+void TextReportGenerator::output_unit(std::ostream& f, const json& unit, bool show_unit_attitudes) {
     if (unit.contains("own_unit")) {
         f << "* ";
     } else if (!show_unit_attitudes) {
@@ -366,7 +366,7 @@ void TextReportGenerator::output_unit(ostream& f, const json& unit, bool show_un
     output_unit_summary(f, unit);
 }
 
-void TextReportGenerator::output_structure(ostream& f, const json& structure, bool show_unit_attitudes) {
+void TextReportGenerator::output_structure(std::ostream& f, const json& structure, bool show_unit_attitudes) {
     f << "+ " << to_s(structure["name"]) << " [" << structure["number"] << "] : ";
     if (structure.contains("ships")) {
         // Fleets are wierd. If you have a fleet of a single ship, the structure type is just the ships item name.
@@ -423,7 +423,7 @@ void TextReportGenerator::output_structure(ostream& f, const json& structure, bo
 }
 
 void TextReportGenerator::output_region(
-    ostream& f, const json& region, bool show_unit_attitudes, bool show_region_depth
+    std::ostream& f, const json& region, bool show_unit_attitudes, bool show_region_depth
 ) {
     output_region_header(f, region, show_region_depth);
     if (region.contains("population")) {
@@ -508,7 +508,7 @@ void TextReportGenerator::output_region(
     }
 }
 
-void TextReportGenerator::output(ostream& f, const json& report, bool show_region_depth) {
+void TextReportGenerator::output(std::ostream& f, const json& report, bool show_region_depth) {
     f << indent::wrap;
 
     if (report.contains("statistics")) {
@@ -517,8 +517,8 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
         f << ";Item                                      Rank  Max        Total\n";
         f << ";=====================================================================\n";
         for (const auto& stat : report["statistics"]) {
-            f << ';' << left << setw(42) << item_to_string(stat) << setw(6) << stat.value("rank", 0)
-              << setw(11) << stat.value("max", 0) << stat.value("total", 0) << right << '\n';
+            f << ';' << std::left << std::setw(42) << item_to_string(stat) << std::setw(6) << stat.value("rank", 0)
+              << std::setw(11) << stat.value("max", 0) << stat.value("total", 0) << std::right << '\n';
         }
         f << '\n';
     }
@@ -536,13 +536,13 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
         if (report.contains("type")) {
             f << " (";
             bool comma = false;
-            // right now there are 4 possible faction types.
+            // std::right now there are 4 possible faction types.
             // martial, war, trade, magic.
             // while it's not legal to have martial along with war and trade, for now we will just check and output
             // all of them.
-            string types[] = {"martial", "war", "trade", "magic"};
+            std::string types[] = {"martial", "war", "trade", "magic"};
             for (const auto& type : types) {
-                string key = type;
+                std::string key = type;
                 key[0] = toupper(key[0]);
                 if (report["type"].contains(type)) {
                     if (comma) f << ", ";
@@ -572,7 +572,7 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
               << " turns until your faction is automatically removed due to inactivity!\n\n";
         }
         if (report["administrative"].contains("quit")) {
-            string quit = to_s(report["administrative"]["quit"]);
+            std::string quit = to_s(report["administrative"]["quit"]);
             if (quit == "quit and restart") {
                 f << "You restarted your faction this turn. This faction has been removed, and a new faction has "
                 << "been started for you. (Your new faction report will come in a separate message.)\n";
@@ -673,13 +673,13 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
     }
 
     if (report.contains("attitudes") && !report["attitudes"].empty()) {
-        string default_attitude = to_s(report["attitudes"]["default"]);
+        std::string default_attitude = to_s(report["attitudes"]["default"]);
         default_attitude[0] = toupper(default_attitude[0]);
         f << "Declared Attitudes (default " << default_attitude << "):\n";
-        string available_attitudes[] = { "hostile", "unfriendly", "neutral", "friendly", "ally" };
+        std::string available_attitudes[] = { "hostile", "unfriendly", "neutral", "friendly", "ally" };
         for (const auto& attitude : available_attitudes) {
             if (report["attitudes"].contains(attitude)) {
-                string attitude_name = attitude;
+                std::string attitude_name = attitude;
                 attitude_name[0] = toupper(attitude_name[0]);
                 f << attitude_name << " : ";
                 if (report["attitudes"][attitude].empty()) {
@@ -709,7 +709,7 @@ void TextReportGenerator::output(ostream& f, const json& report, bool show_regio
     if (final_newline) f << '\n';
 }
 
-void TextReportGenerator::output_unit_orders(ostream& f, const json& orders) {
+void TextReportGenerator::output_unit_orders(std::ostream& f, const json& orders) {
     for (const auto& order : orders) {
         f << to_s(order["order"]) << '\n';
         if (order.contains("nested") && !order["nested"].empty()) {
@@ -720,7 +720,7 @@ void TextReportGenerator::output_unit_orders(ostream& f, const json& orders) {
     }
 }
 
-void TextReportGenerator::output_unit_template(ostream& f, const json& unit, int template_type) {
+void TextReportGenerator::output_unit_template(std::ostream& f, const json& unit, int template_type) {
     f << "\nunit " << unit["number"] << '\n';
     if (template_type == TEMPLATE_LONG || template_type == TEMPLATE_MAP) {
         f << indent::comment;
@@ -731,10 +731,10 @@ void TextReportGenerator::output_unit_template(ostream& f, const json& unit, int
     }
 }
 
-string TextReportGenerator::next_map_header_line(int line, const json& region) {
-    if (line >= template_max_lines) return string(map_width, ' ');
+std::string TextReportGenerator::next_map_header_line(int line, const json& region) {
+    if (line >= template_max_lines) return std::string(map_width, ' ');
 
-    string result = template_map[line];
+    std::string result = template_map[line];
 
     // See if there is anything special to fill on for this line.
     for (const auto& offset: direction_offsets) {
@@ -743,25 +743,25 @@ string TextReportGenerator::next_map_header_line(int line, const json& region) {
 
         if (line == y || line == y + 1) {
             if (offset.first == "center") {
-                string value = (
+                std::string value = (
                     region.contains("settlement") && line == y
                     ? to_s(region["settlement"]["name"])
                     : terrain_fill.at(to_s(region["terrain"]))[line - y]
                 );
-                int len = min(value.length(), template_fill_size);
+                int len = std::min(value.length(), template_fill_size);
                 result.replace(x, len, value.substr(0, len));
             } else {
                 if (region.contains("exits")) {
                     for (const auto& exit : region["exits"]) {
-                        string lower_dir = exit["direction"];
+                        std::string lower_dir = exit["direction"];
                         transform(lower_dir.begin(), lower_dir.end(), lower_dir.begin(), ::tolower);
                         if (lower_dir == offset.first) {
-                            string value = (
+                            std::string value = (
                                 exit["region"].contains("settlement") && line == y
                                 ? to_s(exit["region"]["settlement"]["name"])
                                 : terrain_fill.at(to_s(exit["region"]["terrain"]))[line - y]
                             );
-                            int len = min(value.length(), template_fill_size);
+                            int len = std::min(value.length(), template_fill_size);
                             result.replace(x, len, value.substr(0, len));
                         }
                     }
@@ -772,23 +772,23 @@ string TextReportGenerator::next_map_header_line(int line, const json& region) {
     return result;
 }
 
-void TextReportGenerator::output_region_map_header_line(ostream& f, string line) {
-    string out = line.substr(0, line_width);
+void TextReportGenerator::output_region_map_header_line(std::ostream& f, std::string line) {
+    std::string out = line.substr(0, line_width);
     out.erase(out.find_last_not_of(' ') + 1);
     f << indent::comment << out << '\n';
 }
 
-string TextReportGenerator::map_header_item(const string& header, const json& item) {
-    stringstream ss;
+std::string TextReportGenerator::map_header_item(const std::string& header, const json& item) {
+    std::stringstream ss;
     ss << header;
     if (item.value("unlimited", false)) ss << "unlim";
-    else ss << setw(5) << right << item.value("amount", 0);
-    ss << " " << setw(4) << to_s(item["tag"]);
-    if (item.contains("price")) ss << " @ " << setw(3) << right << item.value("price", 0);
+    else ss << std::setw(5) << std::right << item.value("amount", 0);
+    ss << " " << std::setw(4) << to_s(item["tag"]);
+    if (item.contains("price")) ss << " @ " << std::setw(3) << std::right << item.value("price", 0);
     return ss.str();
 }
 
-void TextReportGenerator::output_region_map_header(ostream& f, const json& region, bool show_region_depth) {
+void TextReportGenerator::output_region_map_header(std::ostream& f, const json& region, bool show_region_depth) {
     f << '\n' << indent::comment << "-----------------------------------------------------------\n";
     f << indent::comment;
     output_region_header(f, region, show_region_depth);
@@ -798,25 +798,25 @@ void TextReportGenerator::output_region_map_header(ostream& f, const json& regio
     output_region_map_header_line(f, next_map_header_line(line++, region));
 
     if (region.contains("weather")) {
-        string weather = "Next " + to_s(region["weather"]["next"]);
+        std::string weather = "Next " + to_s(region["weather"]["next"]);
         // strip off ' season' if it's there (for monsoon)
         if (weather.ends_with(" season")) weather = weather.substr(0, weather.length() - 7);
         output_region_map_header_line(f, next_map_header_line(line++, region) + weather);
     }
 
-    stringstream ss;
-    ss << "Tax  " << setw(5) << right << region.value("tax", 0);
+    std::stringstream ss;
+    ss << "Tax  " << std::setw(5) << std::right << region.value("tax", 0);
     output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
 
     if (region.contains("entertainment")) {
-        stringstream ss;
-        ss << "Ente " << setw(5) << right << region.value("entertainment", 0);
+        std::stringstream ss;
+        ss << "Ente " << std::setw(5) << std::right << region.value("entertainment", 0);
         output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
     }
 
     if (region.contains("wages")) {
-        stringstream ss;
-        ss << "Wage " << setprecision(1) << fixed << setw(7) << right << region["wages"].value("amount", 0.0)
+        std::stringstream ss;
+        ss << "Wage " << std::setprecision(1) << std::fixed << std::setw(7) << std::right << region["wages"].value("amount", 0.0)
            << " (max " << region["wages"].value("max", 0) << ")";
         output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
     }
@@ -825,7 +825,7 @@ void TextReportGenerator::output_region_map_header(ostream& f, const json& regio
     if (region.contains("markets")) {
         for (const auto& item : region["markets"]["wanted"]) {
             if (first) output_region_map_header_line(f, next_map_header_line(line++, region));
-            string s = map_header_item((first ? "Want " : "     "), item);
+            std::string s = map_header_item((first ? "Want " : "     "), item);
             output_region_map_header_line(f, next_map_header_line(line++, region) + s);
             first = false;
         }
@@ -833,7 +833,7 @@ void TextReportGenerator::output_region_map_header(ostream& f, const json& regio
         first = true;
         for (const auto& item : region["markets"]["for_sale"]) {
             if (first) output_region_map_header_line(f, next_map_header_line(line++, region));
-            string s = map_header_item((first ? "Sell " : "     "), item);
+            std::string s = map_header_item((first ? "Sell " : "     "), item);
             output_region_map_header_line(f, next_map_header_line(line++, region) + s);
             first = false;
         }
@@ -842,15 +842,15 @@ void TextReportGenerator::output_region_map_header(ostream& f, const json& regio
     first = true;
     for (const auto& item : region["products"]) {
         if (first) output_region_map_header_line(f, next_map_header_line(line++, region));
-        string s = map_header_item((first ? "Prod " : "     "), item);
+        std::string s = map_header_item((first ? "Prod " : "     "), item);
         output_region_map_header_line(f, next_map_header_line(line++, region) + s);
         first = false;
     }
 
     if (region.contains("gate")) {
         if (region["gate"].contains("open")) {
-            stringstream ss;
-            ss << "Gate " << setw(4) << right << region["gate"].value("number", 0);
+            std::stringstream ss;
+            ss << "Gate " << std::setw(4) << std::right << region["gate"].value("number", 0);
             output_region_map_header_line(f, next_map_header_line(line++, region) + ss.str());
         } else {
             output_region_map_header_line(f, next_map_header_line(line++, region) + "Gate closed");
@@ -863,7 +863,7 @@ void TextReportGenerator::output_region_map_header(ostream& f, const json& regio
 }
 
 void TextReportGenerator::output_region_template(
-    ostream& f, const json& region, int template_type, bool show_region_depth
+    std::ostream& f, const json& region, int template_type, bool show_region_depth
 ) {
     if (template_type == TEMPLATE_MAP) output_region_map_header(f, region, show_region_depth);
     else {
@@ -887,7 +887,7 @@ void TextReportGenerator::output_region_template(
     }
 }
 
-void TextReportGenerator::output_template(ostream& f, const json& report, int template_type, bool show_region_depth) {
+void TextReportGenerator::output_template(std::ostream& f, const json& report, int template_type, bool show_region_depth) {
     f << indent::wrap;
     f << "\n";
     f << "Orders Template (";

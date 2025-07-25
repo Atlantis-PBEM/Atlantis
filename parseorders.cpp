@@ -147,7 +147,7 @@ void Game::ParseOrders(int faction, std::istream& f, orders_check *checker)
     Unit *unit = nullptr;
     int code;
     parser::string_parser order;
-    AString prefix;
+    std::string prefix;
 
     f >> std::ws >> order;
     while (!f.eof()) {

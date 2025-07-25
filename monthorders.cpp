@@ -14,7 +14,6 @@ void Game::RunMovementOrders()
     Unit *u;
     std::list<Location *> locs;
     Location *l;
-    AString order;
 
     for (phase = 0; phase < Globals->MAX_SPEED; phase++) {
         for (const auto r : regions) {
@@ -564,7 +563,6 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 void Game::RunBuildShipOrder(ARegion *r, Object *obj, Unit *u)
 {
     int ship, skill, level, maxbuild, unfinished, output, percent;
-    AString skname;
 
     ship = std::abs(u->build);
     skill = lookup_skill(ItemDefs[ship].pSkill);

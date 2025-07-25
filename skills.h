@@ -6,7 +6,6 @@ class Faction;
 class Skill;
 class SkillList;
 
-#include "astring.h"
 #include "gamedefs.h"
 #include <list>
 #include "string_parser.hpp"

@@ -105,7 +105,7 @@ class Unit {
         void Writeout(std::ostream& f);
         void Readin(std::istream& f, std::list<Faction *>& facs);
 
-        AString SpoilsReport(void);
+        std::string SpoilsReport(void);
         int CanGetSpoil(Item *i);
         json build_json_descriptor();
         void build_json_report(
@@ -113,9 +113,9 @@ class Unit {
         );
         json write_json_orders();
         std::string get_name(int observation);
-        AString MageReport();
-        AString ReadyItem();
-        AString StudyableSkills();
+        std::string MageReport();
+        std::string ReadyItem();
+        std::string StudyableSkills();
         std::string battle_report(int observation);
 
         void ClearOrders();

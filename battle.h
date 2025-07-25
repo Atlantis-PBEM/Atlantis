@@ -5,7 +5,6 @@
 
 class Battle;
 
-#include "astring.h"
 #include "army.h"
 #include "items.h"
 #include "events.h"

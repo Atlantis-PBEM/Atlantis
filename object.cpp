@@ -433,9 +433,9 @@ void Object::AddShip(int type)
 /* Returns the String 'Fleet' for multi-ship fleets
  * and the name of the ship for single ship fleets
  */
-AString Object::FleetDefinition()
+std::string Object::FleetDefinition()
 {
-    AString fleet;
+    std::string fleet;
     int shiptype = -1;
     int num = 0;
     for (int i=0; i<NITEMS; i++) {
@@ -455,9 +455,9 @@ AString Object::FleetDefinition()
             num = GetNumShips(item);
             if (num > 0) {
                 if (num > 1) {
-                    fleet += AString(", ") + num + " " + ItemDefs[item].names;
+                    fleet += std::string(", ") + std::to_string(num) + " " + ItemDefs[item].names;
                 } else {
-                    fleet += AString(", ") + num + " " +ItemDefs[item].name;
+                    fleet += std::string(", ") + std::to_string(num) + " " +ItemDefs[item].name;
                 }
             }
         }

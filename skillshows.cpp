@@ -2,7 +2,6 @@
 #include "items.h"
 #include "object.h"
 #include "gamedata.h"
-#include "astring.h"
 
 static const std::string describe_escape_parameters(int item)
 {

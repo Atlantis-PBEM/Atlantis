@@ -2,7 +2,6 @@
 #ifndef QUEST_H
 #define QUEST_H
 
-#include "astring.h"
 #include "unit.h"
 #include "items.h"
 #include <set>
