@@ -128,15 +128,14 @@ inline constexpr lowercase_t lowercase{};
  */
 struct canonicalize_t {
     std::string process(const std::string& str) const {
+        std::vector<std::string> processed_words;
 #ifdef CPP20_RANGES_ARE_BROKEN
         /** gcc 11 doesn't like the range solution, ergo this hack */
-        std::vector<std::string> words;
         std::istringstream f(str);
         std::string s;
         while (std::getline(f, s, ' ')) {
-            words.push_back(s | capitalize);
+            processed_words.push_back(s | capitalize);
         }
-        return strings::join(words, "_");
 #else
         auto parts_view = str
             | std::views::split(std::string_view{" "}) // Split by space
@@ -145,12 +144,11 @@ struct canonicalize_t {
                 return str | capitalize;
             });
 
-        std::vector<std::string> processed_words;
         // Efficiently copy the view elements into the vector
         std::ranges::copy(parts_view, std::back_inserter(processed_words));
+#endif
         // Join the processed words with an underscore
         return strings::join(processed_words, "_");
-#endif
     }
 
     std::string operator()(const std::string& str) const { return process(str); }
