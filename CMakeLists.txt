@@ -4,11 +4,11 @@ set(CMAKE_CXX_STANDARD 20)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if (CMAKE_CXX_COMPILER_VERSION LESS 12)
-        add_compile_options(-DHAVE_BROKEN_RANGES)
+        add_compile_options(-DCPP20_RANGES_ARE_BROKEN)
         message(STATUS "compiler has broken C++ ranges")
     endif()
 endif()
-if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     #add_compile_options(-pedantic -Wsign-compare -Wextra -Werror -Wno-switch -Wno-unknown-pragmas -Wstrict-prototypes -Wpointer-arith -Wno-char-subscripts -Wno-long-long)
     add_compile_options(-g -Wall -Werror -pedantic)
 elseif(MSVC)
@@ -26,7 +26,6 @@ endif()
 add_library(engine
     aregion.cpp
     army.cpp
-    astring.cpp
     battle.cpp
     economy.cpp
     edit.cpp
