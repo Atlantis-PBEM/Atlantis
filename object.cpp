@@ -753,20 +753,15 @@ std::string object_description(int obj)
         }
         temp += " to study above level 2.";
     }
-    bool buildable;
+    bool buildable = true;
     auto pS = FindSkill(o->skill);
-    if (o->item == -1 || o->skill == nullptr || !pS || pS->get().flags & SkillType::DISABLED)
-    {
+    if (o->item == -1 || o->skill == nullptr || !pS || pS->get().flags & SkillType::DISABLED) buildable = false;
+    if (o->item >= 0 && (ItemDefs[o->item].flags & ItemType::DISABLED)) buildable = false;
+    if (
+        o->item == I_WOOD_OR_STONE &&
+        (ItemDefs[I_WOOD].flags & ItemType::DISABLED) && (ItemDefs[I_STONE].flags & ItemType::DISABLED)
+    ) {
         buildable = false;
-    }
-    else if (o->item >= 0 && (ItemDefs[o->item].flags & ItemType::DISABLED))
-    {
-        buildable = false;
-    }
-    else {
-        buildable = (o->item == I_WOOD_OR_STONE
-            && (ItemDefs[I_WOOD].flags & ItemType::DISABLED)
-            && (ItemDefs[I_STONE].flags & ItemType::DISABLED));
     }
 
     if (!buildable && !(ObjectDefs[obj].flags & ObjectType::GROUP)) {
