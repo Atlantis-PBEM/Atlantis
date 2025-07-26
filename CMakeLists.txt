@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 project(atlantis CXX)
 set(CMAKE_CXX_STANDARD 20)
+# set(CMAKE_VERBOSE_MAKEFILE ON)
+# set_property(GLOBAL PROPERTY GLOBAL_DEPENDS_DEBUG_MODE 1)
 
 include(${CMAKE_SOURCE_DIR}/CompilerSupport.cmake)
 
@@ -71,14 +73,43 @@ add_executable(${GAME}
 )
 target_link_libraries(${GAME} engine)
 target_include_directories(${GAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+#file (GLOB _RULES_CSS RELATIVE ${GAME}/html *.css)
+set (_RULES_CSS ${GAME}.css)
+message(STATUS "CSS ${GAME}: ${_RULES_CSS}")
+set (_RULES_INTRO ${GAME}_intro.html)
+set (_RULES_OUTPUT ${GAME}.html)
+# file (COPY ${GAME}/${_RULES_INTRO} ${GAME}/html/${_RULES_CSS} DESTINATION .)
+add_custom_command(
+    COMMAND ${GAME} ARGS genrules ${CMAKE_SOURCE_DIR}/${GAME}/${_RULES_INTRO} ${_RULES_CSS} ${_RULES_OUTPUT}
+    OUTPUT ${GAME}.html
+    MAIN_DEPENDENCY ${GAME}
+    DEPENDS ${GAME}/${_RULES_INTRO} ${GAME}/html/${_RULES_CSS}
+)
+add_custom_target(${GAME}-rules DEPENDS ${GAME}.html)
+unset(_RULES_CSS)
+unset(_RULES_INTRO)
+unset(_RULES_OUTPUT)
 endmacro()
 
-add_game(basic)
-add_game(fracas)
-add_game(havilah)
-add_game(kingdoms)
-add_game(neworigins)
-add_game(standard)
+set (GAMES
+basic
+fracas
+havilah
+kingdoms
+neworigins
+standard
+)
+
+foreach(GAME IN ITEMS ${GAMES})
+add_game(${GAME})
+endforeach()
+
+add_custom_target(games DEPENDS ${GAMES})
+
+set(RULE_TARGETS ${GAMES})
+list(TRANSFORM RULE_TARGETS APPEND "-rules")
+
+add_custom_target(rules DEPENDS ${RULE_TARGETS})
 
 file(GLOB TEST_SOURCES unittest/*_test.cpp)
 
@@ -96,4 +127,5 @@ target_link_libraries(unittest engine)
 target_include_directories(unittest PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 enable_testing()
-add_test(NAME unittest COMMAND unittest)
+add_test(NAME unittests COMMAND unittest)
+add_custom_target(tests COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS unittest)
