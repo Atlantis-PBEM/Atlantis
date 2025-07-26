@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     // For simplicity, convert all arguments to strings
     std::vector<std::string> args;
     for (int i = 0; i < argc; i++) {
-        args.push_back(argv[i] | filter::lowercase);
+        args.push_back(argv[i]);
     }
 
     game.ModifyTablesPerRuleset();
