@@ -2,15 +2,15 @@ cmake_minimum_required(VERSION 3.22)
 project(atlantis CXX)
 set(CMAKE_CXX_STANDARD 20)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if (CMAKE_CXX_COMPILER_VERSION LESS 12)
-        add_compile_options(-DCPP20_RANGES_ARE_BROKEN)
-        message(STATUS "compiler has broken C++ ranges")
-    endif()
-endif()
+include(${CMAKE_SOURCE_DIR}/CompilerSupport.cmake)
+
+if (NOT COMPILER_HAS_RANGES)
+    message(FATAL_ERROR "Compiler lacks full support for C++20 ranges.")
+endif(NOT COMPILER_HAS_RANGES)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     #add_compile_options(-pedantic -Wsign-compare -Wextra -Werror -Wno-switch -Wno-unknown-pragmas -Wstrict-prototypes -Wpointer-arith -Wno-char-subscripts -Wno-long-long)
-    add_compile_options(-g -Wall -Werror -pedantic)
+    add_compile_options(-g -Wall -Werror -pedantic -Wparentheses)
 elseif(MSVC)
     #add_compile_options(/WX /MP /FC /D_CRT_SECURE_NO_WARNINGS)
     add_compile_options(/MP /FC /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4700)
@@ -19,7 +19,7 @@ elseif(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE
         "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib")
 else()
-    message(STATUS "unknown compiler ${CMAKE_C_COMPILER_ID}")
+    message(STATUS "unknown compiler ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 
