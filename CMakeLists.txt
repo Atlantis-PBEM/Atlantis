@@ -3,9 +3,10 @@ project(atlantis CXX)
 set(CMAKE_CXX_STANDARD 20)
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 # set_property(GLOBAL PROPERTY GLOBAL_DEPENDS_DEBUG_MODE 1)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(${CMAKE_SOURCE_DIR}/CompilerSupport.cmake)
-
 if (NOT COMPILER_HAS_RANGES)
     message(FATAL_ERROR "Compiler lacks full support for C++20 ranges.")
 endif(NOT COMPILER_HAS_RANGES)
