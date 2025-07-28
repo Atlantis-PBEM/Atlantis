@@ -12,7 +12,7 @@ if (NOT COMPILER_HAS_RANGES)
 endif(NOT COMPILER_HAS_RANGES)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-    #add_compile_options(-pedantic -Wsign-compare -Wextra -Werror -Wno-switch -Wno-unknown-pragmas -Wstrict-prototypes -Wpointer-arith -Wno-char-subscripts -Wno-long-long)
+    #add_compile_options(-pedantic -Wsign-compare -Wextra -Werror -Wno-switch -Wno-unknown-pragmas -Wpointer-arith -Wno-char-subscripts -Wno-long-long)
     add_compile_options(-g -Wall -Werror -pedantic -Wparentheses)
 elseif(MSVC)
     #add_compile_options(/WX /MP /FC /D_CRT_SECURE_NO_WARNINGS)
@@ -74,19 +74,19 @@ add_executable(${GAME}
 )
 target_link_libraries(${GAME} engine)
 target_include_directories(${GAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-#file (GLOB _RULES_CSS RELATIVE ${GAME}/html *.css)
 set (_RULES_CSS ${GAME}.css)
 message(STATUS "CSS ${GAME}: ${_RULES_CSS}")
 set (_RULES_INTRO ${GAME}_intro.html)
 set (_RULES_OUTPUT ${GAME}.html)
-# file (COPY ${GAME}/${_RULES_INTRO} ${GAME}/html/${_RULES_CSS} DESTINATION .)
 add_custom_command(
     COMMAND ${GAME} ARGS genrules ${CMAKE_SOURCE_DIR}/${GAME}/${_RULES_INTRO} ${_RULES_CSS} ${_RULES_OUTPUT}
     OUTPUT ${GAME}.html
     MAIN_DEPENDENCY ${GAME}
     DEPENDS ${GAME}/${_RULES_INTRO} ${GAME}/html/${_RULES_CSS}
+    COMMENT "Creating ${GAME}.html"
 )
 add_custom_target(${GAME}-rules DEPENDS ${GAME}.html)
+install(FILES ${CMAKE_BINARY_DIR}/${_RULES_OUTPUT} ${GAME}/html/${_RULES_CSS} DESTINATION html/${GAME})
 unset(_RULES_CSS)
 unset(_RULES_INTRO)
 unset(_RULES_OUTPUT)
@@ -110,7 +110,8 @@ add_custom_target(games DEPENDS ${GAMES})
 set(RULE_TARGETS ${GAMES})
 list(TRANSFORM RULE_TARGETS APPEND "-rules")
 
-add_custom_target(rules DEPENDS ${RULE_TARGETS})
+add_custom_target(rules ALL DEPENDS ${RULE_TARGETS})
+install(TARGETS ${GAMES} DESTINATION bin)
 
 file(GLOB TEST_SOURCES unittest/*_test.cpp)
 
