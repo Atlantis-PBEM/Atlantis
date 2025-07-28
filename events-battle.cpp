@@ -6,20 +6,8 @@
 #include <stdexcept>
 #include <sstream>
 #include "strings_util.hpp"
-using namespace std;
 
-BattleFact::BattleFact() {
-    this->attacker = BattleSide();
-    this->defender = BattleSide();
-    this->location = EventLocation();
-    this->fortificationType = -1;
-}
-
-BattleFact::~BattleFact() {
-
-}
-
-const vector<string> ADJECTIVE = {
+static const std::vector<std::string> ADJECTIVE = {
     "A few",
     "Handful",
     "Some",
@@ -30,7 +18,7 @@ const vector<string> ADJECTIVE = {
     "Dozen"
 };
 
-const vector<string> REPORTING = {
+static const std::vector<std::string> REPORTING = {
     "traders",
     "merchants",
     "pilgrims",
@@ -47,7 +35,7 @@ const vector<string> REPORTING = {
     "commoners"
 };
 
-const vector<string> CHANNEL = {
+static const std::vector<std::string> CHANNEL = {
     "are talking",
     "are rumoring",
     "are worried",
@@ -56,7 +44,7 @@ const vector<string> CHANNEL = {
     "are discussing"
 };
 
-const vector<string> BATTLE = {
+static const std::vector<std::string> BATTLE = {
     "an encounter",
     "a fight",
     "a conflict",
@@ -65,7 +53,7 @@ const vector<string> BATTLE = {
     "the battle"
 };
 
-const vector<string> ONE_SIDE = {
+static const std::vector<std::string> ONE_SIDE = {
     "a faction",
     "a rebels",
     "a villans",
@@ -73,14 +61,14 @@ const vector<string> ONE_SIDE = {
     "a partisans"
 };
 
-const vector<string> TWO_SIDES = {
+static const std::vector<std::string> TWO_SIDES = {
     "hostile forces",
     "enemies",
     "two armies",
     "combatants"
 };
 
-const vector<string> HUNTERS = {
+static const std::vector<std::string> HUNTERS = {
     "adventurers",
     "hunters",
     "daredevils",
@@ -88,14 +76,7 @@ const vector<string> HUNTERS = {
     "rangers"
 };
 
-const vector<string> SIZES = {
-    "couple",
-    "few",
-    "several",
-    "many"
-};
-
-const vector<string> ACTION_SUCCESS = {
+static const std::vector<std::string> ACTION_SUCCESS = {
     "slew",
     "murdered",
     "killed",
@@ -108,14 +89,14 @@ const vector<string> ACTION_SUCCESS = {
     "expelled"
 };
 
-const vector<string> ACTION_ATTEMPT = {
+static const std::vector<std::string> ACTION_ATTEMPT = {
     "attacked",
     "ambushed",
     "tried to cast out",
     "tried to expel"
 };
 
-const vector<string> FEAR_NOUN = {
+static const std::vector<std::string> FEAR_NOUN = {
     "terror",
     "fear",
     "anxiety",
@@ -123,15 +104,7 @@ const vector<string> FEAR_NOUN = {
     "dread"
 };
 
-string relativeSize(int size) {
-    if (size < 3) return SIZES[0];
-    if (size < 12) return SIZES[1];
-    if (size < 24) return SIZES[2];
-
-    return SIZES[3];
-}
-
-const int sizeRating(const int size) {
+static constexpr int sizeRating(const int size) {
     if (size <= 100) return 1;
     if (size <= 500) return 2;
     if (size <= 2500) return 3;
@@ -139,7 +112,7 @@ const int sizeRating(const int size) {
     return 5;
 }
 
-const int combinedRating(const int attackerSize, const int defenderSize) {
+static constexpr int combinedRating(const int attackerSize, const int defenderSize) {
     int att = sizeRating(attackerSize);
     int def = sizeRating(defenderSize);
 
@@ -152,7 +125,7 @@ const int combinedRating(const int attackerSize, const int defenderSize) {
     return delta >= 2 ? minRating + 1 : minRating;
 }
 
-const Event cityCapture(BattleFact* fact) {
+static Event cityCapture(BattleFact* fact) {
     std::ostringstream buffer;
 
     if (fact->outcome == BATTLE_WON) {
@@ -189,7 +162,7 @@ const Event cityCapture(BattleFact* fact) {
     };
 }
 
-const Event monsterHunt(BattleFact* fact) {
+static Event monsterHunt(BattleFact* fact) {
     std::ostringstream buffer;
 
     auto mark = fact->location.GetSignificantLandmark();

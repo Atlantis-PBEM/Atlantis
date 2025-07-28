@@ -376,7 +376,7 @@ void AddBattleFact(
 ) {
     if (!Globals->WORLD_EVENTS) return;
 
-    auto fact = new BattleFact();
+    auto fact = new BattleFact;
 
     fact->location = EventLocation::Create(region);
 

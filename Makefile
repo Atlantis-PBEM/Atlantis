@@ -1,8 +1,8 @@
 GAME ?= standard
 
-CPLUS = g++
-CC = gcc
-CFLAGS = -g -I. -I.. -Wall -Werror -std=c++20
+CPLUS ?= g++
+CC ?= gcc
+CFLAGS = -g -I. -I.. -Wall -Werror -std=c++20 -pedantic -Wparentheses -Wpointer-arith -Wignored-qualifiers
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o
 

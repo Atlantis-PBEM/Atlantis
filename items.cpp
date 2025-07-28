@@ -10,7 +10,7 @@
 
 using namespace std;
 
-const int MonType::getAggression() {
+int MonType::getAggression() const {
     int aggression = this->hostile;
     aggression *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
     aggression /= 100;

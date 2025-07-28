@@ -121,9 +121,6 @@ struct EventLocation {
 
 class BattleFact : public FactBase {
 public:
-    BattleFact();
-    ~BattleFact();
-
     void GetEvents(std::list<Event> &events);
 
     EventLocation location;
@@ -131,7 +128,7 @@ public:
     BattleSide defender;
 
     std::string fortification;
-    int fortificationType;
+    int fortificationType = -1;
 
     int outcome;    // BATTLE_LOST, BATTLE_WON, BATTLE_DRAW
 };
