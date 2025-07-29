@@ -12,8 +12,6 @@ using json = nlohmann::json;
 // closure to make the user defined literals and all the other niceness available.
 namespace ut = boost::ut;
 
-using namespace std;
-
 // This suite will test various aspects of the Faction class in isolation.
 ut::suite<"JSON Report"> json_report_suite = []
 {
@@ -25,7 +23,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
 
     helper.setup_reports();
@@ -36,7 +34,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     faction->build_json_report(json_report, &game, nullptr);
 
     // pick some of the data out of the report for checking
-    string data_name = json_report["name"];
+    std::string data_name = json_report["name"];
     auto data_num = json_report["number"];
     auto new_items = json_report["item_reports"].size();
     auto regions = json_report["regions"].size();
@@ -48,8 +46,8 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(skill_reports == 3_ul); // should have exactly 3 skill reports
 
     // Verify that the game date is correct.
-    string expected_month("January");
-    string data_month = json_report["date"]["month"];
+    std::string expected_month("January");
+    std::string data_month = json_report["date"]["month"];
     expect(data_month == expected_month);
 
     // Verify the basic region info is correct.
@@ -70,8 +68,8 @@ ut::suite<"JSON Report"> json_report_suite = []
 
     auto count = json_report["errors"].size();
     expect(count == 1_ul);
-    string error = json_report["errors"][0]["message"];
-    string expected = "This is an error";
+    std::string error = json_report["errors"][0]["message"];
+    std::string expected = "This is an error";
     expect(error == expected);
   };
 
@@ -82,15 +80,15 @@ ut::suite<"JSON Report"> json_report_suite = []
     helper.setup_turn();
 
     Faction *faction = helper.create_faction("Test Faction");
-    for (auto i = 0; i < 1003; i++) faction->error("This is error #" + to_string(i+1));
+    for (auto i = 0; i < 1003; i++) faction->error("This is error #" + std::to_string(i+1));
 
     json json_report;
     faction->build_json_report(json_report, &helper.game_object(), nullptr);
 
     auto count = json_report["errors"].size();
     expect(count == 1001_ul);
-    string error = json_report["errors"][1000]["message"];
-    string expected = "Too many errors!";
+    std::string error = json_report["errors"][1000]["message"];
+    std::string expected = "Too many errors!";
     expect(error == expected);
 
     error = json_report["errors"][999]["message"];
@@ -115,10 +113,10 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(count == 2_ul);
 
     // make sure they are in the right order
-    string event = json_report["events"][0]["message"];
-    string type = json_report["events"][0]["category"];
-    string expected = "This is event 1";
-    string expected_type = "type1";
+    std::string event = json_report["events"][0]["message"];
+    std::string type = json_report["events"][0]["category"];
+    std::string expected = "This is event 1";
+    std::string expected_type = "type1";
     expect(event == expected);
     expect(type == expected_type);
 
@@ -147,12 +145,12 @@ ut::suite<"JSON Report"> json_report_suite = []
     json json_report;
     region->build_json_report(json_report, faction, helper.get_month(), regions);
 
-    string expected_provice("Testing Wilds"); // name given in the unit test setup
-    string province = json_report["province"];
+    std::string expected_provice("Testing Wilds"); // name given in the unit test setup
+    std::string province = json_report["province"];
     expect(province == expected_provice);
 
-    string expected_terrain("plain"); // should be the terrain set up in the unit test
-    string terrain = json_report["terrain"];
+    std::string expected_terrain("plain"); // should be the terrain set up in the unit test
+    std::string terrain = json_report["terrain"];
     expect(terrain == expected_terrain);
 
     auto x = json_report["coordinates"]["x"];
@@ -162,16 +160,16 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(y == 0_i);
     expect(z == 0_i);
 
-    string expected_label("surface");
-    string label = json_report["coordinates"]["label"];
+    std::string expected_label("surface");
+    std::string label = json_report["coordinates"]["label"];
     expect(label == expected_label);
 
-    string settlement_name = json_report["settlement"]["name"];
-    string expected_settlement_name("Basictown"); // name given in the unit test setup
+    std::string settlement_name = json_report["settlement"]["name"];
+    std::string expected_settlement_name("Basictown"); // name given in the unit test setup
     expect(settlement_name == expected_settlement_name);
 
-    string settlement_size = json_report["settlement"]["size"];
-    string expected_settlement_size("city");
+    std::string settlement_size = json_report["settlement"]["size"];
+    std::string expected_settlement_size("city");
     expect(settlement_size == expected_settlement_size);
 
     auto wages = json_report["wages"];
@@ -274,7 +272,7 @@ ut::suite<"JSON Report"> json_report_suite = []
     Faction *faction = helper.create_faction("Test Faction");
     Unit *leader = helper.get_first_unit(faction);
     leader->set_name("My Leader");
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "@work\n";
@@ -289,15 +287,15 @@ ut::suite<"JSON Report"> json_report_suite = []
     json json_unit_report;
     leader->build_json_report(json_unit_report, -1, 1, 1, 1, AttitudeType::ALLY, 1);
 
-    string name = json_unit_report["name"];
-    string expected_name = "My Leader";
+    std::string name = json_unit_report["name"];
+    std::string expected_name = "My Leader";
     expect(name == expected_name);
 
     auto id = json_unit_report["number"];
     expect(id == 2_i);
 
-    string faction_name = json_unit_report["faction"]["name"];
-    string expected_faction_name = "Test Faction";
+    std::string faction_name = json_unit_report["faction"]["name"];
+    std::string expected_faction_name = "Test Faction";
     expect(faction_name == expected_faction_name);
 
     auto faction_id = json_unit_report["faction"]["number"];
@@ -323,8 +321,8 @@ ut::suite<"JSON Report"> json_report_suite = []
     expect(work_order == expected_work_order);
 
     // verify the turn order
-    string turn_order = json_unit_report["orders"][1]["order"];
-    string expected_turn_order = "TURN";
+    std::string turn_order = json_unit_report["orders"][1]["order"];
+    std::string expected_turn_order = "TURN";
     expect(turn_order == expected_turn_order);
     auto turn_orders_count = json_unit_report["orders"][1]["nested"].size();
     expect(turn_orders_count == 2_ul);

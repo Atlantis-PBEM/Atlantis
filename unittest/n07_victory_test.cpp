@@ -8,7 +8,6 @@
 // using namespace boost::ut; here. Instead, we alias it, and then use the alias inside the
 // closure to make the user defined literals and all the other niceness available.
 namespace ut = boost::ut;
-using namespace std;
 
 // This suite will test various aspects of the Faction class in isolation.
 ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
@@ -23,7 +22,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     Unit *leader = helper.get_first_unit(faction);
     ARegion *region = helper.get_region(0, 0, 0);
@@ -34,7 +33,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     helper.create_building(region, nullptr, O_ENTITY_CAGE);
 
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 3\n";
     ss << "sacrifice 10 lead\n";
@@ -71,7 +70,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     Unit *leader = helper.get_first_unit(faction);
     ARegion *region = helper.get_region(0, 0, 0);
@@ -82,7 +81,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     helper.create_building(region, nullptr, O_ENTITY_CAGE);
 
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 3\n";
     ss << "sacrifice 5 lead\n";
@@ -117,7 +116,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     ARegion *region = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
@@ -126,7 +125,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
 
     // Try to move the unit into the region with the ritual altar.
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move SE\n";
@@ -158,7 +157,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     ARegion *region = helper.get_region(1, 1, 0);
     Unit *leader = helper.get_first_unit(faction);
@@ -170,7 +169,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
 
     // Try to teleport the unit into the region with the ritual altar.
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "cast Teleportation REGION 1 1\n";
@@ -204,7 +203,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(1, 1, 0);
@@ -215,7 +214,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
 
     // Try to move the unit into the region with the ritual altar.
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move SE\n";
@@ -249,7 +248,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(1, 1, 0);
@@ -287,7 +286,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(1, 1, 0);
@@ -298,7 +297,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
 
     // Try to move the unit into the region with the ritual altar.
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move SE\n";
@@ -337,7 +336,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
@@ -348,7 +347,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, nullptr, O_RITUAL_ALTAR);
 
     // Try to move the unit into the region with the ritual altar.
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move SE\n";
@@ -387,7 +386,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     //ARegion *region = helper.get_region(0, 0, 0);
@@ -395,7 +394,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     leader->set_name("My Leader");
 
     // Try to use annihilate
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "annihilate region 1 1 0\n";
@@ -427,7 +426,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
@@ -437,7 +436,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, leader, O_ACTIVE_MONOLITH);
 
     // Try to use annihilate
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "annihilate region 0 0 0\n";
@@ -471,7 +470,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
@@ -486,7 +485,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, second, O_TOWER);
 
     // Try to use annihilate
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move se 1\n";
@@ -562,7 +561,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     json rulesetData = { {"allowed_annihilates", 2}};
     helper.set_ruleset_specific_data(rulesetData);
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
@@ -577,7 +576,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, second, O_TOWER);
 
     // Try to use annihilate
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move se 1\n";
@@ -657,7 +656,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     json rulesetData = { {"allowed_annihilates", 2}, {"random_annihilates", true}};
     helper.set_ruleset_specific_data(rulesetData);
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
@@ -672,7 +671,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, second, O_TOWER);
 
     // Try to use annihilate
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move se 1\n";
@@ -751,7 +750,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     json rulesetData = { {"allowed_annihilates", 2}, {"random_annihilates", true}};
     helper.set_ruleset_specific_data(rulesetData);
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
@@ -766,7 +765,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, second, O_TOWER);
 
     // Try to use annihilate
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move se 1\n";
@@ -846,7 +845,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     json rulesetData = { {"allowed_annihilates", 2}, {"random_annihilates", true}};
     helper.set_ruleset_specific_data(rulesetData);
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
     // Since this is such a tightly defined world, we know this is legal
     ARegion *region = helper.get_region(0, 0, 0);
@@ -861,7 +860,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     helper.create_building(region, second, O_TOWER);
 
     // Try to use annihilate
-    stringstream ss;
+    std::stringstream ss;
     ss << "#atlantis 3\n";
     ss << "unit 2\n";
     ss << "move se 1\n";

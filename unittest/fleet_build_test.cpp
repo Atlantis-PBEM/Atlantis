@@ -9,8 +9,6 @@ using json = nlohmann::json;
 
 namespace ut = boost::ut;
 
-using namespace std;
-
 // This suite will test various aspects of the Build Order functionality.
 ut::suite<"Fleet Builds"> fleet_build_suite = [] {
     using namespace ut;
@@ -19,7 +17,7 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         UnitTestHelper helper;
         helper.initialize_game();
         helper.setup_turn();
-        string name("Test Faction");
+        std::string name("Test Faction");
         Faction *faction = helper.create_faction(name);
         Unit *leader = helper.get_first_unit(faction);
         Unit *unit = helper.create_unit(faction, leader->object->region);
@@ -41,7 +39,7 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         unit->object->flying = false;
 
         // Now set up some build orders
-        stringstream ss;
+        std::stringstream ss;
         ss << "#atlantis 3 \"mypassword\"\n";
         ss << "unit 2\n";
         ss << "build raft\n"; // this should create a new fleet with a raft and move the unit into it.
@@ -69,7 +67,7 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         helper.initialize_game();
         helper.setup_turn();
         Globals->NEW_SHIP_JOINS_FLEET_BEHAVIOR  = GameDefs::NewShipJoinsFleetBehavior::ONLY_FLYING_CROSS_JOIN;
-        string name("Test Faction");
+        std::string name("Test Faction");
         Faction *faction = helper.create_faction(name);
         Unit *leader = helper.get_first_unit(faction);
         Unit *unit = helper.create_unit(faction, leader->object->region);
@@ -91,7 +89,7 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         unit->object->flying = false;
 
         // Now set up some build orders
-        stringstream ss;
+        std::stringstream ss;
         ss << "#atlantis 3 \"mypassword\"\n";
         ss << "unit 2\n";
         ss << "build raft\n"; // this should create a new fleet with a raft and move the unit into it.
@@ -121,7 +119,7 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         helper.initialize_game();
         helper.setup_turn();
         Globals->NEW_SHIP_JOINS_FLEET_BEHAVIOR  = GameDefs::NewShipJoinsFleetBehavior::ALL_CROSS_JOIN;
-        string name("Test Faction");
+        std::string name("Test Faction");
         Faction *faction = helper.create_faction(name);
         Unit *leader = helper.get_first_unit(faction);
         Unit *unit = helper.create_unit(faction, leader->object->region);
@@ -143,7 +141,7 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         unit->object->flying = false;
 
         // Now set up some build orders
-        stringstream ss;
+        std::stringstream ss;
         ss << "#atlantis 3 \"mypassword\"\n";
         ss << "unit 2\n";
         ss << "build raft\n"; // this should join the raft to the flying fleet and make it non-flying

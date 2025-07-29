@@ -9,8 +9,6 @@ using json = nlohmann::json;
 
 namespace ut = boost::ut;
 
-using namespace std;
-
 // This suite will test various aspects of the Build Order functionality.
 ut::suite<"Build Order"> build_order_suite = [] {
     using namespace ut;
@@ -20,7 +18,7 @@ ut::suite<"Build Order"> build_order_suite = [] {
         UnitTestHelper helper;
         helper.initialize_game();
         helper.setup_turn();
-        string name("Test Faction");
+        std::string name("Test Faction");
         Faction *faction = helper.create_faction(name);
         Unit *leader = helper.get_first_unit(faction);
         Unit *unit = helper.create_unit(faction, leader->object->region);
@@ -43,7 +41,7 @@ ut::suite<"Build Order"> build_order_suite = [] {
         unit4->object->incomplete = 10; // Set the tower to be incomplete for testin
 
         // Test a simple build order
-        stringstream ss;
+        std::stringstream ss;
         ss << "#atlantis 3 \"mypassword\"\n";
         ss << "unit 2\n";
         ss << "build tower\n"; // this should start a new tower and not carry over to the next month orders

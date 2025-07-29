@@ -5,8 +5,6 @@
 #include "gamedata.h"
 #include "rng.hpp"
 
-using namespace std;
-
 Production::Production()
 {
     itemtype = -1;
@@ -27,7 +25,7 @@ Production::Production(int it, int maxamt)
     skill = lookup_skill(ItemDefs[it].pSkill);
 }
 
-void Production::write_out(ostream& f)
+void Production::write_out(std::ostream& f)
 {
     f << (itemtype == -1 ? "NO_ITEM" : ItemDefs[itemtype].abr) << '\n';
     f << amount << '\n';
@@ -38,18 +36,18 @@ void Production::write_out(ostream& f)
     f << productivity << '\n';
 }
 
-void Production::read_in(istream& f)
+void Production::read_in(std::istream& f)
 {
     std::string temp;
 
-    f >> ws >> temp;
+    f >> std::ws >> temp;
     itemtype = lookup_item(temp);
 
     f >> amount;
     f >> baseamount;
 
     if (itemtype == I_SILVER)
-        f >> ws >> temp;
+        f >> std::ws >> temp;
     else
         temp = ItemDefs[itemtype].pSkill;
 
@@ -58,6 +56,6 @@ void Production::read_in(istream& f)
     f >> productivity;
 }
 
-string Production::write_report() {
+std::string Production::write_report() {
     return item_string(itemtype, amount);
 }

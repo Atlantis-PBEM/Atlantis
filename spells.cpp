@@ -3,8 +3,6 @@
 
 #include "string_parser.hpp"
 
-using namespace std;
-
 static int RandomiseSummonAmount(int num)
 {
     int retval = 0;
@@ -580,7 +578,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
     }
 
     if (u->GetSkill(u->castorders->spell) < u->castorders->level || u->castorders->level == 0) {
-        u->error(string("CAST '") + SkillDefs[u->castorders->spell].name + "': Skill level isn't that high.");
+        u->error(std::string("CAST '") + SkillDefs[u->castorders->spell].name + "': Skill level isn't that high.");
         return;
     }
 
@@ -818,7 +816,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
         return 0;
     }
 
-    string temp = "Casts Mind Reading: " + tar->name + ", " + tar->faction->name + ".";
+    std::string temp = "Casts Mind Reading: " + tar->name + ", " + tar->faction->name + ".";
 
     if (level >= 3) {
         temp += tar->items.report(2,5,0) + ". Skills: ";
@@ -860,7 +858,7 @@ int Game::RunEnchant(ARegion *r,Unit *u, int skill, int item)
 
     // Add the created items
     u->items.SetNum(item, u->items.GetNum(item) + num);
-    u->event("Enchants " + to_string(num) + " " + ItemDefs[item].names + ".", "spell");
+    u->event("Enchants " + std::to_string(num) + " " + ItemDefs[item].names + ".", "spell");
     if (num == 0) return 0;
     return 1;
 }
@@ -1178,10 +1176,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
     int type = regions.GetRegionArray(r->zloc)->levelType;
 
     if (type != ARegionArray::LEVEL_SURFACE) {
-        std::string error("CAST: Bird Lore may only be cast on the surface of ");
-        error += Globals->WORLD_NAME;
-        error += ".";
-        u->error(error);
+        u->error("CAST: Bird Lore may only be cast on the surface of " + Globals->WORLD_NAME + ".");
         return 0;
     }
 
@@ -1393,7 +1388,7 @@ int Game::RunEarthLore(ARegion *r,Unit *u)
     int amt = r->Wages() * level * 2 / 10;
 
     u->items.SetNum(I_SILVER,u->items.GetNum(I_SILVER) + amt);
-    u->event("Casts Earth Lore, raising " + to_string(amt) + " silver.", "spell");
+    u->event("Casts Earth Lore, raising " + std::to_string(amt) + " silver.", "spell");
     return 1;
 }
 
@@ -1416,14 +1411,14 @@ int Game::RunPhantasmalEntertainment(ARegion *r,Unit *u)
     }
 
     u->items.SetNum(I_SILVER, u->items.GetNum(I_SILVER) + amt);
-    u->event("Casts Phantasmal Entertainment, raising " + to_string(amt) + " silver.", "spell");
+    u->event("Casts Phantasmal Entertainment, raising " + std::to_string(amt) + " silver.", "spell");
     return 1;
 }
 
 int Game::RunClearSkies(ARegion *r, Unit *u)
 {
     ARegion *tar = r;
-    string temp = "Casts Clear Skies";
+    std::string temp = "Casts Clear Skies";
     int val;
 
     CastRegionOrder *order = dynamic_cast<CastRegionOrder *>(u->castorders);
@@ -1458,7 +1453,7 @@ int Game::RunWeatherLore(ARegion *r, Unit *u)
     if (level >= 5) months = 12;
     else if (level >= 3) months = 6;
 
-    string temp = "Casts Weather Lore on " + tar->short_print() + ". It will be ";
+    std::string temp = "Casts Weather Lore on " + tar->short_print() + ". It will be ";
     int weather, futuremonth;
     for (i = 0; i <= months; i++) {
         futuremonth = (month + i)%12;
@@ -1508,14 +1503,14 @@ int Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
     u->event("Casts Gate Lore, detecting nearby Gates:", "spell");
     int found = 0;
     if ((r->gate) && (!r->gateopen)) {
-        u->event("Identified local gate number " + to_string(r->gate) + " in " + r->short_print() + ".", "spell");
+        u->event("Identified local gate number " + std::to_string(r->gate) + " in " + r->short_print() + ".", "spell");
     }
     for (int i=0; i<NDIRS; i++) {
         ARegion *tar = r->neighbors[i];
         if (tar) {
             if (tar->gate) {
                 if (Globals->DETECT_GATE_NUMBERS) {
-                    u->event(tar->print() + " contains Gate " + to_string(tar->gate) + ".", "spell");
+                    u->event(tar->print() + " contains Gate " + std::to_string(tar->gate) + ".", "spell");
                 } else {
                     u->event(tar->print() + " contains a Gate.", "spell");
                 }
@@ -1681,7 +1676,8 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
             if (!tar->gateopen) good = 0;
         } while (!good);
 
-        string jump_text = "Casts Random Gate Jump. Capacity: " + to_string(weight) + "/" + to_string(maxweight) + ".";
+        std::string jump_text = "Casts Random Gate Jump. Capacity: " +
+            std::to_string(weight) + "/" + std::to_string(maxweight) + ".";
         u->event(jump_text, "spell");
     } else {
         tar = regions.FindGate(order->gate);
@@ -1694,12 +1690,13 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
             return 0;
         }
 
-        string jump_text = "Casts Gate Jump. Capacity: " + to_string(weight) + "/" + to_string(maxweight) + ".";
+        std::string jump_text = "Casts Gate Jump. Capacity: " +
+            std::to_string(weight) + "/" + std::to_string(maxweight) + ".";
         u->event(jump_text, "spell");
     }
 
     int comma = 0;
-    string unitlist;
+    std::string unitlist;
     for(const auto id : order->units) {
         Location *loc = r->GetLocation(id, u->faction->num);
         if (loc) {
@@ -1712,7 +1709,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
             if (loc->unit->GetAttitude(r,u) < AttitudeType::ALLY) {
                 u->error("CAST: Unit is not allied.");
             } else {
-                unitlist += (comma ? ", " : "") + to_string(loc->unit->num);
+                unitlist += (comma ? ", " : "") + std::to_string(loc->unit->num);
                 comma = 1;
                 loc->unit->DiscardUnfinishedShips();
                 loc->unit->event("Is teleported through a Gate to " + tar->print() + " by " + u->name + ".", "spell");

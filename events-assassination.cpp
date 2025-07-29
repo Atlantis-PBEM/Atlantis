@@ -7,8 +7,6 @@
 #include "rng.hpp"
 #include "string_filters.hpp"
 
-using namespace std;
-
 AssassinationFact::AssassinationFact() {
     this->location = EventLocation();
 }
@@ -17,7 +15,7 @@ AssassinationFact::~AssassinationFact() {
 
 }
 
-const vector<string> SENTIMENT = {
+const std::vector<std::string> SENTIMENT = {
     "fearsome",
     "alarming",
     "horrifying",
@@ -25,14 +23,14 @@ const vector<string> SENTIMENT = {
     "worrisome"
 };
 
-const vector<string> LOCALS = {
+const std::vector<std::string> LOCALS = {
     "citizens",
     "inhabitants",
     "locals",
     "commoners"
 };
 
-const vector<string> FEELING = {
+const std::vector<std::string> FEELING = {
     "shocked",
     "stunned",
     "horrified",
