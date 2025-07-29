@@ -7,8 +7,6 @@
 #include "items.h"
 #include "strings_util.hpp"
 
-using namespace std;
-
 enum class StatsCategory {
     ROUND,
     BATTLE
@@ -78,12 +76,15 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
             int succeeded = att.attacks - att.failed;
             int reachedTarget = succeeded - att.missed;
 
-            s += ", attacked " + to_string(succeeded) + " of " + to_string(att.attacks) + " " + strings::plural(att.attacks, "time", "times");
-            s += ", " + to_string(reachedTarget) + " successful " + strings::plural(reachedTarget, "attack", "attacks");
-            s += ", " + to_string(att.blocked) + " blocked by armor";
-            s += ", " + to_string(att.hit) + " " + strings::plural(att.killed, "hit", "hits");
-            s += ", " + to_string(att.damage) + " total damage";
-            s += ", and killed " + to_string(att.killed)  + " " + strings::plural(att.killed, "enemy", "enemies") + ".";
+            s += ", attacked " + std::to_string(succeeded) + " of " + std::to_string(att.attacks) + " " +
+                strings::plural(att.attacks, "time", "times");
+            s += ", " + std::to_string(reachedTarget) + " successful " +
+                strings::plural(reachedTarget, "attack", "attacks");
+            s += ", " + std::to_string(att.blocked) + " blocked by armor";
+            s += ", " + std::to_string(att.hit) + " " + strings::plural(att.killed, "hit", "hits");
+            s += ", " + std::to_string(att.damage) + " total damage";
+            s += ", and killed " + std::to_string(att.killed)  + " " +
+                strings::plural(att.killed, "enemy", "enemies") + ".";
 
             battle.AddLine(s);
         }
@@ -239,7 +240,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 void Battle::NormalRound(int round,Army * a,Army * b)
 {
     /* Write round header */
-    AddLine("Round " + to_string(round) + ":");
+    AddLine("Round " + std::to_string(round) + ":");
 
     if (a->tactics_bonus > b->tactics_bonus) {
         AddLine(a->leader->name + " tactics bonus " + std::to_string(a->tactics_bonus) + ".");
@@ -322,7 +323,7 @@ void Battle::NormalRound(int round,Army * a,Army * b)
 
 void Battle::GetSpoils(std::list<Location *>& losers, ItemList& spoils, int ass)
 {
-    string quest_rewards;
+    std::string quest_rewards;
 
     for(const auto l : losers) {
         Unit *u = l->unit;

@@ -8,8 +8,6 @@
 #include <ranges>
 #include <cmath>
 
-using namespace std;
-
 int MonType::getAggression() const {
     int aggression = this->hostile;
     aggression *= Globals->MONSTER_ADVANCE_HOSTILE_PERCENT;
@@ -186,9 +184,9 @@ int parse_transportable_item(const parser::token& token, int flags)
     return item;
 }
 
-string item_string(int type, int num, int flags)
+std::string item_string(int type, int num, int flags)
 {
-    string temp;
+    std::string temp;
     if (num == 1) {
         if (flags & FULLNUM)
             temp += std::to_string(num) + " ";
@@ -1351,7 +1349,7 @@ std::string Item::report(bool see_illusions)
     return ret;
 }
 
-void Item::Writeout(ostream& f)
+void Item::Writeout(std::ostream& f)
 {
     if (type != -1) {
         f << num << " ";
@@ -1361,20 +1359,20 @@ void Item::Writeout(ostream& f)
         f << "-1 NO_ITEM\n";
 }
 
-void Item::Readin(istream &f)
+void Item::Readin(std::istream &f)
 {
     std::string temp;
-    f >> ws >> num >> temp;
+    f >> std::ws >> num >> temp;
     type = lookup_item(temp);
 }
 
-void ItemList::Writeout(ostream& f)
+void ItemList::Writeout(std::ostream& f)
 {
     f << size() << "\n";
     for(auto i : items) i->Writeout(f);
 }
 
-void ItemList::Readin(istream &f)
+void ItemList::Readin(std::istream &f)
 {
     int i;
     f >> i;

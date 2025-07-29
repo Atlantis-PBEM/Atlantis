@@ -271,7 +271,7 @@ class ARegion
         int num;
         int type;
         int buildingseq;
-        int weather;
+        int weather = W_NORMAL;
         int gate;
         int gatemonth;
         int gateopen;
@@ -288,11 +288,11 @@ class ARegion
         int habitat;
         int development;
         int maxdevelopment;
-        int elevation;
-        int humidity;
-        int temperature;
-        int vegetation;
-        int culture;
+        int elevation = -1;
+        int humidity = -1;
+        int temperature = -1;
+        int vegetation = -1;
+        int culture = -1;
         // migration origins
         std::list<ARegion *> migfrom;
         // mid-way migration development
@@ -366,7 +366,7 @@ class ARegionArray
 
         int x;
         int y;
-        ARegion **regions;
+        ARegion **regions = nullptr;
         std::string strName;
 
         enum {
@@ -424,7 +424,6 @@ class ARegionList
     public:
         using iterator = typename std::vector<ARegion *>::iterator;
 
-        ARegionList();
         ~ARegionList();
 
         ARegion *GetRegion(int);
@@ -446,9 +445,9 @@ class ARegionList
         ARegionArray *GetRegionArray(int level);
         ARegionArray *get_first_region_array_of_type(int type);
 
-        int numberofgates;
-        int numLevels;
-        ARegionArray **pRegionArrays;
+        int numberofgates = 0;
+        int numLevels = 0;
+        ARegionArray **pRegionArrays = nullptr;
 
         inline iterator begin() { return regions.begin(); }
         inline iterator end() { return regions.end(); }

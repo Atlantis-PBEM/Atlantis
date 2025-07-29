@@ -6,8 +6,6 @@
 #include <iterator>
 #include <memory>
 
-using namespace std;
-
 #define MINIMUM_ACTIVE_QUESTS 5
 #define MAXIMUM_ACTIVE_QUESTS 20
 #define QUEST_EXPLORATION_PERCENT 30
@@ -114,13 +112,13 @@ static void CreateQuest(ARegionList& regions, int monfaction)
     int d, count, temple, i, j, clash, reward_count;
     ARegion *r;
     std::string rname;
-    map <string, int> temples;
-    map <string, int>::iterator it;
-    string stlstr;
+    std::map <std::string, int> temples;
+    std::map <std::string, int>::iterator it;
+    std::string stlstr;
     int destprobs[MAX_DESTINATIONS] = { 0, 0, 80, 20, 0 };
     int destinations[MAX_DESTINATIONS];
-    string destnames[MAX_DESTINATIONS];
-    set<string> intersection;
+    std::string destnames[MAX_DESTINATIONS];
+    std::set<std::string> intersection;
 
     std::shared_ptr<Quest> q = std::make_shared<Quest>();
     q->type = -1;
@@ -342,14 +340,13 @@ static void CreateQuest(ARegionList& regions, int monfaction)
             for(const auto& q2: quests) {
                 if (q2->type == Quest::VISIT && q->building == q2->building) {
                     intersection.clear();
-                    set_intersection(
+                    std::set_intersection(
                         q->destinations.begin(),
                         q->destinations.end(),
                         q2->destinations.begin(),
                         q2->destinations.end(),
-                        inserter(intersection,
-                            intersection.begin()),
-                        less<string>()
+                        std::inserter(intersection, intersection.begin()),
+                        std::less<std::string>()
                     );
                     if (intersection.size() > 0)
                         q->type = -1;
@@ -521,11 +518,11 @@ Faction *Game::CheckVictory()
     Object *o;
     Location *l;
     std::string message, times, temp;
-    map <string, int> vRegions, uvRegions;
-    map <string, int>::iterator it;
-    string stlstr;
-    set<string> intersection, un;
-    set<string>::iterator it2;
+    std::map <std::string, int> vRegions, uvRegions;
+    std::map <std::string, int>::iterator it;
+    std::string stlstr;
+    std::set<std::string> intersection, un;
+    std::set<std::string>::iterator it2;
     Faction *winner = nullptr;
 
     for(const auto& q: quests) {
@@ -551,11 +548,11 @@ Faction *Game::CheckVictory()
         for(const auto o : r->objects) {
             for(const auto u : o->units) {
                 intersection.clear();
-                set_intersection(
+                std::set_intersection(
                     u->visited.begin(), u->visited.end(),
                     un.begin(), un.end(),
-                    inserter(intersection, intersection.begin()),
-                    less<string>()
+                    std::inserter(intersection, intersection.begin()),
+                    std::less<std::string>()
                 );
                 u->visited = intersection;
             }
@@ -816,16 +813,16 @@ Faction *Game::CheckVictory()
 
             total_cities++;
 
-            string name = r->town->name;
-            string possible_faction = name.substr(0, name.find_first_of(" \t\n"));
+            std::string name = r->town->name;
+            std::string possible_faction = name.substr(0, name.find_first_of(" \t\n"));
             // The first word of the name was not all numeric, don't count for anyone
-            if (!all_of(
+            if (!std::all_of(
                 possible_faction.begin(),
                 possible_faction.end(),
                 [](unsigned char ch){ return std::isdigit(ch); }
             )) continue;
             // Now that we know it's all numeric, convert it to an int
-            int faction_id = stoi(possible_faction);
+            int faction_id = std::stoi(possible_faction);
 
             // Make sure it's a valid faction
             Faction *f = GetFaction(factions, faction_id);
@@ -840,7 +837,7 @@ Faction *Game::CheckVictory()
         }
 
         // Set up the voting result to be reported if we are far enough in
-        string message = "Voting results: \n";
+        std::string message = "Voting results: \n";
 
         int max_vote = -1;
         bool tie = false;
@@ -855,7 +852,7 @@ Faction *Game::CheckVictory()
                 tie = true;
                 maxFaction = nullptr;
             }
-            message += "Faction " + f->name + " has " + to_string(vote.second) + " votes.\n";
+            message += "Faction " + f->name + " has " + std::to_string(vote.second) + " votes.\n";
         }
 
         // See if we have enough votes to even report the info.  Since a win requires 50% + 1, we can start reporting
@@ -866,13 +863,14 @@ Faction *Game::CheckVictory()
                 winner = maxFaction;
                 message += "\n" + winner->name + " has enough votes and has won the game!";
             } else {
-                int percent = floor((max_vote * 100) / total_cities);
+                int percent = std::floor((max_vote * 100) / total_cities);
                 if (tie) {
                     message += "\nThere is a tie for the most votes with multiple factions having ";
                 } else {
                     message += "\nThe current leader is " + maxFaction->name + " with ";
                 }
-                message += to_string(max_vote) + "/" + to_string(total_cities) + " votes (" + to_string(percent) + "%).";
+                message += std::to_string(max_vote) + "/" + std::to_string(total_cities) +
+                    " votes (" + std::to_string(percent) + "%).";
             }
             write_times_article(message);
         }

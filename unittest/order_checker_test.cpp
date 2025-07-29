@@ -12,8 +12,6 @@ using json = nlohmann::json;
 // closure to make the user defined literals and all the other niceness available.
 namespace ut = boost::ut;
 
-using namespace std;
-
 // This suite will test various aspects of the Faction class in isolation.
 ut::suite<"Order Checker"> order_checker_suite = [] {
     using namespace ut;
@@ -23,21 +21,21 @@ ut::suite<"Order Checker"> order_checker_suite = [] {
         helper.initialize_game();
         helper.setup_turn();
 
-        string name("Test Faction");
+        std::string name("Test Faction");
         Faction *faction = helper.create_faction(name);
         faction->password = "mypassword";
 
-        stringstream ss;
+        std::stringstream ss;
         ss << "#atlantis 3 \"mypassword\"\n";
         ss << "unit 2\n";
         ss << "work\n";
 
-        stringstream ss2;
+        std::stringstream ss2;
         orders_check checker(ss2);
 
         helper.parse_orders(faction->num, ss, &checker);
         expect(checker.numerrors == 0_i);
-        expect(ss2.str().find("No errors found.\n") != string::npos);
+        expect(ss2.str().find("No errors found.\n") != std::string::npos);
     };
 
     "Order checker reports an error for incorrect password"_test = [] {
@@ -45,21 +43,21 @@ ut::suite<"Order Checker"> order_checker_suite = [] {
         helper.initialize_game();
         helper.setup_turn();
 
-        string name("Test Faction");
+        std::string name("Test Faction");
         Faction *faction = helper.create_faction(name);
         faction->password = "mypassword";
 
-        stringstream ss;
+        std::stringstream ss;
         ss << "#atlantis 3 \"wrongpassword\"\n";
         ss << "unit 2\n";
         ss << "work\n";
 
-        stringstream ss2;
+        std::stringstream ss2;
         orders_check checker(ss2);
 
         helper.parse_orders(faction->num, ss, &checker);
         expect(checker.numerrors == 1_i);
-        expect(ss2.str().find("No errors found.") == string::npos);
-        expect(ss2.str().find("*** Error: Incorrect password on #atlantis line. ***\n") != string::npos);
+        expect(ss2.str().find("No errors found.") == std::string::npos);
+        expect(ss2.str().find("*** Error: Incorrect password on #atlantis line. ***\n") != std::string::npos);
     };
 };

@@ -12,8 +12,6 @@ using json = nlohmann::json;
 // closure to make the user defined literals and all the other niceness available.
 namespace ut = boost::ut;
 
-using namespace std;
-
 // This suite will test various aspects of the Faction class in isolation.
 ut::suite<"Name Sanitization"> name_sanitization_suite = []
 {
@@ -25,20 +23,20 @@ ut::suite<"Name Sanitization"> name_sanitization_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction");
+    std::string name("Test Faction");
     Faction *faction = helper.create_faction(name);
 
-    string expected_name("Test Faction (3)");
-    string actual_name(faction->name);
+    std::string expected_name("Test Faction (3)");
+    std::string actual_name(faction->name);
     expect(actual_name == expected_name);
 
-    stringstream ss;
+    std::stringstream ss;
     faction->Writeout(ss);
 
     Faction faction2;
     faction2.Readin(ss);
 
-    string actual_name2(faction2.name);
+    std::string actual_name2(faction2.name);
     expect(actual_name2 == expected_name);
   };
 
@@ -48,23 +46,23 @@ ut::suite<"Name Sanitization"> name_sanitization_suite = []
     helper.initialize_game();
     helper.setup_turn();
 
-    string name("Test Faction (3)");
+    std::string name("Test Faction (3)");
     Faction *faction = helper.create_faction(name);
     // Create an unsanitized name that we want to make sure gets sanitized.
     faction->set_name("Test Faction [];boy (3)", false);
 
-    string expected_name("Test Faction [];boy (3)");
-    string actual_name(faction->name);
+    std::string expected_name("Test Faction [];boy (3)");
+    std::string actual_name(faction->name);
     expect(actual_name == expected_name);
 
-    stringstream ss;
+    std::stringstream ss;
     faction->Writeout(ss);
 
     Faction faction2;
     faction2.Readin(ss);
 
-    string sanitized_name("Test Faction boy (3)");
-    string actual_name2(faction2.name);
+    std::string sanitized_name("Test Faction boy (3)");
+    std::string actual_name2(faction2.name);
     expect(actual_name2 == sanitized_name);
   };
 };

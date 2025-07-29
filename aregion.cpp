@@ -791,7 +791,7 @@ Unit *ARegion::GetUnit(int num)
 {
     for(const auto obj : objects) {
         Unit *u = obj->GetUnit(num);
-        if (u) return(u);
+        if (u) return u;
     }
     return nullptr;
 }
@@ -815,7 +815,7 @@ Unit *ARegion::GetUnitAlias(int alias, int faction)
 {
     for(const auto obj : objects) {
         Unit *u = obj->GetUnitAlias(alias, faction);
-        if (u) return(u);
+        if (u) return u;
     }
     return nullptr;
 }
@@ -852,13 +852,13 @@ void ARegion::deduplicate_unit_list(std::list<UnitId *>& list, int factionid)
 
 Location *ARegionList::GetUnitId(UnitId *id, int faction, ARegion *cur)
 {
-    Location *retval = NULL;
+    Location *retval = nullptr;
     // Check current region first
     retval = cur->GetLocation(id, faction);
     if (retval) return retval;
 
     // No? We must be looking for an existing unit.
-    if (!id->unitnum) return NULL;
+    if (!id->unitnum) return nullptr;
 
     return this->FindUnit(id->unitnum);
 }
@@ -872,7 +872,7 @@ bool ARegion::Present(Faction *f)
     return false;
 }
 
-std::set<Faction *>ARegion::PresentFactions()
+std::set<Faction *> ARegion::PresentFactions()
 {
     std::set<Faction *> facs;
     for(const auto obj : objects) {
@@ -1598,13 +1598,6 @@ int ARegion::ResolveFleetAlias(int alias)
     return f->second;
 }
 
-ARegionList::ARegionList()
-{
-    pRegionArrays = 0;
-    numLevels = 0;
-    numberofgates = 0;
-}
-
 ARegionList::~ARegionList()
 {
     if (pRegionArrays) {
@@ -1613,7 +1606,7 @@ ARegionList::~ARegionList()
             delete pRegionArrays[i];
         }
 
-        delete pRegionArrays;
+        delete [] pRegionArrays;
     }
     std::for_each(regions.begin(), regions.end(), [](ARegion *r) { delete r; });
     regions.clear();
@@ -2313,7 +2306,7 @@ ARegionArray::ARegionArray(int xx, int yy)
     strName = "";
 
     int i;
-    for (i = 0; i < x * y / 2; i++) regions[i] = 0;
+    for (i = 0; i < x * y / 2; i++) regions[i] = nullptr;
 }
 
 ARegionArray::~ARegionArray()
@@ -2330,7 +2323,7 @@ ARegion *ARegionArray::GetRegion(int xx, int yy)
 {
     xx = (xx + x) % x;
     yy = (yy + y) % y;
-    if ((xx + yy) % 2) return(0);
+    if ((xx + yy) % 2) return nullptr;
     return(regions[xx / 2 + yy * x / 2]);
 }
 

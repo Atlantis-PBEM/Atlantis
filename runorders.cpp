@@ -2,8 +2,6 @@
 #include "gamedata.h"
 #include "quests.h"
 
-using namespace std;
-
 void Game::RunOrders()
 {
     //
@@ -243,7 +241,8 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
         }
     }
     if (!succ) {
-        string temp = u->name + " is caught attempting to assassinate " + tar->name + " in " + r->short_print() + ".";
+        std::string temp = u->name + " is caught attempting to assassinate " + tar->name +
+            " in " + r->short_print() + ".";
         for(const auto f : seers) {
             f->event(temp, "combat", r, u);
         }
@@ -311,7 +310,8 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
     }
 
     if (!succ) {
-        string temp = u->name + " is caught attempting to steal from " + tar->name + " in " + r->short_print() + ".";
+        std::string temp = u->name + " is caught attempting to steal from " + tar->name +
+            " in " + r->short_print() + ".";
         for(const auto f : seers) {
             f->event(temp, "theft", r, u);
         }
@@ -345,7 +345,7 @@ void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
     u->items.SetNum(so->item, u->items.GetNum(so->item) + amt);
     tar->items.SetNum(so->item, tar->items.GetNum(so->item) - amt);
 
-    string temp = u->name + " steals " + item_string(so->item, amt) + " from " + tar->name + ".";
+    std::string temp = u->name + " steals " + item_string(so->item, amt) + " from " + tar->name + ".";
     for(const auto f : seers) {
         f->event(temp, "theft", r, u);
     }
@@ -448,7 +448,7 @@ void Game::RunDestroyOrders()
 }
 
 void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
-    string quest_rewards;
+    std::string quest_rewards;
 
     if (TerrainDefs[r->type].similar_type == R_OCEAN) {
         u->error("DESTROY: Can't destroy a ship while at sea.");
@@ -490,7 +490,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
 
         willDestroy = std::min(destroyablePoints, destroyPower);
         if (willDestroy == 0) {
-            u->error(string("DESTROY: Can't destroy ") + o->name + " more.");
+            u->error(std::string("DESTROY: Can't destroy ") + o->name + " more.");
             for (const auto u2 : o->units) u2->destroy = 0;
             return;
         }
@@ -500,7 +500,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
             o->destroyed += willDestroy;
             o->incomplete += willDestroy;
 
-            u->event("Destroys " + to_string(willDestroy) + " structure points from the " + o->name + ".", "destroy");
+            u->event("Destroys " + std::to_string(willDestroy) + " structure points from the " + o->name + ".", "destroy");
         } else {
             u->event("Destroys " + o->name + ".", "destroy");
 
@@ -520,7 +520,7 @@ void Game::Do1Destroy(ARegion *r, Object *o, Unit *u) {
         if (o->type == O_DUMMY) {
             u->error("DESTROY: Not inside a structure.");
         } else {
-            u->error(string("DESTROY: Can't destroy ") + o->name + ".");
+            u->error(std::string("DESTROY: Can't destroy ") + o->name + ".");
         }
         for (const auto u2 : o->units) u2->destroy = 0;
         return;
@@ -545,14 +545,14 @@ void Game::RunFindUnit(Unit *u)
         if (!all) {
             fac = GetFaction(factions, f->find);
             if (fac) {
-                string temp = "The address of " + fac->name + " is " + fac->address + ".";
+                std::string temp = "The address of " + fac->name + " is " + fac->address + ".";
                 u->faction->event(temp, "find");
             } else {
-                u->error(string("FIND: ") + to_string(f->find) + " is not a valid faction number.");
+                u->error(std::string("FIND: ") + std::to_string(f->find) + " is not a valid faction number.");
             }
         } else {
             for(const auto fac : factions) {
-                string temp = "The address of " + fac->name + " is " + fac->address + ".";
+                std::string temp = "The address of " + fac->name + " is " + fac->address + ".";
                 u->faction->event(temp, "find");
             }
         }
@@ -1028,7 +1028,7 @@ void Game::EndGame(Faction *victor)
             fac->quit = QUIT_GAME_OVER;
 
         if (victor) {
-            string temp(victor->name);
+            std::string temp(victor->name);
             fac->event(temp + " has won the game!", "gameover");
         } else
             fac->event("The game has ended with no winner.", "gameover");
@@ -1372,7 +1372,8 @@ void Game::DoSell(ARegion *r, Market *m)
                     u->ConsumeShared(o->item, temp);
                     u->SetMoney(u->GetMoney() + temp * m->price);
                     oit = u->sellorders.erase(oit);
-                    u->event("Sells " + item_string(o->item, temp) + " at $" + to_string(m->price) + " each.", "sell");
+                    u->event("Sells " + item_string(o->item, temp) + " at $" +
+                        std::to_string(m->price) + " each.", "sell");
                     delete o;
                     continue;
                 }
@@ -1415,9 +1416,9 @@ int Game::GetBuyAmount(ARegion *r, Market *m)
                             o->num = 0;
                         }
                         if (u->type == U_APPRENTICE) {
-                            string name = Globals->APPRENTICE_NAME;
+                            std::string name = Globals->APPRENTICE_NAME;
                             name[0] = toupper(name[0]);
-                            string temp = "BUY: " + name + "s can't recruit more men.";
+                            std::string temp = "BUY: " + name + "s can't recruit more men.";
                             u->error(temp);
                             o->num = 0;
                         }
@@ -1520,7 +1521,8 @@ void Game::DoBuy(ARegion *r, Market *m)
                     u->faction->DiscoverItem(o->item, 0, 1);
                     u->ConsumeSharedMoney(temp * m->price);
                     oit = u->buyorders.erase(oit);
-                    u->event("Buys " + item_string(o->item, temp) + " at $" + to_string(m->price) + " each.", "buy");
+                    u->event("Buys " + item_string(o->item, temp) + " at $" +
+                        std::to_string(m->price) + " each.", "buy");
                     delete o;
                     continue;
                 }
@@ -1770,7 +1772,7 @@ void Game::CheckAllyHungerItem(int item, int value)
 
 void Game::AssessMaintenance()
 {
-    string quest_rewards;
+    std::string quest_rewards;
 
     /* First pass: set needed */
     for(const auto r : regions) {
@@ -1879,11 +1881,11 @@ void Game::AssessMaintenance()
                 if (u->needed > 0 && u->faction->unclaimed) {
                     /* Now see if faction has money */
                     if (u->faction->unclaimed >= u->needed) {
-                        u->event("Claims " + to_string(u->needed) + " silver for maintenance.", "maintenance");
+                        u->event("Claims " + std::to_string(u->needed) + " silver for maintenance.", "maintenance");
                         u->faction->unclaimed -= u->needed;
                         u->needed = 0;
                     } else {
-                        u->event("Claims " + to_string(u->faction->unclaimed) + " silver for maintenance.",
+                        u->event("Claims " + std::to_string(u->faction->unclaimed) + " silver for maintenance.",
                             "maintenance");
                         u->needed -= u->faction->unclaimed;
                         u->faction->unclaimed = 0;
@@ -1945,14 +1947,14 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
     }
 
     if (cost > u->faction->unclaimed) {
-        u->error(string("WITHDRAW: Too little unclaimed silver to withdraw ") + item_string(itm, amt) + ".");
+        u->error(std::string("WITHDRAW: Too little unclaimed silver to withdraw ") + item_string(itm, amt) + ".");
         return 0;
     }
 
     if (ItemDefs[itm].max_inventory) {
         int cur = u->items.GetNum(itm) + amt;
         if (cur > ItemDefs[itm].max_inventory) {
-            u->error(string("WITHDRAW: Unit cannot have more than ") + item_string(itm, ItemDefs[itm].max_inventory));
+            u->error(std::string("WITHDRAW: Unit cannot have more than ") + item_string(itm, ItemDefs[itm].max_inventory));
             return 0;
         }
     }
@@ -2084,12 +2086,12 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
 
     // Check each Item can be given
     if (ItemDefs[o->giveItem].flags & ItemType::CANTGIVE) {
-        u->error(string("EXCHANGE: Can't trade ") + ItemDefs[o->giveItem].names + ".");
+        u->error(std::string("EXCHANGE: Can't trade ") + ItemDefs[o->giveItem].names + ".");
         return;
     }
 
     if (ItemDefs[o->expectItem].flags & ItemType::CANTGIVE) {
-        u->error(string("EXCHANGE: Can't trade ") + ItemDefs[o->expectItem].names + ".");
+        u->error(std::string("EXCHANGE: Can't trade ") + ItemDefs[o->expectItem].names + ".");
         return;
     }
 
@@ -2111,8 +2113,8 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
     // Check other unit has enough to give
     int amtRecieve = o->expectAmount;
     if (amtRecieve > t->GetSharedNum(o->expectItem)) {
-        t->error(string("EXCHANGE: Not giving enough. Expecting ") + item_string(o->expectItem, o->expectAmount) + ".");
-        u->error(string("EXCHANGE: Exchange aborted.  Not enough recieved. Expecting ") +
+        t->error(std::string("EXCHANGE: Not giving enough. Expecting ") + item_string(o->expectItem, o->expectAmount) + ".");
+        u->error(std::string("EXCHANGE: Exchange aborted.  Not enough recieved. Expecting ") +
             item_string(o->expectItem, o->expectAmount) + ".");
         return;
     }
@@ -2124,18 +2126,18 @@ void Game::DoExchangeOrder(ARegion *r, Unit *u, ExchangeOrder *o)
         if (ptrUnitTemp == u && tOrder->expectItem == o->giveItem && tOrder->giveItem == o->expectItem) {
             exchangeOrderFound = true;
             if (tOrder->giveAmount < o->expectAmount) {
-                t->error(string("EXCHANGE: Not giving enough. Expecting ") +
+                t->error(std::string("EXCHANGE: Not giving enough. Expecting ") +
                     item_string(o->expectItem, o->expectAmount) + ".");
-                u->error(string("EXCHANGE: Exchange aborted. Not enough recieved. Expecting ") +
+                u->error(std::string("EXCHANGE: Exchange aborted. Not enough recieved. Expecting ") +
                     item_string(o->expectItem, o->expectAmount) + ".");
                 tOrder->exchangeStatus = 0;
                 o->exchangeStatus = 0;
                 return;
             }
             if (tOrder->giveAmount > o->expectAmount) {
-                t->error(string("EXCHANGE: Exchange aborted. Too much given. Expecting ") +
+                t->error(std::string("EXCHANGE: Exchange aborted. Too much given. Expecting ") +
                     item_string(o->expectItem, o->expectAmount) + ".");
-                u->error(string("EXCHANGE: Exchange aborted. Too much offered. Expecting ") +
+                u->error(std::string("EXCHANGE: Exchange aborted. Too much offered. Expecting ") +
                     item_string(o->expectItem, o->expectAmount) + ".");
                 tOrder->exchangeStatus = 0;
                 o->exchangeStatus = 0;
@@ -2177,8 +2179,8 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
     Object *fleet;
     SkillList *skills;
 
-    string ord = (o->type == O_TAKE) ? "TAKE" : "GIVE";
-    string event_type = (o->type == O_TAKE) ? "take" : "give";
+    std::string ord = (o->type == O_TAKE) ? "TAKE" : "GIVE";
+    std::string event_type = (o->type == O_TAKE) ? "take" : "give";
 
     /* Transfer/GIVE ship items: */
     if ((o->item >= 0) && (ItemDefs[o->item].type & IT_SHIP)) {
@@ -2432,7 +2434,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
             return 0;
         }
 
-        string temp = "Discards ";
+        std::string temp = "Discards ";
         if (ItemDefs[o->item].type & IT_MAN) {
             u->SetMen(o->item, u->GetMen(o->item) - amt);
             r->DisbandInRegion(o->item, amt);
@@ -2791,7 +2793,7 @@ void Game::CheckTransportOrders()
                     } else { // sender isn't a valid QM
                         if (!target_is_valid_qm) { // Non-qms or invalid qms can only send to valid QMs
                             // Give a specific error message depending on why they aren't considered a quartermaster
-                            string temp = "TRANSPORT: Target " + tar->unit->name;
+                            std::string temp = "TRANSPORT: Target " + tar->unit->name;
                             temp += (
                                 target_owns_qm_building ?
                                 " does not own a transport structure." :
@@ -2967,7 +2969,7 @@ void Game::RunTransportPhase(TransportOrder::TransportPhase phase) {
 
                     u->ConsumeShared(t->item, amt);
                     u->event("Transports " + item_string(t->item, amt) + " to " + tar->unit->name +
-                        " for $" + to_string(cost) + ".", "transport");
+                        " for $" + std::to_string(cost) + ".", "transport");
                     if (u->faction != tar->unit->faction) {
                         tar->unit->event("Receives " + item_string(t->item, amt) + " from " + u->name + ".", "transport");
                     }
@@ -3032,7 +3034,7 @@ void Game::RunSacrificeOrders() {
                     }
 
                     int required = -sacrifice_object->incomplete;
-                    int used = min(required, o->amount);
+                    int used = std::min(required, o->amount);
 
                     // Okay we have a valid sacrifice.  Do it.
                     sacrifice_object->incomplete += used;
@@ -3099,7 +3101,7 @@ void Game::Do1Annihilate(ARegion *reg) {
     if (TerrainDefs[reg->type].flags & TerrainType::ANNIHILATED) return; // just a double check
 
     // put the annihilation in the news and tell every faction.
-    string message = reg->print() + " has been utterly annihilated.";
+    std::string message = reg->print() + " has been utterly annihilated.";
     AnnihilationFact *fact = new AnnihilationFact();
     fact->message = message;
     events->AddFact(fact);
@@ -3264,8 +3266,8 @@ void Game::RunAnnihilateOrders() {
                     u->annihilateorders.pop_front();
 
                     TurnOrder *tOrder = new TurnOrder;
-                    std::string order = "ANNIHILATE " + to_string(o->xloc) + " " + to_string(o->yloc) +
-                        " " + to_string(o->zloc);
+                    std::string order = "ANNIHILATE " + std::to_string(o->xloc) + " " + std::to_string(o->yloc) +
+                        " " + std::to_string(o->zloc);
                     tOrder->repeating = 0;
                     tOrder->turnOrders.push_back(order);
                     u->turnorders.push_front(tOrder);

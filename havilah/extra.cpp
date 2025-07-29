@@ -8,8 +8,6 @@
 #include <iterator>
 #include <memory>
 
-using namespace std;
-
 #define RELICS_REQUIRED_FOR_VICTORY 7
 #define MINIMUM_ACTIVE_QUESTS       3
 #define MAXIMUM_ACTIVE_QUESTS       10
@@ -85,13 +83,13 @@ static void CreateQuest(ARegionList& regions, int monfaction)
     int d, count, temple, i, j, clash;
     ARegion *r;
     std::string rname;
-    map <string, int> temples;
-    map <string, int>::iterator it;
-    string stlstr;
+    std::map <std::string, int> temples;
+    std::map <std::string, int>::iterator it;
+    std::string stlstr;
     int destprobs[MAX_DESTINATIONS] = { 0, 0, 80, 20, 0 };
     int destinations[MAX_DESTINATIONS];
-    string destnames[MAX_DESTINATIONS];
-    set<string> intersection;
+    std::string destnames[MAX_DESTINATIONS];
+    std::set<std::string> intersection;
 
     std::shared_ptr<Quest> q = std::make_shared<Quest>();
     q->type = -1;
@@ -261,13 +259,13 @@ static void CreateQuest(ARegionList& regions, int monfaction)
             for(const auto& q2: quests) {
                 if (q2->type == Quest::VISIT && q->building == q2->building) {
                     intersection.clear();
-                    set_intersection(
+                    std::set_intersection(
                         q->destinations.begin(),
                         q->destinations.end(),
                         q2->destinations.begin(),
                         q2->destinations.end(),
-                        inserter(intersection, intersection.begin()),
-                        less<string>()
+                        std::inserter(intersection, intersection.begin()),
+                        std::less<std::string>()
                     );
                     if (intersection.size() > 0)
                         q->type = -1;
@@ -291,11 +289,11 @@ Faction *Game::CheckVictory()
     Object *o;
     Location *l;
     std::string message, times, temp;
-    map <string, int> vRegions, uvRegions;
-    map <string, int>::iterator it;
-    string stlstr;
-    set<string> intersection, un;
-    set<string>::iterator it2;
+    std::map <std::string, int> vRegions, uvRegions;
+    std::map <std::string, int>::iterator it;
+    std::string stlstr;
+    std::set<std::string> intersection, un;
+    std::set<std::string>::iterator it2;
 
     for(const auto& q: quests) {
         if (q->type != Quest::VISIT) continue;
@@ -319,11 +317,11 @@ Faction *Game::CheckVictory()
         for(const auto o : r->objects) {
             for(const auto u : o->units) {
                 intersection.clear();
-                set_intersection(
+                std::set_intersection(
                     u->visited.begin(), u->visited.end(),
                     un.begin(), un.end(),
-                    inserter(intersection, intersection.begin()),
-                    less<string>()
+                    std::inserter(intersection, intersection.begin()),
+                    std::less<std::string>()
                 );
                 u->visited = intersection;
             }
@@ -637,8 +635,8 @@ Faction *Game::CheckVictory()
             f->event(message, "gameover");
             write_times_article(times);
 
-            string filename = "winner." + to_string(f->num);
-            ofstream wf(filename, ios::out | ios::ate);
+            std::string filename = "winner." + std::to_string(f->num);
+            std::ofstream wf(filename, std::ios::out | std::ios::ate);
 
             if (wf.is_open()) {
                 message = TurnNumber();
@@ -711,7 +709,7 @@ Faction *Game::CheckVictory()
         }
     }
 
-    std::vector<shared_ptr<Quest>> questsWithProblems;
+    std::vector<std::shared_ptr<Quest>> questsWithProblems;
     for(const auto& q: quests) {
         switch(q->type) {
             case Quest::SLAY:
