@@ -1973,9 +1973,12 @@ void ARegionList::TownStatistics()
         }
     }
     int tot = villages + towns + cities;
-    int perv = villages * 100 / tot;
-    int pert = towns * 100 / tot;
-    int perc = cities * 100 / tot;
+    int perv = 0, perc = 0, pert = 0;
+    if (tot > 0) {
+        perv = villages * 100 / tot;
+        pert = towns * 100 / tot;
+        perc = cities * 100 / tot;
+    }
     logger::write("Settlements: " + std::to_string(tot));
     logger::write("Villages: " + std::to_string(villages) + " (" + std::to_string(perv) + "%)");
     logger::write("Towns   : " + std::to_string(towns) + " (" + std::to_string(pert) + "%)");
