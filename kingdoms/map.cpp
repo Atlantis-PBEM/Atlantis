@@ -880,8 +880,8 @@ void ARegionList::SetRegTypes(ARegionArray *pRegs, int newType)
 void ARegionList::RescaleFractalParameters(ARegionArray *pArr)
 {
     logger::write("Rescaling fractal parameters...");
-    int elev_min, humi_min, vege_min, cult_min = 100;
-    int elev_max, humi_max, vege_max, cult_max = 0;
+    int elev_min = 100, humi_min = 100, vege_min = 100, cult_min = 100;
+    int elev_max = 0, humi_max = 0, vege_max = 0, cult_max = 0;
     for (int x = 0; x < pArr->x; x++) {
         for (int y = 0; y < pArr->y; y++) {
             ARegion *reg = pArr->GetRegion(x, y);
