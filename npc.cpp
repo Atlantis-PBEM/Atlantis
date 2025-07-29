@@ -314,7 +314,7 @@ Unit *Game::MakeManUnit(Faction *fac, int mantype, int num, int level, int weapo
 
             if (ItemDefs[current_witem].flags & ItemType::DISABLED) continue;
             if (current_witem == lookup_item("PICK")) continue;
-            if (ItemDefs[current_witem].pSkill != FindSkill("WEAP")->get().abbr) continue;
+            if (ItemDefs[current_witem].pSkill && ItemDefs[current_witem].pSkill != FindSkill("WEAP")->get().abbr) continue;
 
             bool is_ranged = (WeaponDefs[i].flags & WeaponType::RANGED);
             if (is_ranged && !behind) continue;
