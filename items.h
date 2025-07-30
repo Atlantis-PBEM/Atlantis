@@ -229,7 +229,7 @@ class MonType
         This forbids monsters from going deeper into the unusual terrain but leaves regions on borders affected by "uncommon" monsters.
         */
 
-        const int getAggression();
+        int getAggression() const;
 };
 
 extern std::vector<MonType> MonDefs;
