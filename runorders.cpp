@@ -171,10 +171,10 @@ void Game::RunStealthOrders()
             for(const auto u : o->units) {
                 if (!u->stealthorders) continue;
                 if (u->stealthorders->type == O_STEAL) {
-                    Do1Steal(r, o, u);
+                    Do1Steal(r, u);
                 }
                 if (u->stealthorders->type == O_ASSASSINATE) {
-                    Do1Assassinate(r, o, u);
+                    Do1Assassinate(r, u);
                 }
                 delete u->stealthorders;
                 u->stealthorders = nullptr;
@@ -194,7 +194,7 @@ std::list<Faction *> Game::CanSeeSteal(ARegion *r, Unit *u)
     return retval;
 }
 
-void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
+void Game::Do1Assassinate(ARegion *r, Unit *u)
 {
     AssassinateOrder *so = dynamic_cast<AssassinateOrder *>(u->stealthorders);
     Unit *tar = r->GetUnitId(so->target, u->faction->num);
@@ -266,7 +266,7 @@ void Game::Do1Assassinate(ARegion *r, Object *o, Unit *u)
     RunBattle(r, u, tar, ass);
 }
 
-void Game::Do1Steal(ARegion *r, Object *o, Unit *u)
+void Game::Do1Steal(ARegion *r, Unit *u)
 {
     StealOrder *so = dynamic_cast<StealOrder *>(u->stealthorders);
     Unit *tar = r->GetUnitId(so->target, u->faction->num);
@@ -855,17 +855,17 @@ void Game::RunEnterOrders(int phase)
                 // normal enter phase or ENTER NEW / JOIN phase?
                 if (phase == 0) {
                     if (u->enter > 0 || u->enter == -1)
-                        Do1EnterOrder(r, o, u);
+                        Do1EnterOrder(r, u);
                 } else {
                     if (u->joinorders)
-                        Do1JoinOrder(r, o, u);
+                        Do1JoinOrder(r, u);
                 }
             }
         }
     }
 }
 
-void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
+void Game::Do1EnterOrder(ARegion *r, Unit *u)
 {
     Object *to;
     if (u->enter == -1) {
@@ -896,7 +896,7 @@ void Game::Do1EnterOrder(ARegion *r, Object *in, Unit *u)
     u->MoveUnit(to);
 }
 
-void Game::Do1JoinOrder(ARegion *r, Object *in, Unit *u)
+void Game::Do1JoinOrder(ARegion *r, Unit *u)
 {
     JoinOrder *jo;
     Unit *tar;

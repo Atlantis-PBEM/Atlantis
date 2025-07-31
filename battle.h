@@ -52,8 +52,8 @@ class Battle
         // These functions should be implemented in specials.cpp
         //
         void UpdateShields(Army *);
-        void DoSpecialAttack( int round, Soldier *a, Army *attackers,
-                Army *def, int behind, int canattackback);
+        void DoSpecialAttack(Soldier *a, Army *attackers,
+                Army *def, int canattackback);
 
         void WriteSides(
             ARegion * r, Unit * att, Unit * tar, std::list<Location *>& atts, std::list<Location *>& defs, int ass

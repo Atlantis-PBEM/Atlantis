@@ -161,7 +161,7 @@ void UnitTestHelper::activate_spell(int spell, SpellTestHelper helper) {
             game.RunPhanBeasts(helper.region, helper.unit);
             break;
         case S_TELEPORTATION:
-            game.RunTeleport(helper.region, helper.object, helper.unit);
+            game.RunTeleport(helper.region, helper.unit);
             break;
         case S_TRANSMUTATION:
             game.RunTransmutation(helper.region, helper.unit);

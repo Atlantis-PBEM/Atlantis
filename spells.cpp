@@ -675,7 +675,7 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
             val = RunPhanBeasts(r,u);
             break;
         case S_GATE_LORE:
-            val = RunDetectGates(r,o,u);
+            val = RunDetectGates(r, u);
             break;
         case S_FARSIGHT:
             val = RunFarsight(r,u);
@@ -827,7 +827,7 @@ int Game::RunMindReading(ARegion *r,Unit *u)
     return 1;
 }
 
-int Game::RunEnchant(ARegion *r,Unit *u, int skill, int item)
+int Game::RunEnchant(ARegion *, Unit *u, int skill, int item)
 {
     int level, max, num, i, a;
     unsigned int c;
@@ -928,7 +928,7 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
     return 1;
 }
 
-int Game::RunEngraveRunes(ARegion *r,Object *o,Unit *u)
+int Game::RunEngraveRunes(ARegion *, Object *o, Unit *u)
 {
     if (o->IsFleet() || !o->IsBuilding()) {
         u->error("Runes of Warding may only be engraved on a building.");
@@ -1221,7 +1221,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
     return 1;
 }
 
-int Game::RunWolfLore(ARegion *r,Unit *u)
+int Game::RunWolfLore(ARegion *, Unit *u)
 {
     int level = u->GetSkill(S_WOLF_LORE);
     int max = level * level * 4;
@@ -1491,7 +1491,7 @@ int Game::RunFarsight(ARegion *r,Unit *u)
     return 1;
 }
 
-int Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
+int Game::RunDetectGates(ARegion *r, Unit *u)
 {
     int level = u->GetSkill(S_GATE_LORE);
 
@@ -1522,7 +1522,7 @@ int Game::RunDetectGates(ARegion *r,Object *o,Unit *u)
     return 1;
 }
 
-int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
+int Game::RunTeleport(ARegion *r, Unit *u)
 {
     ARegion *tar;
     int val;
@@ -1573,7 +1573,7 @@ int Game::RunTeleport(ARegion *r,Object *o,Unit *u)
     return 1;
 }
 
-int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
+int Game::RunGateJump(ARegion *r, Unit *u)
 {
     int level = u->GetSkill(S_GATE_LORE);
     int nexgate = 0;
@@ -1730,7 +1730,7 @@ int Game::RunGateJump(ARegion *r,Object *o,Unit *u)
     return 1;
 }
 
-int Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
+int Game::RunPortalLore(ARegion *r, Unit *u)
 {
     int level = u->GetSkill(S_PORTAL_LORE);
     TeleportOrder *order = u->teleportorders;
@@ -1968,13 +1968,13 @@ void Game::RunTeleportOrders()
                         foundone = 1;
                         switch (u->teleportorders->spell) {
                             case S_GATE_LORE:
-                                val = RunGateJump(r,o,u);
+                                val = RunGateJump(r, u);
                                 break;
                             case S_TELEPORTATION:
-                                val = RunTeleport(r,o,u);
+                                val = RunTeleport(r, u);
                                 break;
                             case S_PORTAL_LORE:
-                                val = RunPortalLore(r,o,u);
+                                val = RunPortalLore(r, u);
                                 break;
                         }
                         if (val) u->Practice(u->teleportorders->spell);

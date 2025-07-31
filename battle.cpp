@@ -173,7 +173,7 @@ void Battle::FreeRound(Army * att,Army * def, int ass)
 void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
         int behind, int ass, bool canAttackBehind, bool canAttackFromBehind)
 {
-    DoSpecialAttack(round, a, attackers, def, behind, canAttackBehind);
+    DoSpecialAttack(a, attackers, def, canAttackBehind);
     if (!def->NumAlive()) return;
 
     if (!behind && (a->riding != -1)) {
@@ -427,11 +427,9 @@ void AddBattleFact(
     events->AddFact(fact);
 }
 
-void AddAssassinationFact(
+static void AddAssassinationFact(
     Events* events,
     ARegion* region,
-    Unit* defender,
-    Army* defenderArmy,
     int outcome
 ) {
     if (!Globals->WORLD_EVENTS) return;
@@ -517,7 +515,7 @@ int Battle::Run(
             AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_LOST);
         }
         else {
-            AddAssassinationFact(events, region, tar, armies[1], BATTLE_WON);
+            AddAssassinationFact(events, region, BATTLE_WON);
         }
 
         AddLine("Total Casualties:");
@@ -570,7 +568,7 @@ int Battle::Run(
             AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_WON);
         }
         else {
-            AddAssassinationFact(events, region, tar, armies[1], BATTLE_LOST);
+            AddAssassinationFact(events, region, BATTLE_LOST);
         }
 
         AddLine("Total Casualties:");
@@ -611,7 +609,7 @@ int Battle::Run(
         AddBattleFact(events, region, att, tar, armies[0], armies[1], BATTLE_DRAW);
     }
     else {
-        AddAssassinationFact(events, region, tar, armies[1], BATTLE_DRAW);
+        AddAssassinationFact(events, region, BATTLE_DRAW);
     }
 
     AddLine("Total Casualties:");
