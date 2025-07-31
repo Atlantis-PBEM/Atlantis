@@ -31,12 +31,12 @@ int GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell);
 //
 // Spell running
 //
-int RunDetectGates(ARegion *,Object *,Unit *);
+int RunDetectGates(ARegion *, Unit *);
 int RunFarsight(ARegion *,Unit *);
-int RunGateJump(ARegion *,Object *,Unit *);
-int RunTeleport(ARegion *,Object *,Unit *);
+int RunGateJump(ARegion *, Unit *);
+int RunTeleport(ARegion *, Unit *);
 int RunLacandonTeleport(ARegion *, Object *, Unit *);
-int RunPortalLore(ARegion *,Object *,Unit *);
+int RunPortalLore(ARegion *, Unit *);
 int RunEarthLore(ARegion *,Unit *);
 int RunPhantasmalEntertainment(ARegion *,Unit *);
 int RunWeatherLore(ARegion *, Unit *);

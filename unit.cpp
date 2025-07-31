@@ -6,14 +6,6 @@
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
-UnitId::UnitId()
-{
-}
-
-UnitId::~UnitId()
-{
-}
-
 std::string UnitId::Print()
 {
     if (unitnum) {

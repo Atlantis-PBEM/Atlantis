@@ -181,8 +181,7 @@ void Battle::UpdateShields(Army *a)
     }
 }
 
-void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
-        Army *def, int behind, int canattackback)
+void Battle::DoSpecialAttack(Soldier *a, Army *attackers, Army *def, int canattackback)
 {
     int i, num, tot = -1;
     std::string results[4];

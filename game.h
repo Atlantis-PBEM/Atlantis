@@ -524,8 +524,8 @@ private:
     void DoAutoAttackOn(ARegion *, Unit *);
     void RemoveEmptyObjects();
     void RunEnterOrders(int);
-    void Do1EnterOrder(ARegion *, Object *, Unit *);
-    void Do1JoinOrder(ARegion *, Object *, Unit *);
+    void Do1EnterOrder(ARegion *, Unit *);
+    void Do1JoinOrder(ARegion *, Unit *);
     void RunPromoteOrders();
     void Do1PromoteOrder(Object *, Unit *);
     void Do1EvictOrder(Object *, Unit *);
@@ -554,8 +554,8 @@ private:
     void CollectInterQMTransportItems();
     void CheckTransportOrders();
     std::list<Faction *>CanSeeSteal(ARegion *r, Unit *u);
-    void Do1Steal(ARegion *, Object *, Unit *);
-    void Do1Assassinate(ARegion *, Object *, Unit *);
+    void Do1Steal(ARegion *, Unit *);
+    void Do1Assassinate(ARegion *, Unit *);
     void Do1Annihilate(ARegion *reg);
     void AdjustCityMons(ARegion *pReg);
     void AdjustCityMon(ARegion *pReg, Unit *u);
@@ -579,7 +579,7 @@ private:
     void RunAProduction(ARegion *, Production *);
     void RunUnitProduce(ARegion *, Unit *);
     void Run1BuildOrder(ARegion *, Object *, Unit *);
-    void RunBuildShipOrder(ARegion *, Object *, Unit *);
+    void RunBuildShipOrder(ARegion *, Unit *);
     void AddNewBuildings(ARegion *);
     void RunBuildHelpers(ARegion *);
     int ShipConstruction(ARegion *, Unit *, Unit *, int, int, int);
