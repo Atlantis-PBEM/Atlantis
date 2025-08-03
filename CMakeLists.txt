@@ -13,7 +13,7 @@ endif(NOT COMPILER_HAS_RANGES)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     #add_compile_options(-pedantic -Wsign-compare -Wextra -Werror -Wno-switch -Wno-unknown-pragmas -Wpointer-arith -Wno-char-subscripts -Wno-long-long)
-    add_compile_options(-g -Wall -Werror -pedantic -Wparentheses)
+    add_compile_options(-g -Wno-psabi -Wall -Werror -pedantic -Wparentheses)
 elseif(MSVC)
     #add_compile_options(/WX /MP /FC /D_CRT_SECURE_NO_WARNINGS)
     add_compile_options(/MP /FC /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4700)
@@ -75,7 +75,6 @@ add_executable(${GAME}
 target_link_libraries(${GAME} engine)
 target_include_directories(${GAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set (_RULES_CSS ${GAME}.css)
-message(STATUS "CSS ${GAME}: ${_RULES_CSS}")
 set (_RULES_INTRO ${GAME}_intro.html)
 set (_RULES_OUTPUT ${GAME}.html)
 add_custom_command(
