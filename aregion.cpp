@@ -2332,7 +2332,7 @@ ARegion *ARegionArray::GetRegion(int xx, int yy)
 
 std::vector<ARegion *> ARegionArray::get_starting_region_candidates(int terrain) {
     ARegionGraph graph = ARegionGraph(this);
-    graph.setInclusion([](ARegion *current, ARegion *next) { return next->type != R_OCEAN; });
+    graph.setInclusion([](ARegion *, ARegion *next) { return next->type != R_OCEAN; });
 
     std::vector<ARegion *> candidates;
     for (int x2 = 0; x2 < x; x2++) {
@@ -2521,7 +2521,7 @@ void makeRivers(
     std::unordered_set<graphs::Location2D> innerWater;
 
     ARegionGraph graph = ARegionGraph(arr);
-    graph.setInclusion([](ARegion* current, ARegion* next) {
+    graph.setInclusion([](ARegion*, ARegion* next) {
         return next->type == R_OCEAN;
     });
 
@@ -2576,7 +2576,7 @@ void makeRivers(
     for (const auto& water : waterBodies) {
         logger::write("WATER BODY " + std::to_string(water->name));
 
-        graph.setInclusion([ water, &innerWater ](ARegion* current, ARegion* next) {
+        graph.setInclusion([ water, &innerWater ](ARegion*, ARegion* next) {
             graphs::Location2D loc = { next->xloc, next->yloc };
             return !water->includes(loc) && innerWater.find(loc) == innerWater.end();
         });
@@ -2609,7 +2609,7 @@ void makeRivers(
 
     logger::write("Max river reach " + std::to_string(maxRiverReach));
 
-    graph.setCost([ map, &rivers ](ARegion* current, ARegion* next) {
+    graph.setCost([ map, &rivers ](ARegion*, ARegion* next) {
         int cost = std::max(1, map->map.get(next->xloc * 2, next->yloc * 2)->elevation);
         // if (next->type == R_PLAIN || next->type == R_FOREST || next->type == R_JUNGLE) {
         //  cost *= 100;
@@ -3084,8 +3084,8 @@ Ethnicity getRegionEtnos(ARegion* reg) {
     return etnos;
 }
 
-void subdivideArea(
-    const int width, const int height, const int distance,
+static void subdivideArea(
+    const int width, const int distance,
     const std::vector<graphs::Location2D> &regions, std::vector<std::vector<graphs::Location2D>> &subgraphs
 ) {
     auto points = getPointsFromList(width, distance, 8, regions);
@@ -3118,8 +3118,8 @@ void subdivideArea(
 }
 
 void nameArea(
-    int width, int height, ARegionGraph &graph, std::unordered_set<std::string> &usedNames,
-    std::vector<NameArea*>& nameAnchors, std::vector<graphs::Location2D> &regions, std::unordered_set<ARegion*> &named
+    ARegionGraph &graph, std::unordered_set<std::string> &usedNames,
+    std::vector<graphs::Location2D> &regions, std::unordered_set<ARegion*> &named
 ) {
     std::string name;
     Ethnicity etnos = Ethnicity::NONE;
@@ -3182,8 +3182,8 @@ void giveNames(
     // generate name areas
     std::vector<NameArea*> nameAnchors;
     std::unordered_set<int> usedNameSeeds;
-    auto onPoint = [](graphs::Location2D p) { return 8; };
-    auto onIsIncluded = [](graphs::Location2D p) { return true; };
+    auto onPoint = [](graphs::Location2D) { return 8; };
+    auto onIsIncluded = [](graphs::Location2D) { return true; };
     for (auto p : getPoints(w, h, 8, 16, onPoint, onIsIncluded)) {
         int seed;
         do {
@@ -3279,7 +3279,7 @@ void giveNames(
                 continue;
             }
 
-            graph.setInclusion([ reg ](ARegion* current, ARegion* next) {
+            graph.setInclusion([ reg ](ARegion*, ARegion* next) {
                 if (reg->type == R_MOUNTAIN || reg->type == R_VOLCANO) {
                     return next->type == R_MOUNTAIN || next->type == R_VOLCANO;
                 }
@@ -3300,13 +3300,13 @@ void giveNames(
 
                 // the are is too big, we must split it
                 std::vector<std::vector<graphs::Location2D>> subgraphs;
-                subdivideArea(w, h, std::clamp(4, (int) sqrt(area.size()), 8), locations, subgraphs);
+                subdivideArea(w, std::clamp(4, (int) sqrt(area.size()), 8), locations, subgraphs);
 
                 logger::write("  Subdivided into " + std::to_string(subgraphs.size()) + " subgraphs");
 
                 for (auto &regions : subgraphs) {
                     logger::write("    Subgraph with " + std::to_string(regions.size()) + " regions");
-                    nameArea(w, h, graph, usedNames, nameAnchors, regions, named);
+                    nameArea(graph, usedNames, regions, named);
                 }
             }
             else {
@@ -3315,7 +3315,7 @@ void giveNames(
                     regions.push_back(loc.first);
                 }
 
-                nameArea(w, h, graph, usedNames, nameAnchors, regions, named);
+                nameArea(graph, usedNames, regions, named);
             }
         }
     }
@@ -3376,7 +3376,7 @@ void economy(ARegionArray* arr, const int w, const int h) {
         minDist = size + rng::make_roll(2, 2);
 
         return minDist;
-    }, [](graphs::Location2D p) { return true; });
+    }, [](graphs::Location2D) { return true; });
 
     logger::write("Setting up other regions");
 
@@ -3494,11 +3494,11 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 
     ARegionGraph graph = ARegionGraph(arr);
 
-    graph.setInclusion([](ARegion* current, ARegion* next) {
+    graph.setInclusion([](ARegion*, ARegion* next) {
         return next->type != R_OCEAN && next->type != R_VOLCANO;
     });
 
-    graph.setCost([](ARegion* current, ARegion* next) {
+    graph.setCost([](ARegion*, ARegion* next) {
         switch (next->type) {
             case R_MOUNTAIN:
             case R_FOREST:
@@ -3706,8 +3706,8 @@ void ARegionList::create_natural_surface_level(Map* map) {
 
 ARegionGraph::ARegionGraph(ARegionArray* regions) {
     this->regions = regions;
-    this->costFn = [](ARegion* current, ARegion* next) { return 1; };
-    this->includeFn = [](ARegion* current, ARegion* next) { return true; };
+    this->costFn = [](ARegion*, ARegion*) { return 1; };
+    this->includeFn = [](ARegion*, ARegion*) { return true; };
 }
 
 ARegionGraph::~ARegionGraph() {
