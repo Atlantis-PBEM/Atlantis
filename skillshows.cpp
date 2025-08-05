@@ -1695,7 +1695,7 @@ const std::string ShowSkill::Report(Faction *f) const
                 (ItemDefs[I_STONE].flags & ItemType::DISABLED))
             continue;
         std::string skname = SkillDefs[skill].abbr;
-        if (skname == ObjectDefs[i].skill && ObjectDefs[i].level == level) {
+        if (ObjectDefs[i].skill && skname == ObjectDefs[i].skill && ObjectDefs[i].level == level) {
             if (comma) {
                 temp += ", ";
             }
