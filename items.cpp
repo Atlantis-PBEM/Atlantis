@@ -703,7 +703,7 @@ std::string item_description(int item, int full)
             temp += " This monster " + resistance_description(c, monster.defense[c], full);
         }
 
-        if (monster.special && monster.special != NULL) {
+        if (monster.special) {
             temp += " Monster can cast " + show_special(monster.special ? monster.special : "", monster.specialLevel, 1, 0);
         }
 

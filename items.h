@@ -195,7 +195,7 @@ class MonType
         int stealth;
         int obs;
 
-        char const *special;
+        char const *special = nullptr;
         int specialLevel;
 
         int silver;
