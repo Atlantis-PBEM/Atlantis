@@ -77,7 +77,6 @@ add_executable(${GAME}
 target_link_libraries(${GAME} engine)
 target_include_directories(${GAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set (_RULES_CSS ${GAME}.css)
-message(STATUS "CSS ${GAME}: ${_RULES_CSS}")
 set (_RULES_INTRO ${GAME}_intro.html)
 set (_RULES_OUTPUT ${GAME}.html)
 add_custom_command(
