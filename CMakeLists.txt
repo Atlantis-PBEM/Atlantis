@@ -14,6 +14,7 @@ endif(NOT COMPILER_HAS_RANGES)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     #add_compile_options(-pedantic -Wsign-compare -Wextra -Werror -Wno-switch -Wno-unknown-pragmas -Wpointer-arith -Wno-char-subscripts -Wno-long-long)
     add_compile_options(-g -Wall -Werror -pedantic -Wparentheses -Wno-psabi
+        -Wpointer-arith -Wignored-qualifiers 
     # -Wunused-parameter
     )
 elseif(MSVC)
