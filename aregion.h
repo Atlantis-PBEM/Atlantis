@@ -211,7 +211,7 @@ class ARegion
         void MakeStartingCity();
         int IsStartingCity();
         int IsSafeRegion();
-        int CanBeStartingCity(ARegionArray *pRA);
+        int CanBeStartingCity();
         int HasShaft();
 
         // AS
@@ -404,7 +404,7 @@ class GeoMap
 {
     public:
         GeoMap(int, int);
-        void Generate(int spread, int smoothness);
+        void Generate(int smoothness);
         int GetElevation(int, int);
         int GetHumidity(int, int);
         int GetTemperature(int, int);

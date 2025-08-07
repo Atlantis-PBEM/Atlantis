@@ -1284,7 +1284,7 @@ const WeaponBonusMalus* GetWeaponBonusMalus(const WeaponType& attacker, const We
     return nullptr;
 }
 
-int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attackType,
+int Army::DoAnAttack(char const *special, int numAttacks, int attackType,
         int attackLevel, int flags, int weaponClass, char const *effect,
         int mountBonus, Soldier *attacker, Army *attackers, bool attackbehind, int attackDamage)
 {

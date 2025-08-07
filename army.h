@@ -173,7 +173,7 @@ class Army
         Soldier *GetTarget(int);
         int RemoveEffects(int num, char const *effect);
         int DoAnAttack(
-            Battle *, char const *special, int numAttacks, int attackType,
+            char const *special, int numAttacks, int attackType,
             int attackLevel, int flags, int weaponClass, char const *effect,
             int mountBonus, Soldier *attacker, Army *attackers, bool attackbehind, int attackDamage
         );

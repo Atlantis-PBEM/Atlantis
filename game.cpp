@@ -1475,17 +1475,17 @@ int Game::AllowedMartial(Faction *pFac)
     return allowedMartial[points];
 }
 
-bool Game::upgrade_major_version(int current_version)
+bool Game::upgrade_major_version(int)
 {
     return false;
 }
 
-bool Game::upgrade_minor_version(int current_version)
+bool Game::upgrade_minor_version(int)
 {
     return true;
 }
 
-bool Game::upgrade_patch_level(int current_version)
+bool Game::upgrade_patch_level(int)
 {
     return true;
 }

@@ -59,6 +59,6 @@ int RunEngraveRunes(ARegion *,Object *,Unit *);
 int RunConstructGate(ARegion *,Unit *,int);
 int RunEnchant(ARegion *,Unit *, int, int);
 int RunMindReading(ARegion *,Unit *);
-int RunTransmutation(ARegion *,Unit *);
+int RunTransmutation(ARegion *, Unit *);
 int RunBlasphemousRitual(ARegion *,Unit *);
 #endif

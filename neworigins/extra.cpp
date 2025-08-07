@@ -1554,7 +1554,7 @@ void Game::ModifyTablesPerRuleset(void)
     return;
 }
 
-const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList& regions) {
+const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *, ARegion *, ARegionList& regions) {
 
     // If Empowered Altars are active, we should check for them.  This is only used for the NO7 victory condition.
     if (!(ObjectDefs[O_EMPOWERED_ALTAR].flags & ObjectType::DISABLED)) {

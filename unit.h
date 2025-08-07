@@ -107,9 +107,7 @@ class Unit {
         std::string SpoilsReport(void);
         int CanGetSpoil(Item *i);
         json build_json_descriptor();
-        void build_json_report(
-            json& j, int obs, int truesight, int detfac, int autosee, AttitudeType attitude, bool showattitudes
-        );
+        void build_json_report(json& j, int obs, int truesight, int detfac, int autosee, AttitudeType attitude);
         json write_json_orders();
         std::string get_name(int observation);
         std::string MageReport();
@@ -122,7 +120,7 @@ class Unit {
         void DefaultOrders(Object *);
         void set_name(const std::string& newname);
         void set_description(const std::string& newdescription);
-        void PostTurn(ARegion *reg);
+        void PostTurn(ARegion *);
 
         int IsLeader();
         int IsNormal();

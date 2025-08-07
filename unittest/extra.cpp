@@ -40,6 +40,6 @@ void Game::ModifyTablesPerRuleset(void) {
     }
 }
 
-const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *u, ARegion *origin, ARegionList& regs) {
+const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *, ARegion *, ARegionList&) {
     return std::nullopt;
 }

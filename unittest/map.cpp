@@ -4,13 +4,13 @@
 #include "../gamedata.h"
 
 /// For unit testing, just do nothing.
-int ARegion::CheckSea(int dir, int range, int remainocean) { return 1; }
+int ARegion::CheckSea(int, int, int) { return 1; }
 
 /// For unit testing just do nothing.
-void ARegionList::create_abyss_level(int level, const std::string& name) { }
+void ARegionList::create_abyss_level(int, const std::string&) { }
 
 /// For unit testing do nothing.
-void ARegionList::create_nexus_level(int level, int xSize, int ySize, const std::string& name) { }
+void ARegionList::create_nexus_level(int, int, int, const std::string&) { }
 
 void ARegionList::create_surface_level(int level, int xSize, int ySize, const std::string& name) {
     // For the test world, make a very very small 2x2 world with 1 town in the plains
@@ -22,9 +22,9 @@ void ARegionList::create_surface_level(int level, int xSize, int ySize, const st
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::create_island_level(int level, int nPlayers, const std::string& name) { }
-void ARegionList::create_island_ring_level(int level, int xSize, int ySize, const std::string& name) {}
-void ARegionList::create_underworld_ring_level(int level, int xSize, int ySize, const std::string& name) {}
+void ARegionList::create_island_level(int, int, const std::string&) { }
+void ARegionList::create_island_ring_level(int, int, int, const std::string&) { }
+void ARegionList::create_underworld_ring_level(int, int, int, const std::string&) { }
 
 void ARegionList::create_underworld_level(int level, int xSize, int ySize, const std::string& name) {
     MakeRegions(level, xSize, ySize);
@@ -34,33 +34,33 @@ void ARegionList::create_underworld_level(int level, int xSize, int ySize, const
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::create_underdeep_level(int level, int xSize, int ySize, const std::string& name) { }
+void ARegionList::create_underdeep_level(int, int, int, const std::string&) { }
 
-void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean, int continentSize) { }
+void ARegionList::MakeLand(ARegionArray *, int, int) { }
 
-void ARegionList::MakeRingLand(ARegionArray *pReg, int minDistance, int maxDistance) { }
+void ARegionList::MakeRingLand(ARegionArray *, int, int) { }
 
-void ARegionList::MakeCentralLand(ARegionArray *pRegs) { }
+void ARegionList::MakeCentralLand(ARegionArray *) { }
 
-void ARegionList::MakeIslands(ARegionArray *pArr, int nPlayers) { }
+void ARegionList::MakeIslands(ARegionArray *, int) { }
 
-void ARegionList::MakeOneIsland(ARegionArray *pRegs, int xx, int yy) { }
+void ARegionList::MakeOneIsland(ARegionArray *, int, int) { }
 
-void ARegionList::CleanUpWater(ARegionArray *pRegs) { }
+void ARegionList::CleanUpWater(ARegionArray *) { }
 
-void ARegionList::RemoveCoastalLakes(ARegionArray *pRegs) { }
+void ARegionList::RemoveCoastalLakes(ARegionArray *) { }
 
-void ARegionList::SeverLandBridges(ARegionArray *pRegs) { }
+void ARegionList::SeverLandBridges(ARegionArray *) { }
 
-void ARegionList::SetRegTypes(ARegionArray *pRegs, int newType) { }
+void ARegionList::SetRegTypes(ARegionArray *, int) { }
 
-void ARegionList::SetupAnchors(ARegionArray *ta) { }
+void ARegionList::SetupAnchors(ARegionArray *) { }
 
-void ARegionList::GrowTerrain(ARegionArray *pArr, int growOcean) { }
+void ARegionList::GrowTerrain(ARegionArray *, int) { }
 
-void ARegionList::RandomTerrain(ARegionArray *pArr) { }
+void ARegionList::RandomTerrain(ARegionArray *) { }
 
-void ARegionList::MakeUWMaze(ARegionArray *pArr) { }
+void ARegionList::MakeUWMaze(ARegionArray *) { }
 
 void ARegionList::AssignTypes(ARegionArray *pArr) {
     // we have a fixed world, so just assign the types.
@@ -81,11 +81,11 @@ void ARegionList::AssignTypes(ARegionArray *pArr) {
     }
 }
 
-void ARegionList::UnsetRace(ARegionArray *pArr) { }
+void ARegionList::UnsetRace(ARegionArray *) { }
 
-void ARegionList::RaceAnchors(ARegionArray *pArr) { }
+void ARegionList::RaceAnchors(ARegionArray *) { }
 
-void ARegionList::GrowRaces(ARegionArray *pArr) { }
+void ARegionList::GrowRaces(ARegionArray *) { }
 
 void ARegionList::FinalSetup(ARegionArray *pArr) {
     for (auto x = 0; x < pArr->x; x++) {
@@ -98,7 +98,7 @@ void ARegionList::FinalSetup(ARegionArray *pArr) {
     }
  }
 
-void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo) {
+void ARegionList::MakeShaft(ARegion *reg, ARegionArray *, ARegionArray *pTo) {
     ARegion *toReg = pTo->GetRegion(0, 0);
     if (!toReg) return;
 
@@ -119,7 +119,7 @@ void ARegionList::MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo
     toReg->objects.push_back(o);
 }
 
-void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds) {
+void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int) {
     ARegionArray *pFrom = pRegionArrays[levelFrom];
     ARegionArray *pTo = pRegionArrays[levelTo];
 
@@ -128,9 +128,9 @@ void ARegionList::MakeShaftLinks(int levelFrom, int levelTo, int odds) {
     MakeShaft(pFrom->GetRegion(0, 0), pFrom, pTo);
 }
 
-void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY) { }
+void ARegionList::SetACNeighbors(int, int, int, int) { }
 
-void ARegionList::InitSetupGates(int level) { }
+void ARegionList::InitSetupGates(int) { }
 
 void ARegionList::FixUnconnectedRegions() { }
 

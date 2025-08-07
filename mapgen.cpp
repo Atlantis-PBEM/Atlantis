@@ -114,7 +114,7 @@ std::vector<int> CellGraph::neighbors(int id) {
     return list;
 }
 
-double CellGraph::cost(int current, int next) {
+double CellGraph::cost(int, int) {
     return 1;
 }
 
@@ -268,17 +268,17 @@ inline double degToRad(double deg) {
 //     { 0, -1, 0.1 }
 // };
 
-const int MOISTURE_SOURCES = 8;
-const Edge WIND[MOISTURE_SOURCES] = {
-    { -1, -1, 0.20 },
-    { -1,  0, 0.70 },
-    { -1,  1, 0.20 },
-    {  0, -1, 0.10 },
-    {  0,  1, 0.10 },
-    {  1, -1, 0.05 },
-    {  1,  0, 0.05 },
-    {  1,  1, 0.05 }
-};
+// const int MOISTURE_SOURCES = 8;
+// const Edge WIND[MOISTURE_SOURCES] = {
+//     { -1, -1, 0.20 },
+//     { -1,  0, 0.70 },
+//     { -1,  1, 0.20 },
+//     {  0, -1, 0.10 },
+//     {  0,  1, 0.10 },
+//     {  1, -1, 0.05 },
+//     {  1,  0, 0.05 },
+//     {  1,  1, 0.05 }
+// };
 
 const double RAINFALL = 0.1;
 
@@ -288,8 +288,7 @@ const double RAINFALL = 0.1;
 // temperature down | increase
 // altitude up      | increase
 // altitude down    | decrease
-
-void simulateRain(CellMap& map, Cell* target, double windAngle, const Edge* windMatrix) {
+void simulateRain(CellMap& map, Cell* target) {
     int x = target->x;
     int y = target->y;
 
@@ -355,7 +354,7 @@ Blob* fillByElevation(CellMap* map, Cell* start, int biome, Range elevation) {
     blob->biome = biome;
 
     CellGraph graph = CellGraph(map);
-    graph.setInclusion([ elevation ](Cell* current, Cell* next) {
+    graph.setInclusion([ elevation ](Cell*, Cell* next) {
         return elevation.in(next->elevation) && next->biome == B_UNKNOWN;
     });
 
@@ -375,7 +374,7 @@ Blob* fillByBiome(CellMap* map, Cell* start, const Biome* biome) {
     blob->biome = biome->name;
 
     CellGraph graph = CellGraph(map);
-    graph.setInclusion([ biome ](Cell* current, Cell* next) {
+    graph.setInclusion([ biome ](Cell*, Cell* next) {
         return biome->match(next) && next->biome == B_UNKNOWN;
     });
 
@@ -509,7 +508,7 @@ void Map::Generate() {
             for (int y = 0; y < map.height; y++) {
                 auto target = map.get(x, y);
 
-                simulateRain(map, target, 0.0, WIND);
+                simulateRain(map, target);
             }
         }
     }

@@ -347,8 +347,8 @@ private:
     // Helper functions for ProcessBuildOrder
     BuildOrder *ProcessBuildHelp(Unit *u, parser::string_parser& parser, orders_check *checker);
     BuildOrder *ProcessBuildObject(Unit *u, int object_type, orders_check *checker);
-    BuildOrder *ProcessBuildShip(Unit *u, int object_type, orders_check *checker);
-    BuildOrder *ProcessBuildStructure(Unit *u, int object_type, orders_check *checker);
+    BuildOrder *ProcessBuildShip(Unit *u, int object_type);
+    BuildOrder *ProcessBuildStructure(Unit *u, int object_type);
     BuildOrder *ProcessContinuedBuild(Unit *u, orders_check *checker);
     //bool ProcessBuildComplete(Unit *u, BuildOrder *order, parser::token token, orders_check *checker);
     //void CheckBuildOrderConflicts(Unit *u, orders_check *checker);
