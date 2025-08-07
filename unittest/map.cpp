@@ -38,8 +38,6 @@ void ARegionList::create_underdeep_level(int level, int xSize, int ySize, const 
 
 void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize) { }
 
-void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs) { }
-
 void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean, int continentSize) { }
 
 void ARegionList::MakeRingLand(ARegionArray *pReg, int minDistance, int maxDistance) { }

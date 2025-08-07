@@ -293,19 +293,6 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
     logger::write("");
 }
 
-void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs)
-{
-    int x, y;
-
-    for (x = 0; x < pRegs->x; x++) {
-        for (y = 0; y < pRegs->y; y++) {
-            ARegion *reg = pRegs->GetRegion(x, y);
-            if (!reg) continue;
-            IcosahedralNeighSetup(reg, pRegs);
-        }
-    }
-}
-
 void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
         int continentSize)
 {

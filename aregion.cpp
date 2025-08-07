@@ -1782,6 +1782,17 @@ void ARegionList::NeighSetup(ARegion *r, ARegionArray *ar)
     }
 }
 
+void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs)
+{
+    for (int x = 0; x < pRegs->x; x++) {
+        for (int y = 0; y < pRegs->y; y++) {
+            ARegion *reg = pRegs->GetRegion(x, y);
+            if (!reg) continue;
+            IcosahedralNeighSetup(reg, pRegs);
+        }
+    }
+}
+
 void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 {
     int scale, x, y, x2, y2, x3, neighX, neighY;
