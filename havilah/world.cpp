@@ -699,7 +699,7 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
     }
 }
 
-int ARegion::CanBeStartingCity( ARegionArray *pRA )
+int ARegion::CanBeStartingCity()
 {
     if (type == R_OCEAN) return 0;
     if (!IsCoastal()) return 0;
@@ -823,7 +823,7 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 
         reg = pArr->GetRegion( x, y);
 
-        if (!reg || !reg->CanBeStartingCity( pArr )) {
+        if (!reg || !reg->CanBeStartingCity()) {
             reg = 0;
             tries++;
             continue;

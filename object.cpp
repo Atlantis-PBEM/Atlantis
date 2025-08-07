@@ -310,15 +310,15 @@ void Object::build_json_report(json& j, Faction *fac, int obs, int truesight,
         json unit = json::object();
         AttitudeType attitude = fac->get_attitude(u->faction->num);
         if (u->faction == fac) {
-            u->build_json_report(unit, -1, 1, 1, 1, attitude, fac->showunitattitudes);
+            u->build_json_report(unit, -1, 1, 1, 1, attitude);
         } else {
             if (present) {
-                u->build_json_report(unit, obs, truesight, detfac, type != O_DUMMY, attitude, fac->showunitattitudes);
+                u->build_json_report(unit, obs, truesight, detfac, type != O_DUMMY, attitude);
             } else {
                 if (((type == O_DUMMY) && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_OUTDOOR_UNITS)) ||
                     ((type != O_DUMMY) && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_INDOOR_UNITS)) ||
                     ((u->guard == GUARD_GUARD) && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_GUARDS))) {
-                    u->build_json_report(unit, passobs, passtrue, passdetfac, type != O_DUMMY, attitude, fac->showunitattitudes);
+                    u->build_json_report(unit, passobs, passtrue, passdetfac, type != O_DUMMY, attitude);
                 }
             }
         }

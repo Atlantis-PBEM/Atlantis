@@ -936,8 +936,7 @@ int Game::RunEngraveRunes(ARegion *, Object *o, Unit *u)
     }
 
     if (o->incomplete > 0) {
-        u->error( "Runes of Warding may only be engraved on a completed "
-                "building.");
+        u->error("Runes of Warding may only be engraved on a completed building.");
         return 0;
     }
 
@@ -947,19 +946,23 @@ int Game::RunEngraveRunes(ARegion *, Object *o, Unit *u)
         case 5:
             if (o->type == O_MCASTLE) break;
             if (o->type == O_MCITADEL) break;
+            [[fallthrough]]; // Fall through intentionally
         case 4:
             if (o->type == O_CITADEL) break;
             if (o->type == O_MFORTRESS) break;
+            [[fallthrough]]; // Fall through intentionally
         case 3:
             if (o->type == O_CASTLE) break;
             if (o->type == O_MTOWER) break;
+            [[fallthrough]]; // Fall through intentionally
         case 2:
             if (o->type == O_FORT) break;
+            [[fallthrough]]; // Fall through intentionally
         case 1:
             if (o->type == O_TOWER) break;
+            [[fallthrough]]; // Fall through intentionally
         default:
-            u->error("Not high enough level to engrave Runes of Warding on "
-                    "that building.");
+            u->error("Not high enough level to engrave Runes of Warding on that building.");
             return 0;
     }
 
@@ -1821,7 +1824,7 @@ int Game::RunPortalLore(ARegion *r, Unit *u)
     return 1;
 }
 
-int Game::RunTransmutation(ARegion *r, Unit *u)
+int Game::RunTransmutation(ARegion *, Unit *u)
 {
     CastTransmuteOrder *order;
     int level, num, source;

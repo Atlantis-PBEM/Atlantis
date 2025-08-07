@@ -277,12 +277,12 @@ void ARegionList::create_surface_level(int level, int xSize, int ySize, const st
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::create_island_ring_level(int level, int xSize, int ySize, const std::string& name)
+void ARegionList::create_island_ring_level(int, int, int, const std::string&)
 {
     throw "create_island_ring_level not implemented for this game ruleset";
 }
 
-void ARegionList::create_underworld_ring_level(int level, int xSize, int ySize, const std::string& name)
+void ARegionList::create_underworld_ring_level(int, int, int, const std::string&)
 {
     throw "create_underworld_ring_level not implemented for this game ruleset";
 }
@@ -488,8 +488,8 @@ void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs)
 void ARegionList::InitGeographicMap(ARegionArray *pRegs)
 {
     GeoMap geo = GeoMap(pRegs->x, pRegs->y);
-    // Parameters: scatter(1-4), smoothing (1-100)
-    geo.Generate(3, 25);
+    // Parameters: smoothing (1-100)
+    geo.Generate(25);
     geo.ApplyGeography(pRegs);
     logger::write("");
 }
@@ -1615,7 +1615,7 @@ GeoMap::GeoMap(int x, int y)
     }
 }
 
-void GeoMap::Generate(int spread, int smoothness)
+void GeoMap::Generate(int smoothness)
 {
     int step = size / 2;
     while (step > 16) step = step / 2;

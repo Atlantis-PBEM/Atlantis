@@ -152,10 +152,10 @@ std::optional<int> parse_item_category(const parser::token& str)
     return std::nullopt;  // Not a category
 }
 
-int parse_all_items(const parser::token& token, int flags)
+int parse_all_items(const parser::token& token, int flags_to_exclude)
 {
     for (int i = 0; i < NITEMS; i++) {
-        if (ItemDefs[i].flags & flags) continue;
+        if (ItemDefs[i].flags & flags_to_exclude) continue;
         bool illusion = ItemDefs[i].type & IT_ILLUSION;
         std::string itemName = (illusion ? "i" : "") + ItemDefs[i].name;
         std::string itemNames = (illusion ? "i" : "") + ItemDefs[i].names;
@@ -166,21 +166,21 @@ int parse_all_items(const parser::token& token, int flags)
     return -1;
 }
 
-int parse_enabled_item(const parser::token& token, int flags)
+int parse_enabled_item(const parser::token& token, int flags_to_exclude)
 {
-    int item = parse_all_items(token, flags | ItemType::DISABLED);
+    int item = parse_all_items(token, flags_to_exclude | ItemType::DISABLED);
     return item;
 }
 
-int parse_giveable_item(const parser::token& token, int flags)
+int parse_giveable_item(const parser::token& token, int flags_to_exclude)
 {
-    int item = parse_enabled_item(token, flags | ItemType::CANTGIVE);
+    int item = parse_enabled_item(token, flags_to_exclude | ItemType::CANTGIVE);
     return item;
 }
 
-int parse_transportable_item(const parser::token& token, int flags)
+int parse_transportable_item(const parser::token& token, int flags_to_exclude)
 {
-    int item = parse_giveable_item(token, ItemType::NOTRANSPORT);
+    int item = parse_giveable_item(token, flags_to_exclude | ItemType::NOTRANSPORT);
     return item;
 }
 

@@ -1,7 +1,7 @@
 #include "game.h"
 #include "gamedata.h"
 
-int AGetName(int town, ARegion *reg) { return town != 0 ? 1 : 0; }
+int AGetName(int town, ARegion *) { return town != 0 ? 1 : 0; }
 const std::string& AGetNameString(int name) {
     static const std::vector<std::string> regionnames = {"Testing Wilds", "Basictown"};
     return regionnames[name];
@@ -21,20 +21,20 @@ void Game::CreateWorld() {
     reg->MakeStartingCity();
  }
 
-int ARegionList::GetRegType( ARegion *pReg ) { return 0; }
+int ARegionList::GetRegType(ARegion *) { return 0; }
 
 // Unit test levels are unscaled.
-int ARegionList::GetLevelXScale(int level) { return 1; }
+int ARegionList::GetLevelXScale(int) { return 1; }
 
 // Unit test levels are unscaled.
-int ARegionList::GetLevelYScale(int level) { return 1; }
+int ARegionList::GetLevelYScale(int) { return 1; }
 
 // Unit test regions are fully connected
-int ARegionList::CheckRegionExit(ARegion *pFrom, ARegion *pTo ) { return 1; }
+int ARegionList::CheckRegionExit(ARegion *, ARegion *) { return 1; }
 
-int ARegionList::GetWeather( ARegion *pReg, int month ) { return W_NORMAL; }
+int ARegionList::GetWeather(ARegion *, int) { return W_NORMAL; }
 
-int ARegion::CanBeStartingCity( ARegionArray *pRA ) { return 1; }
+int ARegion::CanBeStartingCity() { return 1; }
 
 void ARegion::MakeStartingCity() {
     if (!Globals->TOWNS_EXIST) return;
@@ -97,4 +97,4 @@ int ARegion::IsStartingCity() { return town != nullptr; }
 
 int ARegion::IsSafeRegion() { return 0; }
 
-ARegion *ARegionList::GetStartingCity(ARegion *AC, int i, int level, int maxX, int maxY) { return NULL; }
+ARegion *ARegionList::GetStartingCity(ARegion *, int, int, int, int) { return NULL; }
