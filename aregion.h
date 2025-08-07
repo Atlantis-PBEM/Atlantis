@@ -269,7 +269,7 @@ class ARegion
 
         std::string name;
         int num;
-        int type;
+        int type = -1;
         int buildingseq;
         int weather = W_NORMAL;
         int gate;
@@ -277,10 +277,10 @@ class ARegion
         int gateopen;
 
         TownInfo *town;
-        int race;
-        int population;
+        int race = -1;
+        int population = -1;
         int basepopulation;
-        int wages;
+        int wages = -1;
         int maxwages;
         int wealth;
 
@@ -325,7 +325,7 @@ class ARegion
         ARegion *next;
 
         // A link to the region's level to make some things easier.
-        ARegionArray *level;
+        ARegionArray *level = nullptr;
 
         // find a production for a certain skill.
         Production *get_production_for_skill(int item, int skill);

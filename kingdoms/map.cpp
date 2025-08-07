@@ -357,14 +357,6 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
                 reg->SetLoc(x, y, level);
                 reg->num = regions.size();
 
-                //
-                // Some initial values; these will get reset
-                //
-                reg->type = -1;
-                reg->race = -1; //
-                reg->wages = -1; // initially store: name
-                reg->population = -1; // initially used as flag
-
                 reg->level = arr;
                 regions.push_back(reg);
                 arr->SetRegion(x, y, reg);
