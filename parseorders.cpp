@@ -1396,7 +1396,7 @@ BuildOrder* Game::ProcessBuildHelp(Unit *unit, parser::string_parser& parser, or
     return order;
 }
 
-BuildOrder* Game::ProcessBuildShip(Unit *unit, int object_type, orders_check *checker)
+BuildOrder* Game::ProcessBuildShip(Unit *unit, int object_type)
 {
     int shipType = std::abs(object_type + 1);
 
@@ -1420,7 +1420,7 @@ BuildOrder* Game::ProcessBuildShip(Unit *unit, int object_type, orders_check *ch
     return order;
 }
 
-BuildOrder* Game::ProcessBuildStructure(Unit *unit, int object_type, orders_check *checker)
+BuildOrder* Game::ProcessBuildStructure(Unit *unit, int object_type)
 {
     // Object type was checked in the caller for being a valid, enabled object.
     if (!(ObjectDefs[object_type].flags & ObjectType::CANENTER)) {
@@ -1456,10 +1456,10 @@ BuildOrder *Game::ProcessBuildObject(Unit *unit, int object_type, orders_check *
     }
 
     // Handle ship building (negative object type)
-    if (object_type < 0) return ProcessBuildShip(unit, object_type, checker);
+    if (object_type < 0) return ProcessBuildShip(unit, object_type);
 
     // Regular structure
-    return ProcessBuildStructure(unit, object_type, checker);
+    return ProcessBuildStructure(unit, object_type);
 }
 
 BuildOrder *Game::ProcessContinuedBuild(Unit *unit, orders_check *checker)
@@ -2274,10 +2274,10 @@ void Game::ProcessNameOrder(Unit *unit, parser::string_parser& parser, orders_ch
     switch(towntype) {
         case TOWN_VILLAGE:
             ok = unit->object->type == O_TOWER || unit->object->type == O_MTOWER;
-            // Fall through intentionally
+            [[fallthrough]];// Fall through intentionally
         case TOWN_TOWN:
             ok = ok || unit->object->type == O_FORT || unit->object->type == O_MFORTRESS;
-            // Fall through intentionally
+            [[fallthrough]];// Fall through intentionally
         case TOWN_CITY:
             ok = ok || unit->object->type == O_CASTLE || unit->object->type == O_CITADEL ||
                 unit->object->type == O_MCASTLE || unit->object->type == O_MCITADEL;

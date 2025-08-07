@@ -403,10 +403,10 @@ class BattleItemType
 
 extern std::vector<BattleItemType> BattleItemDefs;
 
-extern int parse_all_items(const parser::token& token, int flags = 0);
-extern int parse_enabled_item(const parser::token& token, int flags = 0);
-extern int parse_giveable_item(const parser::token& token, int flags = 0);
-extern int parse_transportable_item(const parser::token& token, int flags = 0);
+extern int parse_all_items(const parser::token& token, int flags_to_exclude = 0);
+extern int parse_enabled_item(const parser::token& token, int flags_to_exclude = 0);
+extern int parse_giveable_item(const parser::token& token, int flags_to_exclude = 0);
+extern int parse_transportable_item(const parser::token& token, int flags_to_exclude = 0);
 extern std::optional<int> parse_item_category(const parser::token& token);
 
 extern int lookup_item(const strings::ci_string& name);

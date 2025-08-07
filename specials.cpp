@@ -204,8 +204,8 @@ void Battle::DoSpecialAttack(Soldier *a, Army *attackers, Army *def, int canatta
         int realtimes = spd.damage[i].minnum + rng::get_random(times) + rng::get_random(times);
 
         num = def->DoAnAttack(
-            this, a->special, realtimes, spd.damage[i].type, a->slevel, spd.damage[i].flags, spd.damage[i].dclass,
-                spd.damage[i].effect, 0, a, attackers, canattackback, hitDamage
+            a->special, realtimes, spd.damage[i].type, a->slevel, spd.damage[i].flags, spd.damage[i].dclass,
+            spd.damage[i].effect, 0, a, attackers, canattackback, hitDamage
         );
 
         if (spd.effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {

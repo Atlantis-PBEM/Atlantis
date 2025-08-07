@@ -2034,7 +2034,7 @@ void CountNames()
     logger::write("Regions " + std::to_string(nregions));
 }
 
-int AGetName(int town, ARegion *reg)
+int AGetName(int town, ARegion *)
 {
     int offset, number;
     if (town) {
@@ -2441,7 +2441,7 @@ int ARegionList::GetWeather( ARegion *pReg, int month )
     }
 }
 
-int ARegion::CanBeStartingCity( ARegionArray *pRA )
+int ARegion::CanBeStartingCity()
 {
     if (type == R_OCEAN) return 0;
     if (!IsCoastal()) return 0;
@@ -2567,7 +2567,7 @@ ARegion *ARegionList::GetStartingCity( ARegion *AC,
 
         reg = pArr->GetRegion( x, y );
 
-        if (!reg || !reg->CanBeStartingCity( pArr )) {
+        if (!reg || !reg->CanBeStartingCity()) {
             reg = 0;
             tries++;
             continue;

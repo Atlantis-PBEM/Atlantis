@@ -512,9 +512,7 @@ json Unit::build_json_descriptor() {
     return j;
 }
 
-void Unit::build_json_report(
-    json& j, int obs, int truesight, int detfac, int autosee, AttitudeType attitude, bool showattitudes
-)
+void Unit::build_json_report(json& j, int obs, int truesight, int detfac, int autosee, AttitudeType attitude)
 {
     int stealth = GetAttribute("stealth");
     bool my_unit = (obs == -1);
@@ -907,7 +905,7 @@ void Unit::DefaultOrders(Object *obj)
     }
 }
 
-void Unit::PostTurn(ARegion *r)
+void Unit::PostTurn(ARegion *)
 {
     if (type == U_WMON) {
         for(auto it = items.begin(); it != items.end(); ) {

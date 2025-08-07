@@ -156,12 +156,12 @@ void ARegionList::create_island_level(int level, int nPlayers, const std::string
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::create_island_ring_level(int level, int xSize, int ySize, const std::string& name)
+void ARegionList::create_island_ring_level(int, int, int, const std::string&)
 {
     throw "create_island_ring_level not implemented for this game ruleset";
 }
 
-void ARegionList::create_underworld_ring_level(int level, int xSize, int ySize, const std::string& name)
+void ARegionList::create_underworld_ring_level(int, int, int, const std::string&)
 {
     throw "create_underworld_ring_level not implemented for this game ruleset";
 }
@@ -492,7 +492,7 @@ void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
     logger::write("");
 }
 
-void ARegionList::MakeRingLand(ARegionArray *pReg, int minDistance, int maxDistance) { }
+void ARegionList::MakeRingLand(ARegionArray *, int, int) { }
 
 void ARegionList::MakeCentralLand(ARegionArray *pRegs)
 {

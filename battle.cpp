@@ -188,7 +188,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
                 if (spd.effectflags & SpecialType::FX_USE_LEV) times *= mount.specialLev;
                 int realtimes = spd.damage[i].minnum + rng::get_random(times) + rng::get_random(times);
                 num = def->DoAnAttack(
-                    this, mount.mountSpecial, realtimes, spd.damage[i].type, mount.specialLev, spd.damage[i].flags,
+                    mount.mountSpecial, realtimes, spd.damage[i].type, mount.specialLev, spd.damage[i].flags,
                     spd.damage[i].dclass, spd.damage[i].effect, 0, a, attackers, canAttackBehind, hitDamage
                 );
                 if (num != -1) {
@@ -229,8 +229,8 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
             mountBonus = weapon_def->get().mountBonus;
             attackClass = weapon_def->get().weapClass;
         }
-        def->DoAnAttack(this, NULL, 1, attackType, a->askill, flags, attackClass,
-                NULL, mountBonus, a, attackers, canAttackBehind, hitDamage);
+        def->DoAnAttack(nullptr, 1, attackType, a->askill, flags, attackClass,
+            nullptr, mountBonus, a, attackers, canAttackBehind, hitDamage);
         if (!def->NumAlive()) break;
     }
 
