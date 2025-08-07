@@ -36,8 +36,6 @@ void ARegionList::create_underworld_level(int level, int xSize, int ySize, const
 
 void ARegionList::create_underdeep_level(int level, int xSize, int ySize, const std::string& name) { }
 
-void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize) { }
-
 void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean, int continentSize) { }
 
 void ARegionList::MakeRingLand(ARegionArray *pReg, int minDistance, int maxDistance) { }
