@@ -256,18 +256,6 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
     logger::write("");
 }
 
-void ARegionList::SetupNeighbors(ARegionArray *pRegs)
-{
-    int x, y;
-    for (x = 0; x < pRegs->x; x++) {
-        for (y = 0; y < pRegs->y; y++) {
-            ARegion *reg = pRegs->GetRegion(x, y);
-            if (!reg) continue;
-            NeighSetup(reg, pRegs);
-        }
-    }
-}
-
 void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 {
     int scale, x2, y2;
