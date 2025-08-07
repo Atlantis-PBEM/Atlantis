@@ -1742,6 +1742,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
                 reg->level = arr;
                 regions.push_back(reg);
                 arr->SetRegion(x, y, reg);
+                logger::dot();
             }
         }
     }
