@@ -1722,11 +1722,39 @@ Location *ARegionList::FindUnit(int i)
     return nullptr;
 }
 
+void ARegionList::MakeRegions(int level, int xSize, int ySize)
+{
+    logger::write("Making a level...");
+
+    ARegionArray *arr = new ARegionArray(xSize, ySize);
+    pRegionArrays[level] = arr;
+
+    //
+    // Make the regions themselves
+    //
+    for (int y = 0; y < ySize; y++) {
+        for (int x = 0; x < xSize; x++) {
+            if (!((x + y) % 2)) {
+                ARegion *reg = new ARegion;
+                reg->SetLoc(x, y, level);
+                reg->num = regions.size();
+
+                reg->level = arr;
+                regions.push_back(reg);
+                arr->SetRegion(x, y, reg);
+            }
+        }
+    }
+
+    SetupNeighbors(arr);
+
+    logger::write("");
+}
+
 void ARegionList::SetupNeighbors(ARegionArray *pRegs)
 {
-    int x, y;
-    for (x = 0; x < pRegs->x; x++) {
-        for (y = 0; y < pRegs->y; y++) {
+    for (int x = 0; x < pRegs->x; x++) {
+        for (int y = 0; y < pRegs->y; y++) {
             ARegion *reg = pRegs->GetRegion(x, y);
             if (!reg) continue;
             NeighSetup(reg, pRegs);

@@ -225,36 +225,6 @@ void ARegionList::create_underdeep_level(int level, int xSize, int ySize, const 
     FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::MakeRegions(int level, int xSize, int ySize)
-{
-    logger::write("Making a level...");
-
-    ARegionArray *arr = new ARegionArray(xSize, ySize);
-    pRegionArrays[level] = arr;
-
-    //
-    // Make the regions themselves
-    //
-    int x, y;
-    for (y = 0; y < ySize; y++) {
-        for (x = 0; x < xSize; x++) {
-            if (!((x + y) % 2)) {
-                ARegion *reg = new ARegion;
-                reg->SetLoc(x, y, level);
-                reg->num = regions.size();
-
-                reg->level = arr;
-                regions.push_back(reg);
-                arr->SetRegion(x, y, reg);
-            }
-        }
-    }
-
-    SetupNeighbors(arr);
-
-    logger::write("");
-}
-
 void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
 {
     int scale, x2, y2;
