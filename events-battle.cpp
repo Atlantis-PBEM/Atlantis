@@ -210,7 +210,7 @@ static Event monsterHunt(BattleFact* fact) {
     };
 }
 
-const Event monsterAggresion(BattleFact* fact) {
+static Event monsterAggresion(BattleFact* fact) {
     std::ostringstream buffer;
 
     auto mark = fact->location.GetSignificantLandmark();
@@ -253,7 +253,7 @@ const Event monsterAggresion(BattleFact* fact) {
     };
 }
 
-const Event pvpBattle(BattleFact* fact) {
+static Event pvpBattle(BattleFact* fact) {
     std::ostringstream buffer;
 
     int total = fact->attacker.total + fact->defender.total;
