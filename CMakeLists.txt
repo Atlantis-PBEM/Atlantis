@@ -12,8 +12,7 @@ if (NOT COMPILER_HAS_RANGES)
 endif(NOT COMPILER_HAS_RANGES)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-    add_compile_options(-g -Wextra -Wall -Werror -pedantic -Wparentheses -Wno-psabi
-        -Wpointer-arith -Wignored-qualifiers)
+    add_compile_options(-g -Wextra -Wall -Werror -pedantic -Wno-psabi)
 elseif(MSVC)
     #add_compile_options(/WX /MP /FC /D_CRT_SECURE_NO_WARNINGS)
     add_compile_options(/MP /FC /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4700)
