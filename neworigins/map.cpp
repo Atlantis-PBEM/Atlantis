@@ -52,11 +52,11 @@ struct Province;
 struct ZoneRegion {
     int id;
     Coords location;
-    bool exclude;
-    int biome;
-    Zone *zone;
-    Province *province;
-    ARegion* region;
+    bool exclude = false;
+    int biome = -1;
+    Zone *zone = nullptr;
+    Province *province = nullptr;
+    ARegion* region = nullptr;
     ZoneRegion *neighbors[NDIRS];
 
     bool HaveBorderWith(Zone* zone);
@@ -167,8 +167,8 @@ bool ZoneRegion::IsOuter() {
 struct Province {
     int id;
     int h;
-    int biome;
-    Zone* zone;
+    int biome = -1;
+    Zone* zone = nullptr;
     std::map<int, ZoneRegion *> regions;
 
     Coords GetLocation();
@@ -336,15 +336,13 @@ Zone::~Zone() {
     for (auto &kv : provinces) {
         delete kv.second;
     }
-    provinces.clear();
 }
 
 Province* Zone::CreateProvince(ZoneRegion* region, int h) {
-    Province* province = new Province;
+    Province* province = new Province();
     province->id = this->provinces.size();
     province->zone = this;
     province->h = h;
-    province->biome = -1;
 
     province->AddRegion(region);
     this->provinces.insert(std::make_pair(province->id, province));
@@ -577,15 +575,11 @@ MapBuilder::MapBuilder(ARegionArray* aregs) {
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             if (!((x + y) % 2)) {
-                ZoneRegion *reg = new ZoneRegion;
+                ZoneRegion *reg = new ZoneRegion();
                 reg->id = GetRegionIndex(x, y, this->w, this->h);
                 reg->location.x = x;
                 reg->location.y = y;
-                reg->zone = NULL;
-                reg->exclude = false;
-                reg->province = NULL;
                 reg->region = aregs->GetRegion(x, y);
-                reg->biome = -1;
 
                 if (reg->location.x != reg->region->xloc || reg->location.y != reg->region->yloc) {
                     logger::write("Region location do not match");
@@ -610,7 +604,7 @@ MapBuilder::MapBuilder(ARegionArray* aregs) {
 }
 
 Zone* MapBuilder::CreateZone(ZoneType type) {
-    Zone* zone = new Zone;
+    Zone* zone = new Zone();
     zone->id = this->lastZoneId++;
     zone->type = type;
 

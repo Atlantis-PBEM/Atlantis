@@ -30,18 +30,18 @@
 class Production {
 public:
 	Production(int type, int max);
-	Production();
+    Production() {};
 
 	void write_out(std::ostream& f);
 	void read_in(std::istream& f);
 	std::string write_report();
 
-	int itemtype;
-	int baseamount;
-	int amount;
-	int skill;
-	int productivity;
-	int activity;
+	int itemtype = -1;
+	int baseamount = 0;
+	int amount = 0;
+	int skill = -1;
+	int productivity = 0;
+	int activity = 0;
 };
 
 #endif

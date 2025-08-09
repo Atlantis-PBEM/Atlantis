@@ -5,23 +5,11 @@
 #include "gamedata.h"
 #include "rng.hpp"
 
-Production::Production()
-{
-    itemtype = -1;
-    amount = 0;
-    baseamount = 0;
-    productivity = 0;
-    skill = -1;
-}
-
 Production::Production(int it, int maxamt)
+    : itemtype(it), baseamount(amount), amount(maxamt), productivity(10)
 {
-    itemtype = it;
-    amount = maxamt;
     if (Globals->RANDOM_ECONOMY)
         amount += rng::get_random(maxamt);
-    baseamount = amount;
-    productivity = 10;
     skill = lookup_skill(ItemDefs[it].pSkill);
 }
 
