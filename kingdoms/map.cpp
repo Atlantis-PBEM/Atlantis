@@ -353,7 +353,7 @@ void ARegionList::MakeRegions(int level, int xSize, int ySize)
     for (y = 0; y < ySize; y++) {
         for (x = 0; x < xSize; x++) {
             if (!((x + y) % 2)) {
-                ARegion *reg = new ARegion;
+                ARegion *reg = new ARegion();
                 reg->SetLoc(x, y, level);
                 reg->num = regions.size();
 
@@ -449,7 +449,7 @@ void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
                         continue;
                 }
 
-                ARegion *reg = new ARegion;
+                ARegion *reg = new ARegion();
                 reg->SetLoc(x, y, level);
                 reg->num = regions.size();
 
