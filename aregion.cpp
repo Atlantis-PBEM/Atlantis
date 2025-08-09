@@ -29,14 +29,12 @@ Location *GetUnit(std::list<Location *>& locs, int unitid)
     return nullptr;
 }
 
-Farsight::Farsight()
+Farsight::Farsight(Faction *faction, Unit *unit, int level, int observation)
+    : faction(faction), unit(unit), level(level), observation(observation)
 {
-    faction = 0;
-    unit = 0;
-    level = 0;
-    observation = 0;
-    for (int i = 0; i < NDIRS; i++)
+    for (int i = 0; i < NDIRS; i++) {
         exits_used[i] = 0;
+    }
 }
 
 Farsight *GetFarsight(std::list<Farsight *>& farsees, Faction *fac)
@@ -57,15 +55,6 @@ std::string TownString(int i)
     return "huh?";
 }
 
-TownInfo::TownInfo()
-{
-    pop = 0;
-    activity = 0;
-    hab = 0;
-}
-
-TownInfo::~TownInfo() { }
-
 void TownInfo::Readin(std::istream &f)
 {
     std::string temp;
@@ -81,27 +70,10 @@ void TownInfo::Writeout(std::ostream& f)
 }
 
 ARegion::ARegion()
+    : name("Region")
 {
-    name = "Region";
-    xloc = 0;
-    yloc = 0;
-    buildingseq = 1;
-    gate = 0;
-    gatemonth = 0;
-    gateopen = 1;
-    town = 0;
-    development = 0;
-    maxdevelopment = 0;
-    habitat = 0;
-    immigrants = 0;
-    emigrants = 0;
-    improvement = 0;
-    clearskies = 0;
-    earthlore = 0;
-    phantasmal_entertainment = 0;
     for (int i=0; i<NDIRS; i++)
-        neighbors[i] = 0;
-    visited = 0;
+        neighbors[i] = nullptr;
 }
 
 ARegion::~ARegion()
@@ -114,7 +86,7 @@ ARegion::~ARegion()
 void ARegion::ZeroNeighbors()
 {
     for (int i=0; i<NDIRS; i++) {
-        neighbors[i] = 0;
+        neighbors[i] = nullptr;
     }
 }
 
@@ -802,7 +774,7 @@ Location *ARegion::GetLocation(UnitId *id, int faction)
     for(const auto o : objects) {
         Unit *unit = o->GetUnitId(id, faction);
         if (unit) {
-            Location *l = new Location;
+            Location *l = new Location();
             l->region = this;
             l->obj = o;
             l->unit = unit;
@@ -972,7 +944,7 @@ void ARegion::Readin(std::istream &f, std::list<Faction *>& facs)
     int n;
     f >> n;
     if (n) {
-        town = new TownInfo;
+        town = new TownInfo();
         town->Readin(f);
         town->dev = TownDevelopment();
     } else {
@@ -1662,7 +1634,7 @@ int ARegionList::ReadRegions(std::istream &f, std::list<Faction *>& factions)
 
     logger::write("Reading the regions...");
     for (i = 0; i < num; i++) {
-        ARegion *temp = new ARegion;
+        ARegion *temp = new ARegion();
         temp->Readin(f, factions);
         regions.push_back(temp);
 
@@ -1711,7 +1683,7 @@ Location *ARegionList::FindUnit(int i)
         for(const auto obj : reg->objects) {
             for(const auto u : obj->units) {
                 if (u->num == i) {
-                    Location *retval = new Location;
+                    Location *retval = new Location();
                     retval->unit = u;
                     retval->region = reg;
                     retval->obj = obj;
@@ -4001,3 +3973,4 @@ int ARegionList::find_distance_between_regions(ARegion *start, ARegion *end)
     graphs::Location2D b = { end->xloc, end->yloc };
     return cylDistance(a, b, w);
 }
+

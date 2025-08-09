@@ -294,7 +294,7 @@ void SkillList::SetExp(int skill, int exp)
 
 SkillList *SkillList::Split(int total, int leave)
 {
-    SkillList *ret = new SkillList;
+    SkillList *ret = new SkillList();
     for(auto siter = skills.begin(); siter != skills.end();) {
         Skill *s = *siter;
         Skill *n = s->Split(total, leave);

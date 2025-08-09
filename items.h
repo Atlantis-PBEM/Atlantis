@@ -432,18 +432,15 @@ extern int IsSoldier(int);
 class Item
 {
     public:
-        Item();
-        ~Item();
-
         void Readin(std::istream& f);
         void Writeout(std::ostream& f);
 
         std::string report(bool see_illusions);
 
-        int type;
-        int num;
-        int selling;
-        int checked; // flag whether item has been reported, counted etc.
+        int type = 0;
+        int num = 0;
+        int selling = 0;
+        int checked = 0; // flag whether item has been reported, counted etc.
 };
 
 class ItemList

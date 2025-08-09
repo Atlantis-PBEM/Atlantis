@@ -72,25 +72,11 @@ std::optional<AttitudeType> parse_attitude(const parser::token& str)
 }
 
 Faction::Faction()
+    : password("none")
 {
-    exists = true;
     for (auto &ft : *FactionTypes) {
         type[ft] = 1;
     }
-
-    lastchange = -6;
-    password = "none";
-    times = 0;
-    showunitattitudes = 0;
-    temformat = TEMPLATE_OFF;
-    quit = 0;
-    defaultattitude = AttitudeType::NEUTRAL;
-    unclaimed = 0;
-    pReg = NULL;
-    pStartLoc = NULL;
-    noStartLeader = 0;
-    startturn = 0;
-    battleLogFormat = 0;
 }
 
 Faction::Faction(int n)

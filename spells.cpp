@@ -133,13 +133,8 @@ void Game::ProcessMindReading(Unit *u, parser::string_parser& parser, orders_che
         return;
     }
 
-    CastMindOrder *order = new CastMindOrder;
-    order->id = id;
-    order->spell = S_MIND_READING;
-    order->level = 1;
-
     u->ClearCastOrders();
-    u->castorders = order;
+    u->castorders = new CastMindOrder(1, id);
 }
 
 void Game::ProcessBirdLore(Unit *u, parser::string_parser& parser, orders_check *checker)
@@ -151,39 +146,32 @@ void Game::ProcessBirdLore(Unit *u, parser::string_parser& parser, orders_check 
         return;
     }
 
-    if (token != "eagle" && token != "direction") {
-        parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid argument '" + token.get_string() + "'.");
-        return;
+    int level = 0, target = -1;
+    if (token == "eagle") {
+        level = 3;
     }
-
-    int dir = -1;
-    if (token == "direction") {
+    else if (token == "direction") {
+        level = 1;
         parser::token dir_tkn = parser.get_token();
         if (!dir_tkn) {
             parse_error(checker, u, 0, "CAST '" + skdef.name + "': Missing direction.");
             return;
         }
-        dir = parse_dir(dir_tkn);
-        if (dir == -1 || dir > NDIRS) {
+        target = parse_dir(dir_tkn);
+        if (target == -1 || target > NDIRS) {
             parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid direction '" + dir_tkn.get_string() + "'.");
             return;
         }
     }
+    else {
+        parse_error(checker, u, 0, "CAST '" + skdef.name + "': Invalid argument '" + token.get_string() + "'.");
+        return;
+    }
 
     if (checker) return;
 
-    CastIntOrder *order = new CastIntOrder;
-    order->spell = S_BIRD_LORE;
-    if (token == "eagle") {
-        order->level = 3;
-    }
-
-    if (token == "direction") {
-        order->level = 1;
-        order->target = dir;
-    }
     u->ClearCastOrders();
-    u->castorders = order;
+    u->castorders = new CastIntOrder(S_BIRD_LORE, level, target);
 }
 
 void Game::ProcessInvisibility(Unit *u, parser::string_parser& parser, orders_check *checker)
@@ -199,11 +187,8 @@ void Game::ProcessInvisibility(Unit *u, parser::string_parser& parser, orders_ch
     if (u->castorders && u->castorders->spell == S_INVISIBILITY) {
         order = dynamic_cast<CastUnitsOrder *>(u->castorders);
     } else {
-        order = new CastUnitsOrder;
-        order->spell = S_INVISIBILITY;
-        order->level = 1;
         u->ClearCastOrders();
-        u->castorders = order;
+        u->castorders = new CastUnitsOrder(1);
     }
 
     if (checker) return;
@@ -240,12 +225,8 @@ void Game::ProcessPhanDemons(Unit *u, parser::string_parser& parser, orders_chec
     int amt = parser.get_token().get_number().value_or(1);
     if (amt < 1) amt = 1;
 
-    CastIntOrder *order = new CastIntOrder;
-    order->spell = S_CREATE_PHANTASMAL_DEMONS;
-    order->level = level;
-    order->target = amt;
     u->ClearCastOrders();
-    u->castorders = order;
+    u->castorders = new CastIntOrder(S_CREATE_PHANTASMAL_DEMONS, level, amt);
 }
 
 void Game::ProcessPhanUndead(Unit *u, parser::string_parser& parser, orders_check *checker)
@@ -273,12 +254,8 @@ void Game::ProcessPhanUndead(Unit *u, parser::string_parser& parser, orders_chec
     int amt = parser.get_token().get_number().value_or(1);
     if (amt < 1) amt = 1;
 
-    CastIntOrder *order = new CastIntOrder;
-    order->spell = S_CREATE_PHANTASMAL_UNDEAD;
-    order->level = level;
-    order->target = amt;
     u->ClearCastOrders();
-    u->castorders = order;
+    u->castorders = new CastIntOrder(S_CREATE_PHANTASMAL_UNDEAD, level, amt);
 }
 
 void Game::ProcessPhanBeasts(Unit *u, parser::string_parser& parser, orders_check *checker)
@@ -306,23 +283,16 @@ void Game::ProcessPhanBeasts(Unit *u, parser::string_parser& parser, orders_chec
     int amt = parser.get_token().get_number().value_or(1);
     if (amt < 1) amt = 1;
 
-    CastIntOrder *order = new CastIntOrder;
-    order->spell = S_CREATE_PHANTASMAL_BEASTS;
-    order->level = level;
-    order->target = amt;
     u->ClearCastOrders();
-    u->castorders = order;
+    u->castorders = new CastIntOrder(S_CREATE_PHANTASMAL_BEASTS, level, amt);
 }
 
 void Game::ProcessGenericSpell(Unit *u, int spell, orders_check *checker)
 {
     if (checker) return;
 
-    CastOrder *orders = new CastOrder;
-    orders->spell = spell;
-    orders->level = 1;
     u->ClearCastOrders();
-    u->castorders = orders;
+    u->castorders = new CastOrder(spell, 1);
 }
 
 void Game::ProcessRegionSpell(Unit *u, int spell, parser::string_parser& parser, orders_check *checker)
@@ -375,19 +345,14 @@ void Game::ProcessRegionSpell(Unit *u, int spell, parser::string_parser& parser,
     if (y == -1) y = u->object->region->yloc;
     if (z == -1) z = u->object->region->zloc;
 
-    CastRegionOrder *order;
-    if (spell == S_TELEPORTATION) order = new TeleportOrder;
-    else order = new CastRegionOrder;
-
-    order->spell = spell;
-    order->level = 1;
-    order->xloc = x;
-    order->yloc = y;
-    order->zloc = z;
-
     u->ClearCastOrders();
-    if (spell == S_TELEPORTATION) u->teleportorders = dynamic_cast<TeleportOrder *>(order);
-    else u->castorders = order;
+
+    if (spell == S_TELEPORTATION) {
+        u->teleportorders = new TeleportOrder(spell, 1, x, y, z);
+    }
+    else {
+        u->castorders = new CastRegionOrder(spell, 1, x, y, z);
+    }
 }
 
 void Game::ProcessCastPortalLore(Unit *u, parser::string_parser& parser, orders_check *checker)
@@ -410,15 +375,14 @@ void Game::ProcessCastPortalLore(Unit *u, parser::string_parser& parser, orders_
     TeleportOrder *order;
     if (u->teleportorders && u->teleportorders->spell == S_PORTAL_LORE) {
         order = u->teleportorders;
+        order->level = 1;
     } else {
-        order = new TeleportOrder;
+        order = new TeleportOrder(S_PORTAL_LORE, 1);
         u->ClearCastOrders();
         u->teleportorders = order;
     }
 
     order->gate = target;
-    order->spell = S_PORTAL_LORE;
-    order->level = 1;
 
     UnitId *id = parse_unit(parser);
     while(id) {
@@ -442,11 +406,8 @@ void Game::ProcessCastGateLore(Unit *u, parser::string_parser& parser, orders_ch
 
     if (token == "detect") {
         if (checker) return;
-        CastOrder *to = new CastOrder;
-        to->spell = S_GATE_LORE;
-        to->level = 2;
         u->ClearCastOrders();
-        u->castorders = to;
+        u->castorders = new CastOrder(S_GATE_LORE, 2);
         return;
     }
 
@@ -467,10 +428,8 @@ void Game::ProcessCastGateLore(Unit *u, parser::string_parser& parser, orders_ch
         if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE && u->teleportorders->gate == gate) {
             order = u->teleportorders;
         } else {
-            order = new TeleportOrder;
+            order = new TeleportOrder(S_GATE_LORE, 3);
             order->gate = gate;
-            order->spell = S_GATE_LORE;
-            order->level = 3;
             u->ClearCastOrders();
             u->teleportorders = order;
         }
@@ -489,31 +448,33 @@ void Game::ProcessCastGateLore(Unit *u, parser::string_parser& parser, orders_ch
         if (checker) return;
 
         TeleportOrder *order;
-        if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE && u->teleportorders->gate == -1 ) {
-            order = u->teleportorders;
-        } else {
-            order = new TeleportOrder;
-            order->gate = -1;
-            order->spell = S_GATE_LORE;
-            order->level = 1;
-            u->ClearCastOrders();
-            u->teleportorders = order;
-        }
+        int level = 1;
+        int gate = -1;
 
         token = parser.get_token();
         if (token == "level") {
-            order->gate = -2;
-            order->level = 2;
+            gate = -2;
+            level = 2;
             token = parser.get_token();
         }
         if (token != "units") return;
+
+        if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE && u->teleportorders->gate == -1 ) {
+            order = u->teleportorders;
+            order->gate = gate;
+            order->level = level;
+        } else {
+            order = new TeleportOrder(S_GATE_LORE, level);
+            order->gate = gate;
+            u->ClearCastOrders();
+            u->teleportorders = order;
+        }
 
         UnitId *id = parse_unit(parser);
         while(id) {
             order->units.push_back(id);
             id = parse_unit(parser);
         }
-        return;
     }
 }
 
@@ -555,14 +516,8 @@ void Game::ProcessTransmutation(Unit *u, parser::string_parser& parser, orders_c
 
     if (checker) return;
 
-    CastTransmuteOrder *order;
-    order = new CastTransmuteOrder;
-    order->spell = S_TRANSMUTATION;
-    order->level = level;
-    order->item = item;
-    order->number = amt;
     u->ClearCastOrders();
-    u->castorders = order;
+    u->castorders = new CastTransmuteOrder(level, item, amt);
 }
 
 void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
@@ -1191,9 +1146,7 @@ int Game::RunBirdLore(ARegion *r,Unit *u)
             return 0;
         }
 
-        Farsight *f = new Farsight;
-        f->faction = u->faction;
-        f->level = u->GetSkill(S_BIRD_LORE);
+        Farsight *f = new Farsight(u->faction, u, u->GetSkill(S_BIRD_LORE));
         tar->farsees.push_back(f);
         u->event("Sends birds to spy on " + tar->print() + ".", "spell");
         return 1;
@@ -1484,11 +1437,7 @@ int Game::RunFarsight(ARegion *r,Unit *u)
     val = GetRegionInRange(r, tar, u, S_FARSIGHT);
     if (!val) return 0;
 
-    Farsight *f = new Farsight;
-    f->faction = u->faction;
-    f->level = u->GetSkill(S_FARSIGHT);
-    f->unit = u;
-    f->observation = u->GetAttribute("observation");
+    Farsight *f = new Farsight(u->faction, u, u->GetSkill(S_FARSIGHT), u->GetAttribute("observation"));
     tar->farsees.push_back(f);
     u->event("Casts Farsight on " + tar->short_print() + ".", "spell");
     return 1;

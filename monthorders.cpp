@@ -288,10 +288,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
                         }
                     }
                     // And mark the hex being entered
-                    Farsight *f = new Farsight;
-                    f->faction = unit->faction;
-                    f->level = 0;
-                    f->unit = unit;
+                    Farsight *f = new Farsight(unit->faction, unit, 0);
                     f->exits_used[reg->GetRealDirComp(x->dir)] = 1;
                     newreg->passers.push_back(f);
                 }
@@ -317,7 +314,7 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
         }
     }
 
-    loc = new Location;
+    loc = new Location();
     loc->unit = cap;
     loc->region = reg;
     loc->obj = fleet;
@@ -1037,7 +1034,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
     u->Practice(o->skill);
     o->target -= output;
     if (o->target > 0) {
-        TurnOrder *tOrder = new TurnOrder;
+        TurnOrder *tOrder = new TurnOrder();
         tOrder->repeating = 0;
         std::string order = "PRODUCE " + std::to_string(o->target) + " " + ItemDefs[o->item].abr;
         tOrder->turnOrders.push_back(order);
@@ -1208,8 +1205,7 @@ void Game::RunAProduction(ARegion *r, Production *p)
             p->activity += ubucks;
             po->target -= ubucks;
             if (po->target > 0) {
-                TurnOrder *tOrder = new TurnOrder;
-                tOrder->repeating = 0;
+                TurnOrder *tOrder = new TurnOrder();
                 std::string order = "PRODUCE " + std::to_string(po->target) + " " + ItemDefs[po->item].abr;
                 tOrder->turnOrders.push_back(order);
                 u->turnorders.push_front(tOrder);
@@ -1442,8 +1438,7 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
         // study to level order
         if (o->level != -1) {
             if (u->GetRealSkill(sk) < o->level) {
-                TurnOrder *tOrder = new TurnOrder;
-                tOrder->repeating = 0;
+                TurnOrder *tOrder = new TurnOrder();
                 std::string order = "STUDY " + std::string(SkillDefs[sk].abbr) + " " + std::to_string(o->level);
                 tOrder->turnOrders.push_back(order);
                 u->turnorders.push_front(tOrder);
@@ -1763,10 +1758,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
             }
         }
         // And mark the hex being entered
-        Farsight *f = new Farsight;
-        f->faction = unit->faction;
-        f->level = 0;
-        f->unit = unit;
+        Farsight *f = new Farsight(unit->faction, unit, 0);
         if (x->dir < MOVE_IN) { f->exits_used[region->GetRealDirComp(x->dir)] = 1; }
         newreg->passers.push_back(f);
     }
@@ -1776,7 +1768,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
     std::erase(o->dirs, x);
     delete x;
 
-    loc = new Location;
+    loc = new Location();
     loc->unit = unit;
     loc->region = region;
     loc->obj = nullptr;
