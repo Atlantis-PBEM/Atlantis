@@ -32,7 +32,7 @@ ut::suite<"UnitTestHelper"> unit_test_helper_suite = []
     helper.initialize_game();
     // The output will have the fact that it created the world and 1 '.' for each region.
     std::string current = helper.log_output();
-    std::string expected = "Creating world\n.....";
+    std::string expected = "Creating world\nMaking a level...\n....\nMaking a level...\n.\n";
     expect(current == expected);
   };
 
