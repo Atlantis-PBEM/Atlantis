@@ -225,7 +225,6 @@ void ARegionList::create_underdeep_level(int level, int xSize, int ySize, const 
     FinalSetup(pRegionArrays[level]);
 }
 
-
 void ARegionList::MakeLand(ARegionArray *pRegs, int percentOcean,
         int continentSize)
 {
