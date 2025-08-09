@@ -110,17 +110,18 @@ struct EventLocation {
     std::string province;
     std::string settlement;
     int settlementType;
-
     std::vector<Landmark> landmarks;
 
     events::LandmarkType GetLandmarkType();
     const std::string GetTerrainName(const bool plural = false);
-    static const EventLocation Create(ARegion* region);
+    static EventLocation Create(ARegion* region);
     const Landmark *GetSignificantLandmark();
 };
 
 class BattleFact : public FactBase {
 public:
+    ~BattleFact() = default;
+
     void GetEvents(std::list<Event> &events);
 
     EventLocation location;

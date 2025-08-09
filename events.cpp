@@ -18,9 +18,7 @@ std::string townType(const int type) {
     }
 }
 
-FactBase::~FactBase() {
-
-}
+FactBase::~FactBase() { }
 
 void BattleSide::AssignUnit(Unit* unit) {
     this->factionName = unit->faction->name;
@@ -209,7 +207,7 @@ bool compareLandmarks(const Landmark &first, const Landmark &second) {
     return first.y < second.y;
 }
 
-const EventLocation EventLocation::Create(ARegion* region) {
+EventLocation EventLocation::Create(ARegion* region) {
     EventLocation loc;
 
     loc.x = region->xloc;
