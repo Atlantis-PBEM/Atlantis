@@ -1496,9 +1496,7 @@ void Game::DoBuy(ARegion *r, Market *m)
                     }
                     if (ItemDefs[o->item].type & IT_MAN) {
                         /* recruiting; must dilute skills */
-                        SkillList *sl = new SkillList;
                         u->AdjustSkills();
-                        delete sl;
                         /* Setup specialized skill experience */
                         if (Globals->REQUIRED_EXPERIENCE) {
                             auto mt = find_race(ItemDefs[o->item].abr)->get();
