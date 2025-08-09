@@ -101,9 +101,9 @@ public:
     void Writeout(std::ostream &f) const;
     Skill *Split(int total, int split);
 
-    int type;
-    unsigned int days;
-    unsigned int exp;
+    int type = -1;
+    unsigned int days = 0;
+    unsigned int exp = 0;
 };
 
 class SkillList {

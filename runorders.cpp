@@ -942,18 +942,15 @@ void Game::Do1JoinOrder(ARegion *r, Unit *u)
             // DoGiveOrder can modify the item list if the last of an item is given, so increment here.
             it++;
             GiveOrder go;
-            UnitId id;
             go.amount = item->num;
             go.except = 0;
             go.item = item->type;
-            id.unitnum = to->GetOwner()->num;
-            id.alias = 0;
-            id.faction = 0;
+            UnitId id(to->GetOwner()->num, 0, 0);
             go.target = &id;
             go.type = O_GIVE;
             go.merge = 1;
             DoGiveOrder(r, u, &go);
-            go.target = NULL;
+            go.target = nullptr;
         }
         for(const auto pass : u->object->units) {
             pass->MoveUnit(to);
@@ -3263,10 +3260,9 @@ void Game::RunAnnihilateOrders() {
                     AnnihilateOrder *o = u->annihilateorders.front();
                     u->annihilateorders.pop_front();
 
-                    TurnOrder *tOrder = new TurnOrder;
+                    TurnOrder *tOrder = new TurnOrder();
                     std::string order = "ANNIHILATE " + std::to_string(o->xloc) + " " + std::to_string(o->yloc) +
                         " " + std::to_string(o->zloc);
-                    tOrder->repeating = 0;
                     tOrder->turnOrders.push_back(order);
                     u->turnorders.push_front(tOrder);
                 }

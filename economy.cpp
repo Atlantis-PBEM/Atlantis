@@ -144,7 +144,7 @@ void ARegion::SetupEconomy() {
     }
     int wagelimit = (int) ((float) (pp * (Wages() - 10 * Globals->MAINTENANCE_COST) /50));
     if (wagelimit < 0) wagelimit = 0;
-    Production * w = new Production;
+    Production * w = new Production();
     w->itemtype = I_SILVER;
     w->amount = wagelimit / Globals->WORK_FRACTION;
     w->baseamount = wagelimit / Globals->WORK_FRACTION;
@@ -161,7 +161,7 @@ void ARegion::SetupEconomy() {
     int maxent = (int) ((float) (ep * ((Wages() - 10 * Globals->MAINTENANCE_COST) + 1) /50));
     if (maxent < 0) maxent = 0;
 
-    Production * e = new Production;
+    Production * e = new Production();
     e->itemtype = I_SILVER;
     e->skill = S_ENTERTAINMENT;
     e->amount = maxent / Globals->ENTERTAIN_FRACTION;
@@ -271,7 +271,7 @@ void ARegion::SetIncome()
     // In some cases (ie. after products.DeleteAll() in EditGameRegionTerrain)
     // I_SILVER is not in ProductionList
     if( !w ) {
-      w = new Production;
+      w = new Production();
       products.push_back(w);
     }
     w->itemtype = I_SILVER;
@@ -293,7 +293,7 @@ void ARegion::SetIncome()
     // In some cases (ie. after products.DeleteAll() in EditGameRegionTerrain)
     // I_SILVER is not in ProductionList
     if( !e ) {
-      e = new Production;
+      e = new Production();
       products.push_back(e);
     }
     e->itemtype = I_SILVER;
@@ -804,7 +804,7 @@ void ARegion::add_town(int size)
  * in the last instance. */
 void ARegion::add_town(int size, const std::string& name)
 {
-    town = new TownInfo;
+    town = new TownInfo();
     town->name = name;
     SetTownType(size);
     SetupCityMarket();

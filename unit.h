@@ -70,7 +70,8 @@ enum {
 
 class UnitId {
     public:
-        UnitId() {};
+        UnitId(int num, int alias = 0, int faction = 0)
+            : unitnum(num), alias(alias), faction(faction) {};
         std::string Print();
 
         int unitnum; /* if 0, it is a new unit */

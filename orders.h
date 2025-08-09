@@ -101,84 +101,88 @@ int Parse1Order(const parser::token& token);
 
 class Order {
   public:
-    Order();
-    virtual ~Order();
+    Order(int type = 0, int quiet = 0);
+    virtual ~Order() = default;
 
     int type;
     int quiet;
 };
 
-class MoveDir {
-  public:
-    int dir;
+struct MoveDir {
+    int dir = 0;
 };
 
 class MoveOrder : public Order {
   public:
-    MoveOrder();
-    ~MoveOrder();
+    MoveOrder(bool advance = false) : Order(O_MOVE), advancing(advance) {}
+    virtual ~MoveOrder();
 
-    int advancing;
+    bool advancing;
     std::list<MoveDir *> dirs;
 };
 
 class WithdrawOrder : public Order {
   public:
-    WithdrawOrder();
-    ~WithdrawOrder();
+    WithdrawOrder(int item, int amount)
+        : Order(O_WITHDRAW), item(item), amount(amount) {};
+    virtual ~WithdrawOrder() = default;
 
-    int item;
-    int amount;
+    int item = 0;
+    int amount = 0;
 };
 
 class GiveOrder : public Order {
   public:
-    GiveOrder();
-    ~GiveOrder();
+    GiveOrder(int type = O_GIVE) : Order(type) {}
+    virtual ~GiveOrder();
 
-    int item;
+    int item = 0;
     /* if amount == -1, transfer whole unit, -2 means all of item */
-    int amount;
-    int except;
-    int unfinished;
-    int merge;
+    int amount = 0;
+    int except = 0;
+    int unfinished = 0;
+    int merge = 0;
 
-    UnitId *target;
+    UnitId *target = nullptr;
 };
 
 class StudyOrder : public Order {
   public:
-    StudyOrder();
-    ~StudyOrder();
+    StudyOrder(int skill)
+        : Order(O_STUDY), skill(skill) {}
+    virtual ~StudyOrder() = default;
 
     int skill;
-    int days;
-    int level;
+    int days = 0;
+    int level = -1;
 };
 
 class TeachOrder : public Order {
   public:
-    TeachOrder();
-    ~TeachOrder();
+    TeachOrder() : Order(O_TEACH) {}
+    virtual ~TeachOrder();
 
     std::list<UnitId *> targets;
 };
 
 class ProduceOrder : public Order {
   public:
-    ProduceOrder();
-    ~ProduceOrder();
+      ProduceOrder(int item, int skill, int target, int quiet = 0)
+          : Order(O_PRODUCE, quiet), item(item), skill(skill), target(target) {
+    }
+    virtual ~ProduceOrder() = default;
 
     int item;
     int skill; /* -1 for none */
-    int productivity;
     int target;
+    int productivity = 0;
 };
 
 class BuyOrder : public Order {
   public:
-    BuyOrder();
-    ~BuyOrder();
+    BuyOrder(int item, int num = 0, bool repeating = false)
+        : Order(O_BUY), item(item), num(num), repeating(repeating) {
+    }
 
     int item;
     int num;
@@ -187,8 +191,9 @@ class BuyOrder : public Order {
 
 class SellOrder : public Order {
   public:
-    SellOrder();
-    ~SellOrder();
+    SellOrder(int item, int num = 0, bool repeating = false)
+        : Order(O_SELL), item(item), num(num), repeating(repeating) {
+    }
 
     int item;
     int num;
@@ -197,65 +202,67 @@ class SellOrder : public Order {
 
 class AttackOrder : public Order {
   public:
-    AttackOrder();
-    ~AttackOrder();
+    AttackOrder() : Order(O_ATTACK) {}
+    virtual ~AttackOrder();
 
     std::list<UnitId *> targets;
 };
 
 class BuildOrder : public Order {
   public:
-    BuildOrder();
-    ~BuildOrder();
+    BuildOrder(UnitId *target = nullptr) : Order(O_BUILD), target(target), needtocomplete(0) {}
+    BuildOrder(int needtocomplete) : Order(O_BUILD), target(nullptr), needtocomplete(needtocomplete) {}
+    virtual ~BuildOrder();
 
     UnitId *target;
-    int new_building;
+    int new_building = -1;
     int needtocomplete;
-    bool until_complete;
+    bool until_complete = false;
 };
 
 class SailOrder : public Order {
   public:
-    SailOrder();
-    ~SailOrder();
+    SailOrder() : Order(O_SAIL) {}
+    virtual ~SailOrder();
 
     std::list<MoveDir *> dirs;
 };
 
 class FindOrder : public Order {
   public:
-    FindOrder();
-    ~FindOrder();
+    FindOrder(int find) : Order(O_FIND), find(find) {}
+    virtual ~FindOrder() = default;
 
     int find;
 };
 
 class StealthOrder : public Order {
   public:
-    StealthOrder();
-    ~StealthOrder();
+    StealthOrder(int type = 0, UnitId *target = nullptr);
+    virtual ~StealthOrder();
 
     UnitId *target;
 };
 
 class StealOrder : public StealthOrder {
   public:
-    StealOrder();
-    ~StealOrder();
+    StealOrder(UnitId *target, int item)
+        : StealthOrder(O_STEAL, target), item(item) {}
+    virtual ~StealOrder() = default;
 
     int item;
 };
 
 class AssassinateOrder : public StealthOrder {
   public:
-    AssassinateOrder();
-    ~AssassinateOrder();
+      AssassinateOrder(UnitId * target = nullptr) : StealthOrder(O_ASSASSINATE, target) {}
+      virtual ~AssassinateOrder() = default;
 };
 
 class ForgetOrder : public Order {
   public:
-    ForgetOrder();
-    ~ForgetOrder();
+    ForgetOrder(int skill) : Order(O_FORGET), skill(skill) {}
+    virtual ~ForgetOrder() = default;
 
     int skill;
 };
@@ -263,31 +270,32 @@ class ForgetOrder : public Order {
 // Add class for exchange
 class ExchangeOrder : public Order {
   public:
-    ExchangeOrder();
-    ~ExchangeOrder();
+    ExchangeOrder(UnitId *target = nullptr) : Order(O_EXCHANGE), target(target) {};
+    virtual ~ExchangeOrder();
 
-    int giveItem;
-    int giveAmount;
-    int expectItem;
-    int expectAmount;
+    int giveItem = 0;
+    int giveAmount = 0;
+    int expectItem = 0;
+    int expectAmount = 0;
 
-    int exchangeStatus;
+    int exchangeStatus = -1;
 
     UnitId *target;
 };
 
 class TurnOrder : public Order {
   public:
-    TurnOrder();
-    ~TurnOrder();
+    TurnOrder(bool repeating = false) : Order(O_TURN), repeating(repeating) {};
+    virtual ~TurnOrder() = default;
+
     bool repeating;
     std::vector<std::string> turnOrders;
 };
 
 class CastOrder : public Order {
   public:
-    CastOrder();
-    ~CastOrder();
+    CastOrder(int spell, int level) : Order(O_CAST), spell(spell), level(level) {};
+    virtual ~CastOrder() = default;
 
     int spell;
     int level;
@@ -295,24 +303,24 @@ class CastOrder : public Order {
 
 class CastMindOrder : public CastOrder {
   public:
-    CastMindOrder();
-    ~CastMindOrder();
+    CastMindOrder(int level, UnitId *id = nullptr);
+    virtual ~CastMindOrder();
 
     UnitId *id;
 };
 
 class CastRegionOrder : public CastOrder {
   public:
-    CastRegionOrder();
-    ~CastRegionOrder();
+    CastRegionOrder(int spell, int level, int x = 0, int y = 0, int z = 0);
+    virtual ~CastRegionOrder() = default;
 
     int xloc, yloc, zloc;
 };
 
 class TeleportOrder : public CastRegionOrder {
   public:
-    TeleportOrder();
-    ~TeleportOrder();
+    TeleportOrder(int spell, int level, int x = 0, int y = 0, int z = 0);
+    virtual ~TeleportOrder();
 
     int gate;
     std::list<UnitId *> units;
@@ -320,24 +328,24 @@ class TeleportOrder : public CastRegionOrder {
 
 class CastIntOrder : public CastOrder {
   public:
-    CastIntOrder();
-    ~CastIntOrder();
+    CastIntOrder(int spell, int level, int target);
+    virtual ~CastIntOrder() = default;
 
     int target;
 };
 
 class CastUnitsOrder : public CastOrder {
   public:
-    CastUnitsOrder();
-    ~CastUnitsOrder();
+    CastUnitsOrder(int level);
+    virtual ~CastUnitsOrder();
 
     std::list<UnitId *> units;
 };
 
 class CastTransmuteOrder : public CastOrder {
   public:
-    CastTransmuteOrder();
-    ~CastTransmuteOrder();
+    CastTransmuteOrder(int level, int item, int number);
+    virtual ~CastTransmuteOrder() = default;
 
     int item;
     int number;
@@ -345,62 +353,69 @@ class CastTransmuteOrder : public CastOrder {
 
 class EvictOrder : public Order {
   public:
-    EvictOrder();
-    ~EvictOrder();
+    EvictOrder() : Order(O_EVICT) {};
+    virtual ~EvictOrder();
 
     std::list<UnitId *> targets;
 };
 
 class IdleOrder : public Order {
   public:
-    IdleOrder();
-    ~IdleOrder();
+    IdleOrder() : Order(O_IDLE) {};
+    virtual ~IdleOrder() = default;
 };
 
 class TransportOrder : public Order {
   public:
-    TransportOrder();
-    ~TransportOrder();
+    TransportOrder(int item, int amount, int except, UnitId *target = nullptr)
+        : Order(O_TRANSPORT), item(item), amount(amount), except(except), target(target)
+    {
+    };
+    virtual ~TransportOrder();
 
     int item;
     // amount == -1 means all available at transport time
     // any other amount is also checked at transport time
     int amount;
     int except;
-    int distance;
+    int distance = 0;
 
     enum class TransportPhase {
+        UNDEFINED,
         SHIP_TO_QM,
         INTER_QM_TRANSPORT,
         DISTRIBUTE_FROM_QM
     };
-    TransportPhase phase;
+    TransportPhase phase = TransportPhase::UNDEFINED;
 
     UnitId *target;
 };
 
 class JoinOrder : public Order {
   public:
-    JoinOrder();
-    ~JoinOrder();
+    JoinOrder(int overload, int merge, UnitId *target = nullptr)
+        : Order(O_JOIN), overload(overload), merge(merge), target(target) {};
+    virtual ~JoinOrder();
 
-    UnitId *target;
     int overload;
     int merge;
+    UnitId *target;
 };
 
 class AnnihilateOrder : public Order {
   public:
-    AnnihilateOrder();
-    ~AnnihilateOrder();
+    AnnihilateOrder(int x, int y, int z)
+        : Order(O_ANNIHILATE), xloc(x), yloc(y), zloc(z) {};
+    virtual ~AnnihilateOrder() = default;
 
     int xloc, yloc, zloc;
 };
 
 class SacrificeOrder : public Order {
   public:
-    SacrificeOrder();
-    ~SacrificeOrder();
+    SacrificeOrder(int item = 0, int amount = 0)
+        : Order(O_SACRIFICE), item(item), amount(amount) {};
+    virtual ~SacrificeOrder() = default;
 
     int item;
     int amount;

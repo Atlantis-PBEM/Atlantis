@@ -39,11 +39,7 @@ UnitId *Game::parse_unit(parser::string_parser& parser)
     if (!token) return nullptr;
 
     if (token == "0") {
-        UnitId *id = new UnitId;
-        id->unitnum = -1;
-        id->alias = 0;
-        id->faction = 0;
-        return id;
+        return new UnitId(-1, 0, 0);
     }
 
     if (token == "faction") {
@@ -56,32 +52,20 @@ UnitId *Game::parse_unit(parser::string_parser& parser)
         if (!unit_alias) return nullptr;
 
         /* Return UnitId */
-        UnitId *id = new UnitId;
-        id->unitnum = 0;
-        id->alias = unit_alias;
-        id->faction = faction_id;
-        return id;
+        return new UnitId(0, unit_alias, faction_id);
     }
 
     if (token == "new") {
         int unit_alias = parser.get_token().get_number().value_or(0);
         if (!unit_alias) return nullptr;
 
-        UnitId *id = new UnitId;
-        id->unitnum = 0;
-        id->alias = unit_alias;
-        id->faction = 0;
-        return id;
+        return new UnitId(0, unit_alias, 0);
     }
 
     int unit_id = token.get_number().value_or(0);
     if (!unit_id) return nullptr;
 
-    UnitId *id = new UnitId;
-    id->unitnum = unit_id;
-    id->alias = 0;
-    id->faction = 0;
-    return id;
+    return new UnitId(unit_id, 0, 0);
 }
 
 int parse_faction_type(parser::string_parser& parser, std::unordered_map<std::string, int> &type)
@@ -805,8 +789,7 @@ void Game::ProcessForgetOrder(Unit *u, parser::string_parser& parser, orders_che
 
     if (checker) return;
 
-    ForgetOrder *ord = new ForgetOrder;
-    ord->skill = sk;
+    ForgetOrder *ord = new ForgetOrder(sk);
     u->forgetorders.push_back(ord);
 }
 
@@ -822,10 +805,7 @@ void Game::ProcessEntertainOrder(Unit *unit, orders_check *checker)
 
     if (Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 
-    ProduceOrder *order = new ProduceOrder;
-    order->item = I_SILVER;
-    order->skill = S_ENTERTAINMENT;
-    order->target = 0;
+    ProduceOrder *order = new ProduceOrder(I_SILVER, S_ENTERTAINMENT, 0);
     unit->monthorders = order;
 }
 
@@ -1132,9 +1112,7 @@ void Game::ProcessAssassinateOrder(Unit *u, parser::string_parser& parser, order
     }
 
     if (u->stealthorders) delete u->stealthorders;
-    AssassinateOrder *ord = new AssassinateOrder;
-    ord->target = id;
-    u->stealthorders = ord;
+    u->stealthorders = new AssassinateOrder(id);
 }
 
 void Game::ProcessStealOrder(Unit *u, parser::string_parser& parser, orders_check *checker)
@@ -1172,11 +1150,8 @@ void Game::ProcessStealOrder(Unit *u, parser::string_parser& parser, orders_chec
         return;
     }
 
-    StealOrder *ord = new StealOrder;
-    ord->target = id;
-    ord->item = i;
     if (u->stealthorders) delete u->stealthorders;
-    u->stealthorders = ord;
+    u->stealthorders = new StealOrder(id, i);
 }
 
 void Game::ProcessQuitOrder(Unit *u, parser::string_parser& parser, orders_check *checker)
@@ -1238,8 +1213,7 @@ void Game::ProcessFindOrder(Unit *u, parser::string_parser& parser, orders_check
     }
 
     if (!checker) {
-        FindOrder *f = new FindOrder;
-        f->find = n;
+        FindOrder *f = new FindOrder(n);
         u->findorders.push_back(f);
     }
 }
@@ -1382,7 +1356,7 @@ void Game::ProcessEnterOrder(Unit *u, parser::string_parser& parser, orders_chec
 
 BuildOrder* Game::ProcessBuildHelp(Unit *unit, parser::string_parser& parser, orders_check *checker)
 {
-    if (checker) return new BuildOrder;
+    if (checker) return new BuildOrder();
 
     UnitId *target = parse_unit(parser);
     if (!target || target->unitnum == -1) {
@@ -1391,9 +1365,7 @@ BuildOrder* Game::ProcessBuildHelp(Unit *unit, parser::string_parser& parser, or
         return nullptr;
     }
 
-    BuildOrder *order = new BuildOrder;
-    order->target = target;
-    return order;
+    return new BuildOrder(target);
 }
 
 BuildOrder* Game::ProcessBuildShip(Unit *unit, int object_type)
@@ -1414,9 +1386,8 @@ BuildOrder* Game::ProcessBuildShip(Unit *unit, int object_type)
     // If we already have an unfinished ship, see how much work is left
     if (unit->items.GetNum(shipType) > 0) maxbuild = unit->items.GetNum(shipType);
 
-    BuildOrder* order = new BuildOrder;
     // Set needtocomplete if we have a maxbuild value
-    if (maxbuild != 0) order->needtocomplete = maxbuild;
+    BuildOrder* order = new BuildOrder(maxbuild);
     return order;
 }
 
@@ -1434,7 +1405,7 @@ BuildOrder* Game::ProcessBuildStructure(Unit *unit, int object_type)
         return nullptr;
     }
 
-    BuildOrder* order = new BuildOrder;
+    BuildOrder* order = new BuildOrder();
     order->new_building = object_type;
     return order;
 }
@@ -1447,7 +1418,7 @@ BuildOrder *Game::ProcessBuildObject(Unit *unit, int object_type, orders_check *
     }
 
     // If we get here, we can just treat it as a valid order and bail early.
-    if (checker) return new BuildOrder;
+    if (checker) return new BuildOrder();
 
     ARegion *region = unit->object->region;
     if (TerrainDefs[region->type].similar_type == R_OCEAN) {
@@ -1465,7 +1436,7 @@ BuildOrder *Game::ProcessBuildObject(Unit *unit, int object_type, orders_check *
 BuildOrder *Game::ProcessContinuedBuild(Unit *unit, orders_check *checker)
 {
 
-    if(checker) return new BuildOrder;
+    if (checker) return new BuildOrder();
 
     int maxbuild = 0;
     // Look for an incomplete ship in inventory
@@ -1485,9 +1456,8 @@ BuildOrder *Game::ProcessContinuedBuild(Unit *unit, orders_check *checker)
         maxbuild = unit->items.GetNum(-ship_type);
     }
 
-    BuildOrder *order = new BuildOrder;
     // Set needtocomplete if we have a maxbuild value
-    if (maxbuild != 0) order->needtocomplete = maxbuild;
+    BuildOrder *order = new BuildOrder(maxbuild);
     return order;
 }
 
@@ -1546,7 +1516,7 @@ void Game::ProcessAttackOrder(Unit *u, parser::string_parser& parser, orders_che
     // Process all target units listed in the order
     while (target && target->unitnum != -1) {
         // Create attack orders structure if this is the first target
-        if (!u->attackorders) u->attackorders = new AttackOrder;
+        if (!u->attackorders) u->attackorders = new AttackOrder();
         u->attackorders->targets.push_back(target);
         target = parse_unit(parser);
     }
@@ -1591,10 +1561,7 @@ void Game::ProcessSellOrder(Unit *u, parser::string_parser& parser, orders_check
     }
 
     // we didn't find one above, so make a new one.
-    SellOrder *s = new SellOrder;
-    s->item = it;
-    s->num = num;
-    s->repeating = repeating;
+    SellOrder *s = new SellOrder(it, num, repeating);
     u->sellorders.push_back(s);
 }
 
@@ -1636,10 +1603,7 @@ void Game::ProcessBuyOrder(Unit *u, parser::string_parser& parser, orders_check 
     }
 
     // we didn't find one above, so make a new one.
-    BuyOrder *b = new BuyOrder;
-    b->item = it;
-    b->num = num;
-    b->repeating = repeating;
+    BuyOrder *b = new BuyOrder(it, num, repeating);
     u->buyorders.push_back(b);
 }
 
@@ -1668,10 +1632,7 @@ void Game::ProcessProduceOrder(Unit *u, parser::string_parser& parser, orders_ch
         return;
     }
 
-    ProduceOrder *p = new ProduceOrder;
-    p->item = it;
-    p->skill = lookup_skill(item_def.pSkill);
-    p->target = target;
+    ProduceOrder *p = new ProduceOrder(it, lookup_skill(item_def.pSkill), target);
 
     bool monthtaxing = (Globals->TAX_PILLAGE_MONTH_LONG && (u->taxing == TAX_TAX || u->taxing == TAX_PILLAGE));
     if (u->monthorders || monthtaxing) {
@@ -1685,11 +1646,7 @@ void Game::ProcessProduceOrder(Unit *u, parser::string_parser& parser, orders_ch
 
 void Game::ProcessWorkOrder(Unit *u, int quiet, orders_check *checker)
 {
-    ProduceOrder *order = new ProduceOrder;
-    order->skill = -1;
-    order->item = I_SILVER;
-    order->target = 0;
-    if (quiet) order->quiet = 1;
+    ProduceOrder *order = new ProduceOrder(I_SILVER, -1, 0, quiet);
 
     bool monthtaxing = (Globals->TAX_PILLAGE_MONTH_LONG && (u->taxing == TAX_TAX || u->taxing == TAX_PILLAGE));
     if (u->monthorders || monthtaxing) {
@@ -1707,7 +1664,7 @@ void Game::ProcessTeachOrder(Unit *u, parser::string_parser& parser, orders_chec
 
     // Reuse existing teach order if one exists
     if (u->monthorders && u->monthorders->type == O_TEACH) order = dynamic_cast<TeachOrder *>(u->monthorders);
-    else order = new TeachOrder;
+    else order = new TeachOrder();
 
     // Parse all student units
     int students = 0;
@@ -1752,9 +1709,7 @@ void Game::ProcessStudyOrder(Unit *u, parser::string_parser& parser, orders_chec
         return;
     }
 
-    StudyOrder *order = new StudyOrder;
-    order->skill = sk;
-    order->days = 0;
+    StudyOrder *order = new StudyOrder(sk);
 
     // Parse study level if provided
     order->level = parser.get_token().get_number().value_or(-1);
@@ -1859,9 +1814,7 @@ void Game::ProcessWithdrawOrder(Unit *unit, parser::string_parser& parser, order
 
     if (checker) return;
 
-    WithdrawOrder *order = new WithdrawOrder;
-    order->item = item;
-    order->amount = amt;
+    WithdrawOrder *order = new WithdrawOrder(item, amt);
     unit->withdraworders.push_back(order);
 }
 
@@ -1870,8 +1823,7 @@ std::string Game::ProcessTurnOrder(Unit *unit, std::istream& f, orders_check *ch
     int turnDepth = 1;
     int turnLast = 1;
     int formDepth = 0;
-    TurnOrder *tOrder = new TurnOrder;
-    tOrder->repeating = repeat;
+    TurnOrder *tOrder = new TurnOrder(repeat);
 
     parser::string_parser order;
 
@@ -2026,12 +1978,11 @@ void Game::ProcessExchangeOrder(Unit *unit, parser::string_parser& parser, order
 
     if (checker) return;
 
-    ExchangeOrder *order = new ExchangeOrder;
+    ExchangeOrder *order = new ExchangeOrder(t);
     order->giveItem = itemGive;
     order->giveAmount = amtGive;
     order->expectAmount = amtExpected;
     order->expectItem = itemExpected;
-    order->target = t;
     unit->exchangeorders.push_back(order);
 }
 
@@ -2161,8 +2112,7 @@ void Game::ProcessGiveOrder(int order, Unit *unit, parser::string_parser& parser
     }
 
     // Create the order
-    GiveOrder *go = new GiveOrder;
-    go->type = order;
+    GiveOrder *go = new GiveOrder(order);
     go->item = item;
     go->target = t;
     go->amount = amt;
@@ -2543,11 +2493,11 @@ void Game::ProcessAdvanceOrder(Unit *u, parser::string_parser& parser, orders_ch
 
     if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 
-    if (!u->monthorders) u->monthorders = new MoveOrder;
+    if (!u->monthorders) u->monthorders = new MoveOrder();
     u->monthorders->type = O_ADVANCE;
 
     MoveOrder *m = dynamic_cast<MoveOrder *>(u->monthorders);
-    m->advancing = 1;
+    m->advancing = true;
 
     while(parser::token token = parser.get_token()) {
         int d = parse_dir(token);
@@ -2556,8 +2506,7 @@ void Game::ProcessAdvanceOrder(Unit *u, parser::string_parser& parser, orders_ch
             return;
         }
         if (checker) continue;
-        MoveDir *x = new MoveDir;
-        x->dir = d;
+        MoveDir *x = new MoveDir{ d };
         m->dirs.push_back(x);
     }
 }
@@ -2573,10 +2522,10 @@ void Game::ProcessMoveOrder(Unit *u, parser::string_parser& parser, orders_check
 
     if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 
-    if (!u->monthorders) u->monthorders = new MoveOrder;
+    if (!u->monthorders) u->monthorders = new MoveOrder();
 
     MoveOrder *m = dynamic_cast<MoveOrder *>(u->monthorders);
-    m->advancing = 0;
+    m->advancing = false;
 
     while (parser::token token = parser.get_token()) {
         int d = parse_dir(token);
@@ -2585,8 +2534,7 @@ void Game::ProcessMoveOrder(Unit *u, parser::string_parser& parser, orders_check
             return;
         }
         if (checker) continue;
-        MoveDir *x = new MoveDir;
-        x->dir = d;
+        MoveDir *x = new MoveDir{ d };
         m->dirs.push_back(x);
     }
 }
@@ -2601,7 +2549,7 @@ void Game::ProcessSailOrder(Unit *u, parser::string_parser& parser, orders_check
     }
 
     if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-    if (!u->monthorders) u->monthorders = new SailOrder;
+    if (!u->monthorders) u->monthorders = new SailOrder();
 
     SailOrder* m = dynamic_cast<SailOrder *>(u->monthorders);
 
@@ -2612,8 +2560,7 @@ void Game::ProcessSailOrder(Unit *u, parser::string_parser& parser, orders_check
             return;
         }
         if (checker) continue;
-        MoveDir *x = new MoveDir;
-        x->dir = d;
+        MoveDir *x = new MoveDir{ d };
         m->dirs.push_back(x);
     }
 }
@@ -2624,7 +2571,7 @@ void Game::ProcessEvictOrder(Unit *u, parser::string_parser& parser, orders_chec
 
     UnitId *id = parse_unit(parser);
     while (id && id->unitnum != -1) {
-        if (!u->evictorders) u->evictorders = new EvictOrder;
+        if (!u->evictorders) u->evictorders = new EvictOrder();
         u->evictorders->targets.push_back(id);
         id = parse_unit(parser);
     }
@@ -2640,7 +2587,7 @@ void Game::ProcessIdleOrder(Unit *u, orders_check *checker)
         overwrite_month_warning("IDLE", u, checker);
     }
     if (Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
-    IdleOrder *i = new IdleOrder;
+    IdleOrder *i = new IdleOrder();
     u->monthorders = i;
 }
 
@@ -2707,13 +2654,9 @@ void Game::ProcessTransportOrder(Unit *u, parser::string_parser& parser, orders_
         return;
     }
 
-    TransportOrder *order = new TransportOrder;
-    // At this point we don't know that transport phase for the order but
+    TransportOrder *order = new TransportOrder(item, amt, except, tar);
+    // At this point we don't know the transport phase for the order but
     // we will set that later.
-    order->item = item;
-    order->target = tar;
-    order->amount = amt;
-    order->except = except;
     u->transportorders.push_back(order);
 }
 
@@ -2752,10 +2695,7 @@ void Game::ProcessJoinOrder(Unit *u, parser::string_parser& parser, orders_check
     if (token == "nooverload") overload = 0;
     if (token == "merge") merge = 1;
 
-    JoinOrder *ord = new JoinOrder;
-    ord->target = id;
-    ord->overload = overload;
-    ord->merge = merge;
+    JoinOrder *ord = new JoinOrder(overload, merge, id);
     if (u->joinorders) delete u->joinorders;
     u->joinorders = ord;
 }
@@ -2796,9 +2736,7 @@ void Game::ProcessSacrificeOrder(Unit *unit, parser::string_parser& parser, orde
 
     if (checker) return;
 
-    SacrificeOrder *order = new SacrificeOrder;
-    order->item = item;
-    order->amount = amt;
+    SacrificeOrder *order = new SacrificeOrder(item, amt);
     if (unit->sacrificeorders) delete unit->sacrificeorders;
     unit->sacrificeorders = order;
 }
@@ -2865,9 +2803,6 @@ void Game::ProcessAnnihilateOrder(Unit *unit, parser::string_parser& parser, ord
 
     if (checker) return;
 
-    AnnihilateOrder *order = new AnnihilateOrder;
-    order->xloc = x;
-    order->yloc = y;
-    order->zloc = z;
+    AnnihilateOrder *order = new AnnihilateOrder(x, y, z);
     unit->annihilateorders.push_back(order);
 }

@@ -169,18 +169,18 @@ public:
     //
     std::unordered_map<std::string, int> type;
 
-    int lastchange;
+    int lastchange = -6;
     int lastorders;
-    int unclaimed;
+    int unclaimed = 0;
     std::string name;
     std::string address;
     std::string password;
-    int times;
-    int showunitattitudes;
-    int temformat;
-    int battleLogFormat;
-    bool exists;
-    int quit;
+    int times = 0;
+    int showunitattitudes = 0;
+    int temformat = TEMPLATE_OFF;
+    int battleLogFormat = 0;
+    bool exists = true;
+    int quit = 0;
     int numshows;
 
     int nummages;
@@ -198,7 +198,7 @@ public:
     /* Used when writing reports */
     std::vector<ARegion *> present_regions;
 
-    AttitudeType defaultattitude;
+    AttitudeType defaultattitude = AttitudeType::NEUTRAL;
     // TODO: Convert this to a hashmap of <attitude, vector<factionid>>
     // For now, just making it a vector of attitudes.  More will come later.
     std::vector<Attitude> attitudes;
@@ -220,10 +220,10 @@ public:
 
     // These are used for 'granting' units to a faction via the players.in
     // file
-    ARegion *pReg;
-    ARegion *pStartLoc;
-    int noStartLeader;
-    int startturn;
+    ARegion *pReg = nullptr;
+    ARegion *pStartLoc = nullptr;
+    int noStartLeader = 0;
+    int startturn = 0;
 
 private:
     std::vector<FactionStatistic> compute_faction_statistics(Game *game, size_t **citems);
