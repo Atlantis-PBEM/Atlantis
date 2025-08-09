@@ -29,7 +29,7 @@
 
 class Production {
 public:
-	Production(int type, int max);
+	Production(int type, int amount);
     Production() {};
 
 	void write_out(std::ostream& f);
