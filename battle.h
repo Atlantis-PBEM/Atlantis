@@ -31,9 +31,6 @@ enum {
 class Battle
 {
     public:
-        Battle();
-        ~Battle();
-
         void build_json_report(json &j, Faction *fac);
         void AddLine(const std::string& line);
 

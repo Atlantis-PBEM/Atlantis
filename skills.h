@@ -101,9 +101,9 @@ public:
     void Writeout(std::ostream &f) const;
     Skill *Split(int total, int split);
 
-    int type;
-    unsigned int days;
-    unsigned int exp;
+    int type = -1;
+    unsigned int days = 0;
+    unsigned int exp = 0;
 };
 
 class SkillList {
@@ -114,8 +114,8 @@ public:
 
     int GetDays(int sk);
     int GetExp(int sk);
-    void SetDays(int sk, int days);
-    void SetExp(int sk,int exp);
+    void SetDays(int sk, unsigned int days);
+    void SetExp(int sk, unsigned int exp);
     void Combine(SkillList *skl);
     int GetStudyRate(int sk, int men);
     SkillList *Split(int total, int split);

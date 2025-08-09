@@ -450,7 +450,7 @@ int Game::OpenGame()
     f >> i;
 
     for (int j = 0; j < i; j++) {
-        Faction *temp = new Faction;
+        Faction *temp = new Faction();
         temp->Readin(f);
         factions.push_back(temp);
     }

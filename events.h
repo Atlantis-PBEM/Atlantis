@@ -113,7 +113,6 @@ struct EventLocation {
 
     std::vector<Landmark> landmarks;
 
-    events::LandmarkType GetLandmarkType();
     const std::string GetTerrainName(const bool plural = false);
     static const EventLocation Create(ARegion* region);
     const Landmark *GetSignificantLandmark();
@@ -121,7 +120,8 @@ struct EventLocation {
 
 class BattleFact : public FactBase {
 public:
-    void GetEvents(std::list<Event> &events);
+    virtual ~BattleFact() = default;
+    virtual void GetEvents(std::list<Event> &events);
 
     EventLocation location;
     BattleSide attacker;

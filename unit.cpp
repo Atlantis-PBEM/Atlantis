@@ -864,15 +864,10 @@ void Unit::DefaultOrders(Object *obj)
             int dir = directions[dirIndex];
 
             if (dir >= 0) {
-                MoveOrder *o = new MoveOrder;
-                o->advancing = 0;
+                bool advance = (rng::get_random(100) < aggression);
 
-                if (rng::get_random(100) < aggression) {
-                    o->advancing = 1;
-                }
-
-                MoveDir *d = new MoveDir;
-                d->dir = dir;
+                MoveOrder *o = new MoveOrder(advance);
+                MoveDir *d = new MoveDir{ dir };
                 o->dirs.push_back(d);
                 monthorders = o;
             }
@@ -894,12 +889,7 @@ void Unit::DefaultOrders(Object *obj)
             if (GetFlag(FLAG_AUTOTAX) && Globals->TAX_PILLAGE_MONTH_LONG && Taxers(1)) {
                 taxing = TAX_AUTO;
             } else {
-                ProduceOrder *order = new ProduceOrder;
-                order->skill = -1;
-                order->item = I_SILVER;
-                order->target = 0;
-                order->quiet = 1;
-                monthorders = order;
+                monthorders = new ProduceOrder(I_SILVER, -1, 0, 1);
             }
         }
     }
