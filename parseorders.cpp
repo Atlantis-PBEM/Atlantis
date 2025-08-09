@@ -2450,7 +2450,7 @@ Unit *Game::ProcessFormOrder(Unit *former, parser::string_parser& parser, orders
     }
 
     if (checker) {
-        Unit *unit = new Unit;
+        Unit *unit = new Unit();
         unit->former = former;
         former->form_repeated = repeating;
         return unit;

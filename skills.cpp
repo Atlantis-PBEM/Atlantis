@@ -225,12 +225,9 @@ void Skill::Writeout(std::ostream& f) const
 
 Skill *Skill::Split(int total, int leave)
 {
-    Skill *temp = new Skill;
-    temp->type = type;
-    temp->days = (days * leave) / total;
-    days = days - temp->days;
-    temp->exp = (exp * leave) / total;
-    exp = exp - temp->exp;
+    Skill *temp = new Skill{ type, (days * leave) / total, (exp * leave) / total };
+    days -= temp->days;
+    exp -= temp->exp;
     return temp;
 }
 
@@ -244,7 +241,7 @@ int SkillList::GetDays(int skill)
     return 0;
 }
 
-void SkillList::SetDays(int skill, int days)
+void SkillList::SetDays(int skill, unsigned int days)
 {
     for(const auto s: skills) {
         if (s->type == skill) {
@@ -259,10 +256,7 @@ void SkillList::SetDays(int skill, int days)
         }
     }
     if (days == 0) return;
-    Skill *s = new Skill;
-    s->type = skill;
-    s->days = days;
-    s->exp = 0;
+    Skill *s = new Skill{ skill, days, 0 };
     skills.push_back(s);
 }
 
@@ -276,7 +270,7 @@ int SkillList::GetExp(int skill)
     return 0;
 }
 
-void SkillList::SetExp(int skill, int exp)
+void SkillList::SetExp(int skill, unsigned int exp)
 {
     for(const auto s: skills) {
         if (s->type == skill) {
@@ -285,10 +279,7 @@ void SkillList::SetExp(int skill, int exp)
         }
     }
     if (exp == 0) return;
-    Skill *s = new Skill;
-    s->type = skill;
-    s->days = 0;
-    s->exp = exp;
+    Skill *s = new Skill{ skill, 0, exp };
     skills.push_back(s);
 }
 
@@ -367,7 +358,7 @@ void SkillList::Readin(std::istream& f)
     int n;
     f >> n;
     for (int i = 0; i < n; i++) {
-        Skill *s = new Skill;
+        Skill *s = new Skill();
         s->Readin(f);
         if ((s->days == 0) && (s->exp==0)) delete s;
         else skills.push_back(s);

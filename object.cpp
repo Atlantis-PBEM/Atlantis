@@ -117,7 +117,7 @@ void Object::Readin(std::istream& f, std::list<Faction *>& facs)
     int i;
     f >> i;
     for (int j = 0; j < i; j++) {
-        Unit *temp = new Unit;
+        Unit *temp = new Unit();
         temp->Readin(f, facs);
         if (!temp->faction) continue;
         temp->MoveUnit(this);
