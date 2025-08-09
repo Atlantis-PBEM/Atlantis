@@ -3244,7 +3244,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
     f << anchor("magic") << '\n';
     f << enclose(class_tag("div", "rule"), true) << '\n' << enclose("div", false);
     f << enclose("h2", true) << "Magic\n" << enclose("h2", false);
-    f << enclose("p", 2) << "A character enters the world of magic in Atlantis by beginning study on one "
+    f << enclose("p", true) << "A character enters the world of magic in Atlantis by beginning study on one "
       << "of the Foundation magic skills.  Only one man units"
       << (!Globals->MAGE_NONLEADERS && Globals->LEADERS_EXIST ? ", with the man being a leader," : "")
       << " are permitted to study these skills. ";

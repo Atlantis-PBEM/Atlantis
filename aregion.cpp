@@ -1723,6 +1723,47 @@ Location *ARegionList::FindUnit(int i)
     return nullptr;
 }
 
+void ARegionList::MakeRegions(int level, int xSize, int ySize)
+{
+    logger::write("Making a level...");
+
+    ARegionArray *arr = new ARegionArray(xSize, ySize);
+    pRegionArrays[level] = arr;
+
+    //
+    // Make the regions themselves
+    //
+    for (int y = 0; y < ySize; y++) {
+        for (int x = 0; x < xSize; x++) {
+            if (!((x + y) % 2)) {
+                ARegion *reg = new ARegion;
+                reg->SetLoc(x, y, level);
+                reg->num = regions.size();
+
+                reg->level = arr;
+                regions.push_back(reg);
+                arr->SetRegion(x, y, reg);
+                logger::dot();
+            }
+        }
+    }
+
+    SetupNeighbors(arr);
+
+    logger::write("");
+}
+
+void ARegionList::SetupNeighbors(ARegionArray *pRegs)
+{
+    for (int x = 0; x < pRegs->x; x++) {
+        for (int y = 0; y < pRegs->y; y++) {
+            ARegion *reg = pRegs->GetRegion(x, y);
+            if (!reg) continue;
+            NeighSetup(reg, pRegs);
+        }
+    }
+}
+
 void ARegionList::NeighSetup(ARegion *r, ARegionArray *ar)
 {
     r->ZeroNeighbors();
@@ -1740,6 +1781,91 @@ void ARegionList::NeighSetup(ARegion *r, ARegionArray *ar)
     }
     if (r->yloc != ar->y - 1 && r->yloc != ar->y - 2) {
         r->neighbors[D_SOUTH] = ar->GetRegion(r->xloc, r->yloc + 2);
+    }
+}
+
+void ARegionList::MakeIcosahedralRegions(int level, int xSize, int ySize)
+{
+    int scale, x2, y2;
+
+    logger::write("Making an icosahedral level...");
+
+    scale = xSize / 10;
+    if (scale < 1) {
+        logger::write("Can't create an icosahedral level with xSize < 10!");
+        return;
+    }
+    if (ySize < scale * 10) {
+        logger::write("ySize must be at least xSize!");
+        return;
+    }
+
+    // Create the arrays as the specified size, as some code demands that
+    // the RegionArray be multiples of 8 in each direction
+    ARegionArray *arr = new ARegionArray(xSize, ySize);
+    pRegionArrays[level] = arr;
+
+    // but we'll only use up to multiples of 10, as that is required
+    // by the geometry of the resulting icosahedron.  The best choice
+    // would be to satisfy both criteria by choosing a multiple of 40,
+    // of course (remember that sublevels are halved in size though)!
+    xSize = scale * 10;
+    ySize = xSize;
+
+    //
+    // Make the regions themselves
+    //
+    for (int y = 0; y < ySize; y++) {
+        for (int x = 0; x < xSize; x++) {
+            if (!((x + y) % 2)) {
+                // These cases remove all the hexes that are cut out to
+                // make the world join up into a big icosahedron (d20).
+                if (y < 2) {
+                    if (x)
+                        continue;
+                }
+                else if (y <= 3 * scale) {
+                    x2 = x % (2 * scale);
+                    if (y < 3 * x2 && y <= 3 * (2 * scale - x2))
+                        continue;
+                }
+                else if (y < 7 * scale - 1) {
+                    // Include all of this band
+                }
+                else if (y < 10 * scale - 2) {
+                    x2 = (x + 2 * scale + 1) % (2 * scale);
+                    y2 = 10 * scale - 1 - y;
+                    if (y2 < 3 * x2 && y2 <= 3 * (2 * scale - x2))
+                        continue;
+                }
+                else {
+                    if (x != 10 * scale - 1)
+                        continue;
+                }
+
+                ARegion *reg = new ARegion;
+                reg->SetLoc(x, y, level);
+                reg->num = regions.size();
+
+                regions.push_back(reg);
+                arr->SetRegion(x, y, reg);
+            }
+        }
+    }
+
+    SetupIcosahedralNeighbors(arr);
+
+    logger::write("");
+}
+
+void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs)
+{
+    for (int x = 0; x < pRegs->x; x++) {
+        for (int y = 0; y < pRegs->y; y++) {
+            ARegion *reg = pRegs->GetRegion(x, y);
+            if (!reg) continue;
+            IcosahedralNeighSetup(reg, pRegs);
+        }
     }
 }
 

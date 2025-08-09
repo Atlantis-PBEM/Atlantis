@@ -36,56 +36,6 @@ void ARegionList::create_underworld_level(int level, int xSize, int ySize, const
 
 void ARegionList::create_underdeep_level(int, int, int, const std::string&) { }
 
-void ARegionList::MakeRegions(int level, int xSize, int ySize)
-{
-    ARegionArray *arr = new ARegionArray(xSize, ySize);
-    pRegionArrays[level] = arr;
-
-    //
-    // Make the regions themselves
-    //
-    int x, y;
-    for (y = 0; y < ySize; y++) {
-        for (x = 0; x < xSize; x++) {
-            if (!((x + y) % 2)) {
-                ARegion *reg = new ARegion;
-                reg->SetLoc(x, y, level);
-                reg->num = regions.size();
-
-                //
-                // Some initial values; these will get reset
-                //
-                reg->type = -1;
-                reg->race = -1;
-                reg->wages = -1;
-
-                reg->level = arr;
-                regions.push_back(reg);
-                arr->SetRegion(x, y, reg);
-                logger::dot();
-            }
-        }
-    }
-
-    SetupNeighbors(arr);
-}
-
-void ARegionList::SetupNeighbors(ARegionArray *pRegs)
-{
-    int x, y;
-    for (x = 0; x < pRegs->x; x++) {
-        for (y = 0; y < pRegs->y; y++) {
-            ARegion *reg = pRegs->GetRegion(x, y);
-            if (!reg) continue;
-            NeighSetup(reg, pRegs);
-        }
-    }
-}
-
-void ARegionList::MakeIcosahedralRegions(int, int, int) { }
-
-void ARegionList::SetupIcosahedralNeighbors(ARegionArray *) { }
-
 void ARegionList::MakeLand(ARegionArray *, int, int) { }
 
 void ARegionList::MakeRingLand(ARegionArray *, int, int) { }
