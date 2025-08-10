@@ -457,7 +457,6 @@ void Game::ProcessCastGateLore(Unit *u, parser::string_parser& parser, orders_ch
             level = 2;
             token = parser.get_token();
         }
-        if (token != "units") return;
 
         if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE && u->teleportorders->gate == -1 ) {
             order = u->teleportorders;
@@ -469,6 +468,8 @@ void Game::ProcessCastGateLore(Unit *u, parser::string_parser& parser, orders_ch
             u->ClearCastOrders();
             u->teleportorders = order;
         }
+
+        if (token != "units") return;
 
         UnitId *id = parse_unit(parser);
         while(id) {
