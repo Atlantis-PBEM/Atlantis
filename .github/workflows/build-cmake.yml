@@ -1,0 +1,62 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+      - jt-*
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ format('{0}-latest', matrix.os) }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu
+          - windows
+          - macos
+        compiler:
+          - msvc
+          - gcc
+        exclude: # exclude invalid combinations of os/compiler
+          - os: ubuntu
+            compiler: msvc
+          - os: macos
+            compiler: msvc
+        include: # Windows adds .exe to the file names, msvc puts them in config-specific subdirs
+          - os: windows
+            ext: .exe
+          - compiler: msvc  # We add the artifacttag here so that the windows-gcc and windows-msvc artifacts are unique
+            buildconfig: /Debug
+            artifacttag: -msvc
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure CMake (For Windows MSVC) # MSVC on windows uses a different generator and ignores BUILD_TYPE
+        if: matrix.os == 'windows' && matrix.compiler == 'msvc'
+        run: |
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: Configure CMake (Except Windows MSVC) # All other platforms use Unix Makefiles
+        if: matrix.os != 'windows' || matrix.compiler != 'msvc'
+        run: |
+          cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: cmake --build build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}${{ matrix.artifacttag }}
+          path: |
+              build${{ matrix.buildconfig }}/basic${{ matrix.ext }}
+              build${{ matrix.buildconfig }}/fracas${{ matrix.ext }}
+              build${{ matrix.buildconfig }}/havilah${{ matrix.ext }}
+              build${{ matrix.buildconfig }}/kingdoms${{ matrix.ext }}
+              build${{ matrix.buildconfig }}/neworigins${{ matrix.ext }}
+              build${{ matrix.buildconfig }}/standard${{ matrix.ext }}
+
+      - name: Unit Tests
+        if: matrix.os == 'ubuntu' # Currently, unit tests only work correctly on ubuntu
+        run: ./build/unittest
