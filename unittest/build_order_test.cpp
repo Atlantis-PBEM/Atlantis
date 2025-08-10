@@ -62,12 +62,12 @@ ut::suite<"Build Order"> build_order_suite = [] {
 
         expect(leader->oldorders.empty());
         expect(unit->oldorders.empty());
-        expect(leader->object->incomplete == 8);
+        expect(leader->object->incomplete == 8_i);
         expect(unit2->oldorders.front() == "BUILD Tower COMPLETE");
         expect(unit3->oldorders.front() == "BUILD HELP 4 COMPLETE");
-        expect(unit2->object->incomplete == 8);
+        expect(unit2->object->incomplete == 8_i);
         expect(unit4->oldorders.front() == "BUILD Tower COMPLETE");
-        expect(unit4->object->incomplete == 9);
+        expect(unit4->object->incomplete == 9_i);
 
         expect(leader->object->region->objects.size() == 5); // dummy + shaft + 3 towers.
 
