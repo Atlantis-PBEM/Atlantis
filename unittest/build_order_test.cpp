@@ -56,12 +56,12 @@ ut::suite<"Build Order"> build_order_suite = [] {
 
         helper.parse_orders(faction->num, ss, nullptr);
 
-        expect(leader->object->region->objects.size() == 3); // dummy + shaft + tower
+        expect(leader->object->region->objects.size() == 3_ul); // dummy + shaft + tower
 
         helper.run_month_orders();
 
-        expect(leader->oldorders.empty());
-        expect(unit->oldorders.empty());
+        expect(leader->oldorders.empty() == "true"_b);
+        expect(unit->oldorders.empty() == "true"_b);
         expect(leader->object->incomplete == 8_i);
         expect(unit2->oldorders.front() == "BUILD Tower COMPLETE");
         expect(unit3->oldorders.front() == "BUILD HELP 4 COMPLETE");
@@ -69,7 +69,7 @@ ut::suite<"Build Order"> build_order_suite = [] {
         expect(unit4->oldorders.front() == "BUILD Tower COMPLETE");
         expect(unit4->object->incomplete == 9_i);
 
-        expect(leader->object->region->objects.size() == 5); // dummy + shaft + 3 towers.
+        expect(leader->object->region->objects.size() == 5_ul); // dummy + shaft + 3 towers.
 
         // Check the messages too
         expect(faction->errors.size() == 0_ul); // No errors should be reported
