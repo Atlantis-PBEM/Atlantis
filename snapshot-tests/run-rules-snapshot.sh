@@ -19,7 +19,7 @@ else
   executable="../$game/$game"
 fi
 
-[ -e "${executable}" ] || executable="../build/$game"
+[ -f "${executable}" ] || executable="../build/$game"
 
 if [[ ! -f "${executable}" ]]; then
   echo "Please build the $game executable before running the rules snapshot tests.  Test failed."

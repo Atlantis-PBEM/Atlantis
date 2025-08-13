@@ -10,7 +10,7 @@ else
   turndir="${game}_turns"
 fi
 
-[ -e "${executable}" ] || executable="../build/$game"
+[ -f "${executable}" ] || executable="../build/$game"
 
 if [[ ! -e "${executable}" ]]; then
   echo "Please build the $game executable before running the snapshot tests.  Test failed."
