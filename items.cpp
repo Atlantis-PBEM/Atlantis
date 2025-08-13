@@ -1325,17 +1325,6 @@ int IsSoldier(int item)
     return 0;
 }
 
-
-Item::Item()
-{
-    selling = 0;
-    checked = 0;
-}
-
-Item::~Item()
-{
-}
-
 std::string Item::report(bool see_illusions)
 {
     std::string ret = "";
@@ -1377,7 +1366,7 @@ void ItemList::Readin(std::istream &f)
     int i;
     f >> i;
     for (int j = 0; j < i; j++) {
-        Item *temp = new Item;
+        Item *temp = new Item();
         temp->Readin(f);
         if (temp->type < 0 || temp->num < 1 || ItemDefs[temp->type].flags & ItemType::DISABLED) {
             delete temp;
@@ -1527,7 +1516,7 @@ void ItemList::SetNum(int t,int n)
                 return;
             }
         }
-        Item *i = new Item;
+        Item *i = new Item();
         i->type = t;
         i->num = n;
         items.push_back(i);

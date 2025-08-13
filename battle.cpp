@@ -95,9 +95,6 @@ void WriteStats(Battle &battle, Army &army, StatsCategory category) {
     if (statLines == 0) battle.AddLine("Army made no attacks.");
 }
 
-Battle::Battle() { }
-Battle::~Battle() { }
-
 // Checks if army A is overwhelmed by army B
 bool IsArmyOverwhelmedBy(Army * a, Army * b) {
     if (!Globals->OVERWHELMING) return false;
@@ -377,7 +374,7 @@ void AddBattleFact(
 ) {
     if (!Globals->WORLD_EVENTS) return;
 
-    auto fact = new BattleFact();
+    BattleFact * fact = new BattleFact();
 
     fact->location = EventLocation::Create(region);
 
@@ -737,7 +734,7 @@ void Game::GetAFacs(
                 }
 
                 if (add && dfacs.find(u->faction) == dfacs.end()) {
-                    Location * l = new Location;
+                    Location * l = new Location();
                     l->unit = u;
                     l->obj = obj;
                     l->region = r;
@@ -773,13 +770,13 @@ void Game::GetSides(
 {
     if (ass) {
         /* Assassination attempt */
-        Location * l = new Location;
+        Location * l = new Location();
         l->unit = att;
         l->obj = r->GetDummy();
         l->region = r;
         atts.push_back(l);
 
-        l = new Location;
+        l = new Location();
         l->unit = tar;
         l->obj = r->GetDummy();
         l->region = r;
@@ -888,13 +885,13 @@ void Game::GetSides(
                 }
 
                 if (add == ADD_ATTACK) {
-                    Location * l = new Location;
+                    Location * l = new Location();
                     l->unit = u;
                     l->obj = o;
                     l->region = r2;
                     atts.push_back(l);
                 } else if (add == ADD_DEFENSE) {
-                        Location * l = new Location;
+                        Location * l = new Location();
                         l->unit = u;
                         l->obj = o;
                         l->region = r2;
@@ -1028,7 +1025,7 @@ int Game::RunBattle(ARegion * r,Unit * attacker,Unit * target,int ass,
         return BATTLE_IMPOSSIBLE;
     }
 
-    Battle *b = new Battle;
+    Battle *b = new Battle();
     b->WriteSides(r, attacker, target, atts, defs, ass);
 
     battles.push_back(b);

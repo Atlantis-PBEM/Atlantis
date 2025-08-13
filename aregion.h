@@ -83,9 +83,9 @@ class TerrainType
 class Location
 {
     public:
-        Unit *unit;
-        Object *obj;
-        ARegion *region;
+        Unit *unit = nullptr;
+        Object *obj = nullptr;
+        ARegion *region = nullptr;
 };
 
 Location *GetUnit(std::list<Location *>& locs, int unitid);
@@ -96,7 +96,7 @@ const std::string& AGetNameString(int name);
 class Farsight
 {
     public:
-        Farsight();
+        Farsight(Faction *faction, Unit *unit, int level, int observation = 0);
 
         Faction *faction;
         Unit *unit;
@@ -117,20 +117,17 @@ enum {
 class TownInfo
 {
     public:
-        TownInfo();
-        ~TownInfo();
-
         void Readin(std::istream& f);
         void Writeout(std::ostream& f);
         int TownType();
 
         std::string name;
-        int pop;
-        int activity;
+        int pop = 0;
+        int activity = 0;
         // achieved settled habitat
-        int hab;
+        int hab = 0;
         // town's development
-        int dev;
+        int dev = 0;
 };
 
 struct RegionSetup {
@@ -270,13 +267,13 @@ class ARegion
         std::string name;
         int num;
         int type = -1;
-        int buildingseq;
+        int buildingseq = 1;
         int weather = W_NORMAL;
-        int gate;
-        int gatemonth;
-        int gateopen;
+        int gate = 0;
+        int gatemonth = 0;
+        int gateopen = 1;
 
-        TownInfo *town;
+        TownInfo *town = nullptr;
         int race = -1;
         int population = -1;
         int basepopulation;
@@ -285,9 +282,9 @@ class ARegion
         int wealth;
 
         /* Economy */
-        int habitat;
-        int development;
-        int maxdevelopment;
+        int habitat = 0;
+        int development = 0;
+        int maxdevelopment = 0;
         int elevation = -1;
         int humidity = -1;
         int temperature = -1;
@@ -297,15 +294,15 @@ class ARegion
         std::list<ARegion *> migfrom;
         // mid-way migration development
         int migdev;
-        int immigrants;
-        int emigrants;
+        int immigrants= 0;
+        int emigrants = 0;
         // economic improvement
-        int improvement;
+        int improvement = 0;
 
         /* Potential bonuses to economy */
-        int clearskies;
-        int earthlore;
-        int phantasmal_entertainment;
+        int clearskies = 0;
+        int earthlore = 0;
+        int phantasmal_entertainment = 0;
 
         ARegion *neighbors[NDIRS];
         safe::list<Object *> objects;
@@ -317,8 +314,8 @@ class ARegion
         std::list<Farsight *>passers;
         std::vector<Production *> products;
         std::vector<Market*> markets;
-        int xloc, yloc, zloc;
-        int visited;
+        int xloc = 0, yloc = 0, zloc = 0;
+        int visited = 0;
 
         // Used for calculating distances using an A* search
         int distance;
