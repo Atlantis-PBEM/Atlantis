@@ -188,7 +188,8 @@ void Game::ProcessInvisibility(Unit *u, parser::string_parser& parser, orders_ch
         order = dynamic_cast<CastUnitsOrder *>(u->castorders);
     } else {
         u->ClearCastOrders();
-        u->castorders = new CastUnitsOrder(1);
+        order = new CastUnitsOrder(1);
+        u->castorders = order; 
     }
 
     if (checker) return;
