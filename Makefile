@@ -9,7 +9,7 @@
 
 GAME ?= standard
 
-CPLUS = g++-13
+CPLUS = g++
 CC = gcc
 CFLAGS = -g -I. -I.. -Wall -Werror -std=c++20
 
