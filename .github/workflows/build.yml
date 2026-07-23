@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: make all-clean && make all
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
           path: |
