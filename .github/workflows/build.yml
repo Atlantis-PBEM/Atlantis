@@ -17,7 +17,6 @@ jobs:
         os:
           - ubuntu
           - windows
-          - macos
         include:
            - os: windows
              ext: .exe
