@@ -149,4 +149,47 @@ ut::suite<"ARegion units"> aregion_units_suite = []
 		AList *facs = reg->PresentFactions();
 		expect(facs->Num() == 0_i);
 	};
+
+	// DeduplicateUnitList drops UnitId entries that resolve to the same unit. When every
+	// entry resolves to a DISTINCT unit, nothing is removed and the list is untouched.
+	"DeduplicateUnitList keeps entries that resolve to distinct units"_test = []
+	{
+		ARegion *reg = new ARegion();
+		Faction *fac = new Faction(1);
+		Object *o1 = addObject(reg, 1);
+		addUnit(o1, 100, fac);
+		addUnit(o1, 200, fac);
+
+		AList list;
+		UnitId *id1 = new UnitId(); id1->unitnum = 100; id1->alias = 0; id1->faction = 0;
+		UnitId *id2 = new UnitId(); id2->unitnum = 200; id2->alias = 0; id2->faction = 0;
+		list.Add(id1);
+		list.Add(id2);
+
+		reg->DeduplicateUnitList(&list, 1);
+		expect(list.Num() == 2_i) << "distinct references must all be preserved";
+	};
+
+	// KNOWN BUG (see the aregion review): DeduplicateUnitList deletes a duplicate node
+	// inside a nested plain `forlist`, which can free the outer loop's already-pre-fetched
+	// `_elem2`, causing a use-after-free when the list contains a repeated unit id. This
+	// test is SKIPPED so it does not crash CI; it documents the intended post-dedup result
+	// (one entry) and should be enabled once DeduplicateUnitList is switched to
+	// forlist_safe / deferred deletion.
+	skip / "DeduplicateUnitList collapses repeated ids (blocked by use-after-free)"_test = []
+	{
+		ARegion *reg = new ARegion();
+		Faction *fac = new Faction(1);
+		Object *o1 = addObject(reg, 1);
+		addUnit(o1, 100, fac);
+
+		AList list;
+		UnitId *id1 = new UnitId(); id1->unitnum = 100; id1->alias = 0; id1->faction = 0;
+		UnitId *id2 = new UnitId(); id2->unitnum = 100; id2->alias = 0; id2->faction = 0;
+		list.Add(id1);
+		list.Add(id2);
+
+		reg->DeduplicateUnitList(&list, 1);
+		expect(list.Num() == 1_i) << "the duplicate reference should be removed";
+	};
 };

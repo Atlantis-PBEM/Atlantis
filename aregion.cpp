@@ -177,44 +177,6 @@ int ARegion::IsNativeRace(int item)
 	return 0;
 }
 
-int ARegion::GetNearestProd(int item)
-{
-	AList regs, regs2;
-	AList *rptr = &regs;
-	AList *r2ptr = &regs2;
-	AList *temp;
-	ARegionPtr *p = new ARegionPtr;
-	p->ptr = this;
-	regs.Add(p);
-
-	for (int i=0; i<5; i++) {
-		forlist(rptr) {
-			ARegion *r = ((ARegionPtr *) elem)->ptr;
-			AString skname = ItemDefs[item].pSkill;
-			int sk = LookupSkill(&skname);
-			if (r->products.GetProd(item, sk)) {
-				regs.DeleteAll();
-				regs2.DeleteAll();
-				return i;
-			}
-			for (int j=0; j<NDIRS; j++) {
-				if (neighbors[j]) {
-					p = new ARegionPtr;
-					p->ptr = neighbors[j];
-					r2ptr->Add(p);
-				}
-			}
-			rptr->DeleteAll();
-			temp = rptr;
-			rptr = r2ptr;
-			r2ptr = temp;
-		}
-	}
-	regs.DeleteAll();
-	regs2.DeleteAll();
-	return 5;
-}
-
 std::vector<int> ARegion::GetPossibleLairs() {
 	std::vector<int> lairs;
 	TerrainType *tt = &TerrainDefs[type];

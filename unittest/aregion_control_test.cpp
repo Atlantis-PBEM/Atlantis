@@ -167,6 +167,29 @@ ut::suite<"ARegion control"> aregion_control_suite = []
 		expect(reg->Forbidden(mover) == nullptr) << "non-guarding unit does not forbid";
 	};
 
+	// ForbiddenByAlly only considers guards belonging to a faction the mover treats as an
+	// ally. A non-ally guard, even a forbidding one, is ignored by this variant. Here we
+	// cover the null paths (which need no CanSee/CanCatch setup): no guard, and a guard
+	// whose faction the mover does not consider an ally.
+	"ForbiddenByAlly ignores guards the mover does not consider allies"_test = []
+	{
+		ARegion *reg = new ARegion();
+		Faction *me = new Faction(1);
+		Faction *them = new Faction(2);
+		Object *o = addObject(reg, 1);
+		Unit *mover = addUnit(o, 100, me);
+
+		expect(reg->ForbiddenByAlly(mover) == nullptr) << "empty region forbids nobody";
+
+		Unit *guard = addUnit(o, 101, them);
+		guard->guard = GUARD_GUARD;
+		makeAlive(guard);
+		// mover's attitude toward `them` defaults to A_NEUTRAL (not A_ALLY), so the guard
+		// is not considered even though it is guarding.
+		expect(reg->ForbiddenByAlly(mover) == nullptr)
+			<< "a non-ally guard is not consulted by ForbiddenByAlly";
+	};
+
 	// ForbiddenShip walks the ship's units and returns 1 if any is forbidden. With no
 	// guards in the region, none are forbidden.
 	"ForbiddenShip is false when the region has no guards"_test = []

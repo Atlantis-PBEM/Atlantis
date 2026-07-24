@@ -245,6 +245,37 @@ runner configuration.
   a test written against the "obvious fix" would have been wrong. `unittest/alist_test.cpp` is
   the reference example of this behavior-locking style.
 
+## Covering a file or class: enumerate, don't cherry-pick
+
+When the task is "test file X" or "cover class Y" (not a single function), coverage here is
+**opt-in per method**: a method is only exercised if some test names it. The unittest binary
+links into no game, so nothing else calls your code. This produces a specific, dangerous
+blind spot — **dead code and logic-broken code that nothing calls are invisible to every
+layer at once**: the snapshot suite never reaches an uncalled method, and the unit suite
+won't either unless you deliberately wrote a test for it. A method can be outright wrong and
+still show green across all 28 snapshot turns and the whole unit suite. (This really
+happened: `ARegion::GetNearestProd` expanded the wrong region's neighbors for years, was
+never called, and deleting it failed no test.)
+
+So do not stop at the handful of obvious pure functions. Work the whole surface:
+
+1. **Enumerate every method up front.** `grep -nE 'ClassName::' file.cpp` (and the class
+   body in the header for methods defined elsewhere). That list — not your intuition — is
+   the coverage denominator.
+2. **Cross-reference call sites.** For each method, `grep -rn 'MethodName' --include=*.cpp`.
+   Zero call sites on a non-trivial method is a finding in itself: it is dead code. Flag it
+   for deletion or a pinning test; do not silently skip it as "not worth testing".
+3. **Classify each method** into: *tested*, *hand-constructible gap* (reachable with
+   `new ARegion()` + objects/units/factions built by hand — write the test), or
+   *world-dependent* (needs regions/markets/RNG/reports — belongs to the snapshot suite).
+   Private methods are usually only reachable through a world-dependent caller; note them
+   rather than pretending they are covered.
+4. **Report the inventory as a number, not a vibe.** "N methods; X tested; Y untested — Z of
+   those are hand-constructible (listed), the rest are world-dependent." A per-method table
+   is the deliverable, so the gaps are explicit and reviewable rather than assumed away.
+
+Grep-and-classify is cheap; a wrong-but-uncalled method surviving every suite is not.
+
 ## Which layers does this change need?
 
 | Change | Unit | Snapshot | `make all` |

@@ -369,7 +369,6 @@ class ARegion : public AListElem
 		void SetupProds(double weight);
 		void SetIncome();
 		void Grow();
-		int GetNearestProd(int);
 		void SetupCityMarket();
 		void AddTown();
 		void AddTown(int);
