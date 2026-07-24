@@ -234,6 +234,16 @@ runner configuration.
 - **Write an independent oracle.** When testing a formula, re-derive the expected value from
   the specification rather than calling the sibling engine function. Otherwise a consistently
   wrong pair of functions will round-trip its way to a green suite and prove nothing.
+- **When writing tests, write only tests. Never change non-test code to make a test pass or
+  read more nicely** — not even code that looks buggy. A test's job is to describe the engine
+  as it is, so it can catch the day that behavior changes. Assert the *current* behavior and
+  lock it in. If, while writing tests, you become convinced a non-test function is genuinely
+  wrong, you may add a *comment* to that function (and to the test) flagging the behavior and
+  pointing at the pinning test — but leave the code itself untouched and raise the suspected
+  bug with the user as a separate, explicit decision. Trace surprising logic by hand before
+  calling it a bug: `AList::Remove`'s `lastelem` handling reads like a bug but is correct, and
+  a test written against the "obvious fix" would have been wrong. `unittest/alist_test.cpp` is
+  the reference example of this behavior-locking style.
 
 ## Which layers does this change need?
 

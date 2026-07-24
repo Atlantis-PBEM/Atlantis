@@ -133,6 +133,20 @@ AListElem * AList::Get(AListElem * e)
 /// Remove an element from the list... I think
 /**This one looks like deep voodoo, and I can't follow it at all :\
 */
+// NOTE (behavior, traced by hand; see unittest/alist_test.cpp which pins all of
+// this): the lastelem bookkeeping keys off e->next, not off actually finding e.
+//   * If e->next != 0 (e is not a tail), lastelem is left untouched. Removing a
+//     non-tail element does not change the tail, so this is correct - including
+//     when e is not in the list at all.
+//   * If e->next == 0 (e looks like a tail), lastelem is cleared up front and
+//     then rebuilt to the real last node as the loop walks. So even removing an
+//     absent tail-looking element restores lastelem to the true tail rather than
+//     corrupting it.
+// Two current behaviors worth knowing before you "clean this up":
+//   * On a successful match, e->next is NOT nulled (unlike Add()); the removed
+//     node is left pointing into the former list. forlist_safe relies on the
+//     snapshot copy, not on this, but callers should not assume e is detached.
+//   * Return type is char: 1 on removal, 0 if e is null or not found.
 char AList::Remove(AListElem * e)
 {
 	if (!e) return 0;
@@ -156,6 +170,12 @@ int AList::Num()
 }
 
 /// No idea what this one does.
+// NOTE (behavior, pinned in unittest/alist_test.cpp): helper for forlist_safe.
+// Given a snapshot array `copy` of the elements captured before iteration began,
+// advance past `pos` and return the next index whose element is STILL a live
+// member of the list (verified by scanning from First()). Elements removed
+// during the walk are skipped. When no live element remains, it returns a value
+// >= size, which ends forlist_safe's loop.
 int AList::NextLive(AListElem **copy, int size, int pos)
 {
 	while (++pos < size) {
