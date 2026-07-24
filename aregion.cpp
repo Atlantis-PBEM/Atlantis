@@ -573,6 +573,7 @@ int ARegion::GetMaxClicks()
 		case R_CERAN_DESERT3:
 			terrainAdd = -1;
 			if (badWeather) weatherAdd = 5;
+			break;
 		case R_CAVERN:
 		case R_UFOREST:
 		case R_TUNNELS:
