@@ -58,8 +58,8 @@ ut::suite<"ARegion statistics"> aregion_stats_suite = []
 		expect(contains(out, "mountain 1")) << out;
 	};
 
-	// TownStatistics counts each settlement size and prints totals + percentages. (It divides
-	// by the settlement total, so it must not be called with zero towns -- we supply three.)
+	// TownStatistics counts each settlement size and prints totals + percentages. It divides by
+	// the settlement total; the zero-town path is pinned separately below.
 	"TownStatistics counts villages, towns and cities"_test = []
 	{
 		ARegionList *regs = new ARegionList();
@@ -72,6 +72,25 @@ ut::suite<"ARegion statistics"> aregion_stats_suite = []
 		expect(contains(out, "Villages: 1")) << out;
 		expect(contains(out, "Towns   : 1")) << out;
 		expect(contains(out, "Cities  : 1")) << out;
+	};
+
+	// REGRESSION GUARD: with no towns the settlement total is 0. TownStatistics guards the
+	// percentage divisions with `if (tot > 0)` (aregion.cpp ~line 2410); without that guard the
+	// three `x * 100 / tot` divisions are a divide-by-zero -- SIGFPE -- which would crash the
+	// whole unittest binary and report nothing. This exercises a region list that has regions but
+	// no settlements (e.g. an all-ocean or freshly created level): it must not crash, and every
+	// count/percentage must print as 0.
+	"TownStatistics survives a settlement-free region list"_test = []
+	{
+		ARegionList *regs = new ARegionList();
+		typedRegion(regs, R_OCEAN); // regions present, but none carry a town
+		typedRegion(regs, R_PLAIN);
+
+		std::string out = captureCout([&]{ regs->TownStatistics(); });
+		expect(contains(out, "Settlements: 0")) << out;
+		expect(contains(out, "Villages: 0 (0%)")) << out;
+		expect(contains(out, "Towns   : 0 (0%)")) << out;
+		expect(contains(out, "Cities  : 0 (0%)")) << out;
 	};
 
 	// ResoucesStatistics aggregates products and markets across regions and prints three

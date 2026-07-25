@@ -2401,9 +2401,17 @@ void ARegionList::TownStatistics()
 		}
 	}
 	int tot = villages + towns + cities;
-	int perv = villages * 100 / tot;
-	int pert = towns * 100 / tot;
-	int perc = cities * 100 / tot;
+	int perv = 0;
+	int pert = 0;
+	int perc = 0;
+	// tot can be 0 when the region list has no settlements (e.g. an all-ocean
+	// or freshly created level); guard the division so the stats dump does not
+	// divide by zero. Percentages stay 0 in that case.
+	if (tot > 0) {
+		perv = villages * 100 / tot;
+		pert = towns * 100 / tot;
+		perc = cities * 100 / tot;
+	}
 	Awrite(AString("Settlements: ") + tot);
 	Awrite(AString("Villages: ") + villages + " (" + perv + "%)");
 	Awrite(AString("Towns   : ") + towns + " (" + pert + "%)");
