@@ -44,6 +44,17 @@ namespace {
 		r->SetName(name);
 		r->type = R_PLAIN;
 		r->SetLoc(x, y, ARegionArray::LEVEL_SURFACE);
+		// ARegion::ARegion() does not initialize population/race/wealth, so a
+		// freshly-new'd region holds heap garbage in those fields. WriteReport reads
+		// them: Population() != 0 opens the peasants branch, which then indexes
+		// ItemDefs[race] under RACES_EXIST. Garbage population + garbage race is an
+		// out-of-bounds read that segfaults on Linux (glibc) while happening to be
+		// benign on macOS. Pin a defined baseline here; race = -1 is the engine's
+		// "no race" sentinel (see ARegion::Print / aregion.cpp). Tests that need
+		// peasants override population/race explicitly after calling this helper.
+		r->population = 0;
+		r->race = -1;
+		r->wealth = 0;
 		return r;
 	}
 
