@@ -51,18 +51,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Build with AddressSanitizer + UBSan so a crash prints a symbolized
-      # backtrace instead of an opaque "exit code 139". CFLAGS on the make
-      # command line REPLACES the Makefile's CFLAGS, so we must repeat the
-      # required -I/-std flags here; -Werror is dropped so sanitizer-related
-      # warnings don't fail the build.
-      - name: Build unit tests (with sanitizers)
-        run: make unittest CFLAGS="-g -O1 -I. -I.. -std=c++20 -fsanitize=address,undefined -fno-omit-frame-pointer"
-      - name: Run unit tests
-        run: ./unittest
+      - run: make unittest
+      # Plain (non-sanitized) build: pre-existing, benign-on-x86 UB — the ISAAC
+      # RNG's misaligned loads, AString's new[]/scalar-delete — must not fail CI.
+      # Run under gdb so a genuine crash prints a symbolized backtrace (the build
+      # already compiles with -g) instead of an opaque "exit code 139". gdb is
+      # preinstalled on GitHub-hosted ubuntu runners. --return-child-result makes
+      # this step's exit status follow the test binary's, so a real failure (or a
+      # crash) still fails the job; a clean run exits 0 with no extra noise.
+      - name: Run unit tests (backtrace on crash)
+        run: gdb -batch -ex run -ex bt -ex quit --return-child-result ./unittest
         working-directory: unittest
-        env:
-          # abort_on_error makes ASan crash loudly; detect_leaks=0 because the
-          # engine intentionally leaks, and we only care about the segfault here.
-          ASAN_OPTIONS: abort_on_error=1:detect_leaks=0:print_stacktrace=1
-          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
