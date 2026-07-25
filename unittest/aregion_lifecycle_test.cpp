@@ -71,6 +71,78 @@ ut::suite<"ARegion lifecycle"> aregion_lifecycle_suite = []
 		expect(reg->hell.Num() == 1_i);
 	};
 
+	// Soldier items (IT_MAN/IT_MONSTER) are NOT bequeathed -- the transfer is skipped and
+	// they simply vanish with the corpse.
+	"Kill does not bequeath soldier items"_test = []
+	{
+		ARegion *reg = new ARegion();
+		reg->type = R_PLAIN;
+		Faction *fac = new Faction(1);
+		Object *o = addObject(reg, 1);
+		Unit *heir = addUnit(o, 100, fac);
+		Unit *victim = addUnit(o, 101, fac);
+		victim->items.SetNum(I_LEADERS, 3); // leaders are soldiers (IT_MAN)
+
+		reg->Kill(victim);
+
+		expect(heir->items.GetNum(I_LEADERS) == 0_i) << "heir does not inherit soldiers";
+		expect(victim->items.GetNum(I_LEADERS) == 0_i) << "victim's soldiers are cleared";
+	};
+
+	// Ship items get special handling: when the heir already carries the same ship type, its
+	// count is capped down to the victim's (it is not summed), and the victim keeps its own.
+	"Kill caps a heir's ship items to the victim's count"_test = []
+	{
+		ARegion *reg = new ARegion();
+		reg->type = R_PLAIN;
+		Faction *fac = new Faction(1);
+		Object *o = addObject(reg, 1);
+		Unit *heir = addUnit(o, 100, fac);
+		Unit *victim = addUnit(o, 101, fac);
+		heir->items.SetNum(I_LONGBOAT, 5);
+		victim->items.SetNum(I_LONGBOAT, 2);
+
+		reg->Kill(victim);
+
+		expect(heir->items.GetNum(I_LONGBOAT) == 2_i) << "heir capped to the victim's count";
+	};
+
+	// With no heir to inherit, the item-transfer block is skipped entirely: a lone unit
+	// carries its items with it to hell rather than losing them.
+	"Kill carries a lone unit's items to hell (no heir)"_test = []
+	{
+		ARegion *reg = new ARegion();
+		reg->type = R_PLAIN;
+		Faction *fac = new Faction(1);
+		Object *o = addObject(reg, 1);
+		Unit *u = addUnit(o, 100, fac);
+		u->items.SetNum(I_SILVER, 40);
+
+		reg->Kill(u);
+
+		expect(u->items.GetNum(I_SILVER) == 40_i) << "items are untouched with no heir";
+		expect(reg->hell.Num() == 1_i) << "the unit still goes to hell";
+		expect(o->units.Num() == 0_i) << "and leaves its object";
+	};
+
+	// In the ocean, an heir standing in the open (a dummy object) that cannot swim will not
+	// pick up bequeathed goods -- they would drown it, so they are dropped.
+	"Kill drops inherited goods on an heir that would drown"_test = []
+	{
+		ARegion *reg = new ARegion();
+		reg->type = R_OCEAN; // triggers the drowning branch
+		Faction *fac = new Faction(1);
+		Object *o = addObject(reg, 1); // O_DUMMY -> open water
+		Unit *heir = addUnit(o, 100, fac);   // no men -> cannot swim
+		Unit *victim = addUnit(o, 101, fac);
+		victim->items.SetNum(I_SILVER, 50);
+
+		reg->Kill(victim);
+
+		expect(heir->items.GetNum(I_SILVER) == 0_i)
+			<< "goods are dropped rather than drowning the heir";
+	};
+
 	// ClearHell empties the hell list (and deletes its occupants).
 	"ClearHell empties the hell list"_test = []
 	{
@@ -151,5 +223,35 @@ ut::suite<"ARegion lifecycle"> aregion_lifecycle_suite = []
 		plain->gateopen = 1;
 		plain->SetGateStatus(5);
 		expect(plain->gateopen == 0_i) << "non-perennial gates stay closed off-month";
+	};
+
+	// With GATES_NOT_PERENNIAL > 0 the gate opens during the window [gatemonth,
+	// gatemonth + GATES_NOT_PERENNIAL), wrapping past December. (Flag is 0 in the unittest
+	// ruleset, so we flip it for the test and restore it afterwards.)
+	"SetGateStatus opens a non-perennial gate during its active months"_test = []
+	{
+		int saved = Globals->GATES_NOT_PERENNIAL;
+		Globals->GATES_NOT_PERENNIAL = 3;
+
+		ARegion *r = new ARegion();
+		r->type = R_PLAIN;
+		r->gate = 1;
+		r->gatemonth = 3; // active months 3, 4, 5
+
+		r->gateopen = 0;
+		r->SetGateStatus(4);
+		expect(r->gateopen == 1_i) << "open during an active month";
+
+		r->gateopen = 1;
+		r->SetGateStatus(8);
+		expect(r->gateopen == 0_i) << "closed outside the window";
+
+		// The window wraps past month 11.
+		r->gatemonth = 10; // active months 10, 11, 0
+		r->gateopen = 0;
+		r->SetGateStatus(0);
+		expect(r->gateopen == 1_i) << "window wraps past December";
+
+		Globals->GATES_NOT_PERENNIAL = saved;
 	};
 };

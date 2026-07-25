@@ -117,4 +117,38 @@ ut::suite<"ARegion terrain"> aregion_terrain_suite = []
 		// M_SWIM never enters the road-discount branch, so the cost stays at 2.
 		expect(dest->MoveCost(M_SWIM, from, D_NORTH, nullptr) == 2_i);
 	};
+
+	// The weather block of MoveCost is gated by WEATHER_EXISTS (off in the unittest ruleset).
+	// Flip it to reach: the blizzard fast-return, the bad-weather doubled base cost, and the
+	// clearskies/normal reset.
+	"MoveCost applies weather modifiers when weather exists"_test = []
+	{
+		int saved = Globals->WEATHER_EXISTS;
+		Globals->WEATHER_EXISTS = 1;
+
+		ARegion *from = new ARegion();
+		from->ZeroNeighbors();
+
+		// Blizzard: fixed cost of 10 regardless of terrain/movement.
+		ARegion *blizz = new ARegion();
+		blizz->type = R_PLAIN;
+		blizz->weather = W_BLIZZARD;
+		blizz->clearskies = 0;
+		blizz->ZeroNeighbors();
+		expect(blizz->MoveCost(M_WALK, from, D_NORTH, nullptr) == 10_i) << "blizzard costs 10";
+
+		// Non-blizzard bad weather doubles the base cost: plain movepoints 1 * 2 = 2.
+		ARegion *winter = new ARegion();
+		winter->type = R_PLAIN;
+		winter->weather = W_WINTER;
+		winter->clearskies = 0;
+		winter->ZeroNeighbors();
+		expect(winter->MoveCost(M_WALK, from, D_NORTH, nullptr) == 2_i) << "bad weather doubles";
+
+		// clearskies resets the base back to 1: plain 1 * 1 = 1.
+		winter->clearskies = 1;
+		expect(winter->MoveCost(M_WALK, from, D_NORTH, nullptr) == 1_i) << "clearskies resets";
+
+		Globals->WEATHER_EXISTS = saved;
+	};
 };

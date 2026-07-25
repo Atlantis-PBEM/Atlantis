@@ -170,13 +170,37 @@ ut::suite<"ARegion units"> aregion_units_suite = []
 		expect(list.Num() == 2_i) << "distinct references must all be preserved";
 	};
 
-	// KNOWN BUG (see the aregion review): DeduplicateUnitList deletes a duplicate node
-	// inside a nested plain `forlist`, which can free the outer loop's already-pre-fetched
-	// `_elem2`, causing a use-after-free when the list contains a repeated unit id. This
-	// test is SKIPPED so it does not crash CI; it documents the intended post-dedup result
-	// (one entry) and should be enabled once DeduplicateUnitList is switched to
-	// forlist_safe / deferred deletion.
-	skip / "DeduplicateUnitList collapses repeated ids (blocked by use-after-free)"_test = []
+	// DeduplicateUnitList removes later references that resolve to an already-seen unit.
+	// NUANCE: the removal happens inside a nested plain `forlist`, whose macro pre-fetches
+	// the *next* node before each body runs. Deleting the node that is the OUTER loop's
+	// prefetched next (which happens when a duplicate sits IMMEDIATELY after the outer's
+	// current element) is a use-after-free -- see the aregion review. We therefore exercise
+	// the removal with a duplicate that is NOT adjacent to its original ([100, 200, 100]):
+	// unit 100's second reference is at index 2 while the outer loop is at index 0, so the
+	// freed node is never the prefetched next, and the dedup is observed safely.
+	"DeduplicateUnitList removes a non-adjacent duplicate reference"_test = []
+	{
+		ARegion *reg = new ARegion();
+		Faction *fac = new Faction(1);
+		Object *o1 = addObject(reg, 1);
+		addUnit(o1, 100, fac);
+		addUnit(o1, 200, fac);
+
+		AList list;
+		UnitId *id1 = new UnitId(); id1->unitnum = 100; id1->alias = 0; id1->faction = 0;
+		UnitId *id2 = new UnitId(); id2->unitnum = 200; id2->alias = 0; id2->faction = 0;
+		UnitId *id3 = new UnitId(); id3->unitnum = 100; id3->alias = 0; id3->faction = 0;
+		list.Add(id1);
+		list.Add(id2); // separates the two references to unit 100
+		list.Add(id3);
+
+		reg->DeduplicateUnitList(&list, 1);
+		expect(list.Num() == 2_i) << "the later duplicate of unit 100 is removed";
+	};
+
+	// An id that does not resolve to a unit in the region (GetUnitId returns null) is skipped
+	// by both loops and left in place -- exercising the `!outer`/`!inner` continue branches.
+	"DeduplicateUnitList keeps unresolvable ids"_test = []
 	{
 		ARegion *reg = new ARegion();
 		Faction *fac = new Faction(1);
@@ -185,11 +209,46 @@ ut::suite<"ARegion units"> aregion_units_suite = []
 
 		AList list;
 		UnitId *id1 = new UnitId(); id1->unitnum = 100; id1->alias = 0; id1->faction = 0;
-		UnitId *id2 = new UnitId(); id2->unitnum = 100; id2->alias = 0; id2->faction = 0;
+		UnitId *id2 = new UnitId(); id2->unitnum = 999; id2->alias = 0; id2->faction = 0; // no such unit
 		list.Add(id1);
 		list.Add(id2);
 
 		reg->DeduplicateUnitList(&list, 1);
-		expect(list.Num() == 1_i) << "the duplicate reference should be removed";
+		expect(list.Num() == 2_i) << "the unresolvable id is skipped, not removed";
+	};
+
+	// GetUnitId dispatches to GetUnitAlias when the id carries no unit number, only an alias.
+	// Two sub-branches: the id names a faction (use it) vs. it does not (use the passed one).
+	"GetUnitId resolves an alias-only UnitId"_test = []
+	{
+		ARegion *reg = new ARegion();
+		Faction *fac = new Faction(7);
+		Object *o1 = addObject(reg, 1);
+		Unit *u = new Unit(500, fac, /*alias*/ 42);
+		u->MoveUnit(o1);
+
+		// id->faction == 0 -> GetUnitAlias(alias, <passed faction>)
+		UnitId passedId; passedId.unitnum = 0; passedId.alias = 42; passedId.faction = 0;
+		expect(reg->GetUnitId(&passedId, 7) == u) << "alias resolved via the passed faction";
+
+		// id->faction set -> GetUnitAlias(alias, id->faction)
+		UnitId ownId; ownId.unitnum = 0; ownId.alias = 42; ownId.faction = 7;
+		expect(reg->GetUnitId(&ownId, 1) == u) << "alias resolved via the id's own faction";
+	};
+
+	// GetLocation also resolves an alias-only id, returning the full Location.
+	"GetLocation resolves an alias-only UnitId"_test = []
+	{
+		ARegion *reg = new ARegion();
+		Faction *fac = new Faction(3);
+		Object *o1 = addObject(reg, 1);
+		Unit *u = new Unit(600, fac, /*alias*/ 9);
+		u->MoveUnit(o1);
+
+		UnitId id; id.unitnum = 0; id.alias = 9; id.faction = 0;
+		Location *loc = reg->GetLocation(&id, 3);
+		expect(fatal(loc != nullptr));
+		expect(loc->unit == u);
+		expect(loc->obj == o1);
 	};
 };

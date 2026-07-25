@@ -78,4 +78,28 @@ ut::suite<"ARegion fleets"> aregion_fleet_suite = []
 		expect(dummy->units.Num() == 1_i) << "passenger relocated to the dummy";
 		expect(passenger->object == dummy);
 	};
+
+	// A crewless fleet that still has capacity (a real ship aboard, so bail is NOT set) is
+	// culled only at sea: on the ocean `alive` stays 0 and the fleet sinks, but on land
+	// CheckFleets force-sets `alive` so the same fleet survives. This exercises the
+	// terrain-dependent `similar_type != R_OCEAN` branch.
+	"CheckFleets sinks a crewless fleet at sea but keeps it on land"_test = []
+	{
+		// At sea: removed.
+		ARegion *sea = new ARegion();
+		sea->type = R_OCEAN;
+		Object *seaFleet = addObject(sea, 1, O_FLEET);
+		seaFleet->SetNumShips(I_LONGBOAT, 1); // capacity > 0 -> bail is not set
+		expect(fatal(seaFleet->FleetCapacity() >= 1_i));
+		sea->CheckFleets();
+		expect(sea->GetObject(1) == nullptr) << "crewless fleet sinks at sea";
+
+		// On land: the identical fleet survives.
+		ARegion *land = new ARegion();
+		land->type = R_PLAIN;
+		Object *landFleet = addObject(land, 1, O_FLEET);
+		landFleet->SetNumShips(I_LONGBOAT, 1);
+		land->CheckFleets();
+		expect(land->GetObject(1) != nullptr) << "on land the fleet is not auto-removed";
+	};
 };

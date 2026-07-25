@@ -2161,6 +2161,13 @@ void ARegionList::NeighSetup(ARegion *r, ARegionArray *ar)
 	}
 }
 
+// COVERAGE NOTE: this method has no unit test. It is private, and its only callers
+// (MakeIcosahedralRegions -> SetupIcosahedralNeighbors) live in neworigins/map.cpp, which is
+// not linked into the unittest binary -- so it is unreachable from any test without exposing it.
+// It is also inert for every shipped ruleset (ICOSAHEDRAL_WORLD == 0 in all *_rules.cpp), so the
+// snapshot suite never exercises it either. If icosahedral worlds are ever enabled, add a public
+// test seam and pin the geometry (each hex has 5 or 6 neighbours; links are mutual; the poles are
+// pentagons). The parallel icosahedral branch in GetPlanarDistance IS tested (via a flag flip).
 void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 {
 	int scale, x, y, x2, y2, x3, neighX, neighY;

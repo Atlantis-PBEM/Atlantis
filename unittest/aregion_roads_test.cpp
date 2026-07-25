@@ -210,4 +210,51 @@ ut::suite<"ARegion roads"> aregion_roads_suite = []
 
 		expect(a->RoadDevelopmentBonus(50, 0) > 0_i);
 	};
+
+	// TraceConnectedRoad adds a separate bonus point for a connected *town*, independent of
+	// development. With an undeveloped but town-bearing neighbor, the town bonus is the only
+	// contributor, giving exactly 1 (vs 0 with no town).
+	"RoadDevelopmentBonus counts a connected town"_test = []
+	{
+		auto build = [](bool withTown) {
+			ARegion *a = new ARegion();
+			ARegion *b = new ARegion();
+			a->ZeroNeighbors();
+			b->ZeroNeighbors();
+			a->neighbors[D_NORTH] = b;
+			b->neighbors[D_SOUTH] = a;
+			addRoad(a, O_ROADN);
+			addRoad(b, O_ROADS);
+			b->development = 0; // no development bonus, isolate the town bonus
+			if (withTown) {
+				b->town = new TownInfo;
+				b->town->name = new AString("Roadton");
+			}
+			return a->RoadDevelopmentBonus(50, 0);
+		};
+
+		expect(build(false) == 0_i) << "no town, no development -> no bonus";
+		expect(build(true) == 1_i) << "connected town contributes one bonus point";
+	};
+
+	// A cyclic road network (triangle a-b-c) must terminate: TraceConnectedRoad's visited
+	// guard (isnew == 0) stops it re-entering a region already on the path. If the guard were
+	// broken this would recurse forever; a returning, finite result proves it works.
+	"RoadDevelopmentBonus terminates on a cyclic road network"_test = []
+	{
+		ARegion *a = new ARegion(); a->ZeroNeighbors();
+		ARegion *b = new ARegion(); b->ZeroNeighbors();
+		ARegion *c = new ARegion(); c->ZeroNeighbors();
+
+		// Triangle: a(N)-b, a(NE)-c, b(SE)-c, with mutual roads on each edge.
+		a->neighbors[D_NORTH] = b;     b->neighbors[D_SOUTH] = a;
+		a->neighbors[D_NORTHEAST] = c; c->neighbors[D_SOUTHWEST] = a;
+		b->neighbors[D_SOUTHEAST] = c; c->neighbors[D_NORTHWEST] = b;
+		addRoad(a, O_ROADN); addRoad(a, O_ROADNE);
+		addRoad(b, O_ROADS); addRoad(b, O_ROADSE);
+		addRoad(c, O_ROADSW); addRoad(c, O_ROADNW);
+
+		int bonus = a->RoadDevelopmentBonus(50, 0); // must return, not hang
+		expect(that % bonus >= 0) << "cyclic trace terminates with a finite bonus";
+	};
 };

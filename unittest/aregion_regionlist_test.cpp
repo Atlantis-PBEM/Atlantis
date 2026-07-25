@@ -9,6 +9,7 @@
 #include "unit.h"
 #include "faction.h"
 #include "fileio.h"
+#include "gameio.h"
 
 // boost::ut exposes an `events` namespace that collides with the game's Events class, so a
 // file-scope `using namespace boost::ut;` will not compile. Alias it, and pull the literals
@@ -261,6 +262,68 @@ ut::suite<"ARegion region list"> aregion_regionlist_suite = []
 		ARegion *nexus = new ARegion();
 		nexus->SetLoc(0, 0, ARegionArray::LEVEL_NEXUS);
 		expect(regs->GetPlanarDistance(nexus, b, 0, -1) == 10000000_i);
+	};
+
+	// The x == -1 form of FindGate picks a random region that has a gate. (Seeded for
+	// determinism; we assert the invariant rather than which one.)
+	"ARegionList::FindGate(-1) returns a random gated region"_test = []
+	{
+		seedrandom(1);
+		ARegionList *regs = new ARegionList();
+		ARegion *r1 = new ARegion(); r1->num = 1; r1->gate = 5;
+		ARegion *r2 = new ARegion(); r2->num = 2; r2->gate = 9;
+		ARegion *nogate = new ARegion(); nogate->num = 3; nogate->gate = 0;
+		regs->Add(r1); regs->Add(r2); regs->Add(nogate);
+
+		ARegion *found = regs->FindGate(-1);
+		expect(fatal(found != nullptr)) << "a gated region is chosen";
+		expect(that % found->gate > 0) << "the chosen region actually has a gate";
+	};
+
+	// The icosahedral branch of GetPlanarDistance does a neighbor BFS instead of the flat
+	// grid formula. (ICOSAHEDRAL_WORLD is off in the unittest ruleset; flip it.) Level scale
+	// is 1 here, so region coords map straight through.
+	"ARegionList::GetPlanarDistance BFS on an icosahedral world"_test = []
+	{
+		int saved = Globals->ICOSAHEDRAL_WORLD;
+		Globals->ICOSAHEDRAL_WORLD = 1;
+
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(2);
+		regs->pRegionArrays[0] = new ARegionArray(4, 4);
+		ARegionArray *surf = new ARegionArray(4, 4);
+		regs->pRegionArrays[1] = surf;
+
+		ARegion *a = new ARegion(); a->SetLoc(0, 0, ARegionArray::LEVEL_SURFACE);
+		ARegion *b = new ARegion(); b->SetLoc(2, 0, ARegionArray::LEVEL_SURFACE);
+		surf->SetRegion(0, 0, a);
+		surf->SetRegion(2, 0, b);
+		a->neighbors[D_SOUTHEAST] = b;
+		b->neighbors[D_NORTHWEST] = a;
+		regs->Add(a);
+		regs->Add(b);
+
+		expect(regs->GetPlanarDistance(a, b, 0, -1) == 1_i) << "adjacent hexes are distance 1";
+
+		Globals->ICOSAHEDRAL_WORLD = saved;
+	};
+
+	// With an abyss level configured, teleporting into or out of it is forbidden -- the
+	// distance is the "unreachable" sentinel. The abyss level index is
+	// UNDERWORLD_LEVELS + UNDERDEEP_LEVELS + 2 (== 2 in the unittest ruleset).
+	"ARegionList::GetPlanarDistance forbids crossing the abyss"_test = []
+	{
+		int saved = Globals->ABYSS_LEVEL;
+		Globals->ABYSS_LEVEL = 1;
+
+		ARegionList *regs = new ARegionList();
+		ARegion *deep = new ARegion(); deep->SetLoc(0, 0, 2); // the abyss level
+		ARegion *surf = new ARegion(); surf->SetLoc(2, 0, ARegionArray::LEVEL_SURFACE);
+
+		expect(regs->GetPlanarDistance(deep, surf, 0, -1) == 10000000_i)
+			<< "cannot path into or out of the abyss";
+
+		Globals->ABYSS_LEVEL = saved;
 	};
 
 	// FindConnectedRegions is the BFS frontier step: for the source region r it links each

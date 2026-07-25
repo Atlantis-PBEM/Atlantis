@@ -227,8 +227,13 @@ runner configuration.
 - **Prefer pure functions.** Anything needing no world is a clean target: `GetLevelByDays` /
   `GetDaysByLevel`, `SkillCost`, `LookupItem` / `LookupSkill`, `AString` tokenising, capacity
   and weight arithmetic, name formatting, faction type strings.
-- **Anything needing regions, markets, or a turn belongs in the snapshot suite** — the
-  unittest ruleset has no world to put it in.
+- **"No world" means none is built _for_ you — not that you cannot build one by hand.** The
+  unittest ruleset's `CreateWorld()` is empty, but `Globals` and all the global tables
+  (`ItemDefs`, `SkillDefs`, `TerrainDefs`, …) still exist. A single region with the objects,
+  units, products and markets you need is a legitimate, hand-constructible fixture. Reserve
+  the snapshot suite for genuinely global behaviour — full map generation, multi-turn
+  interactions, whole-report byte diffs — not for every method that happens to touch a
+  region. See **Reaching world / report / RNG-dependent code** below.
 - **Leaks are tolerated.** Existing suites `new` their fixtures and never delete. Do not add
   teardown the surrounding code does not expect.
 - **Write an independent oracle.** When testing a formula, re-derive the expected value from
@@ -244,6 +249,64 @@ runner configuration.
   calling it a bug: `AList::Remove`'s `lastelem` handling reads like a bug but is correct, and
   a test written against the "obvious fix" would have been wrong. `unittest/alist_test.cpp` is
   the reference example of this behavior-locking style.
+
+## Reaching world / report / RNG-dependent code
+
+Methods that "need a world" are usually still unit-testable with one of three techniques.
+Most of `aregion.cpp`'s once-deferred methods are covered this way (see the `aregion_*_test.cpp`
+suites), leaving only true map generation to the snapshot suite.
+
+**1. Capture report text through an `Areport` backed by a temp file.** Every `Write*` method
+(`WriteReport`, `WriteEconomy`, `WriteProducts`, `WriteMarkets`, `WriteExits`, `WriteTemplate`)
+emits into an `Areport`. Point one at a scratch file, call the method, read the file back, and
+assert on the text. `ShortPrint`/`Print` return an `AString` directly — no capture needed.
+
+```cpp
+std::string capture(std::function<void(Areport*)> emit) {
+    const char *scratch = "aregion_report.tmp";
+    std::remove(scratch);                       // Areport::OpenByName refuses a non-empty file
+    Areport rep; rep.OpenByName(scratch);
+    emit(&rep);
+    rep.Close();
+    std::ifstream in(scratch); std::stringstream ss; ss << in.rdbuf();
+    std::remove(scratch);
+    return ss.str();
+}
+// expect(capture([&](Areport *r){ reg->WriteEconomy(r, fac, 1); }).find("Wages: $0.") != npos);
+```
+
+**2. Seed the RNG for anything using `getrandom()`.** `seedrandom(int)` (from `gameio.h`) makes
+`Setup`, `SetupProds`/`SetupPop`, `LairCheck`/`MakeLair`, `FindGate(-1)` and the decay checks
+reproducible. Do **not** pin the exact draw sequence — it is brittle. Instead assert (a) the
+_reproducibility property_ — same seed ⇒ identical result, by running the method twice from the
+same seed — and (b) the deterministic post-conditions that hold regardless of the draws (e.g.
+`Setup` always creates the dummy object; population is never negative). Watch for constructors
+that themselves draw: `Production(item, amt)` bumps `amount` by `getrandom()` under
+`RANDOM_ECONOMY`, so seed first or set the field explicitly.
+
+**3. Build the unit/faction fixtures by hand.** Guard/tax/observation/notify methods just walk
+`region → objects → units`. Construct units, set `guard`/`type`/skills/items, wire faction
+attitudes with `SetAttitude`, and call. (One caveat: attribute-driven paths like
+`GetAttribute("observation")` return 0 unless the ruleset defines the attribute mods, which the
+unittest ruleset does not — so `GetObservation` can only be exercised in its degenerate form.)
+
+**Use the recorded turns as a data source.** `snapshot-tests/neworigins_turns/turn_*/` holds real
+NewOrigins `game.in`/`game.out` and `report.*`/`template.*` files. Mine them — do **not** copy
+them verbatim into a test:
+- **Expected report strings:** grep a `report.*` for the exact wording your `Write*` assertion
+  should match, so the format stays honest against the real ruleset (e.g. `Wages: $13.5 (Max:
+  $595)`, `Products: none.`, `Exits:`). This keeps a unit test's text in sync with what players
+  actually see.
+- **Realistic fixture shapes:** read a populated region block to see plausible product/market
+  layouts, wage productivities, populations and terrain, then reproduce a minimal version by
+  hand. It shows you what "normal" values look like without guessing.
+- **Format/field reference:** `game.in` is the positional savegame; consult it when testing
+  `Readin`/`Writeout` round-trips to see field order and sentinels (`NO_RACE`, `none`).
+
+Caveat on overlap: report-text unit tests partially duplicate the snapshot suite (which diffs
+whole reports). They still earn their place — they are fast, target one method, and pin specific
+edge cases the 14 recorded turns may never hit — but assert a focused substring, don't re-diff a
+whole report the snapshot suite already owns.
 
 ## Covering a file or class: enumerate, don't cherry-pick
 

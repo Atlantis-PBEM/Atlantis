@@ -130,4 +130,43 @@ ut::suite<"ARegion geometry"> aregion_geometry_suite = []
 		land->neighbors[D_NORTHEAST] = sea;
 		expect(land->IsCoastalOrLakeside() == 1_i);
 	};
+
+	// A lake region itself is coastal only when LAKESIDE_IS_COASTAL is set (off in the
+	// unittest ruleset). We flip the flag for the test and restore it.
+	"IsCoastal treats a lake region as coastal only under LAKESIDE_IS_COASTAL"_test = []
+	{
+		int saved = Globals->LAKESIDE_IS_COASTAL;
+
+		ARegion *lake = new ARegion();
+		lake->type = R_LAKE;
+		lake->ZeroNeighbors();
+
+		Globals->LAKESIDE_IS_COASTAL = 1;
+		expect(lake->IsCoastal() == 1_i) << "lake is coastal when the rule is on";
+		Globals->LAKESIDE_IS_COASTAL = 0;
+		expect(lake->IsCoastal() == 0_i) << "isolated lake is not coastal when the rule is off";
+
+		Globals->LAKESIDE_IS_COASTAL = saved;
+	};
+
+	// A lake NEIGHBOR is ocean-similar, but IsCoastal skips it in the seacount unless
+	// LAKESIDE_IS_COASTAL is set. This exercises the neighbor-lake-skip branch.
+	"IsCoastal skips a lake neighbor unless LAKESIDE_IS_COASTAL"_test = []
+	{
+		int saved = Globals->LAKESIDE_IS_COASTAL;
+
+		ARegion *land = new ARegion();
+		land->type = R_PLAIN;
+		land->ZeroNeighbors();
+		ARegion *lakeNbr = new ARegion();
+		lakeNbr->type = R_LAKE;
+		land->neighbors[D_NORTH] = lakeNbr;
+
+		Globals->LAKESIDE_IS_COASTAL = 0;
+		expect(land->IsCoastal() == 0_i) << "lake neighbor is skipped when the rule is off";
+		Globals->LAKESIDE_IS_COASTAL = 1;
+		expect(land->IsCoastal() == 1_i) << "lake neighbor counts when the rule is on";
+
+		Globals->LAKESIDE_IS_COASTAL = saved;
+	};
 };

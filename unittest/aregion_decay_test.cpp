@@ -112,4 +112,69 @@ ut::suite<"ARegion decay"> aregion_decay_suite = []
 		r->wages = 50;
 		expect(r->PillageCheck() == 0_i) << "negative gap is clamped to 0";
 	};
+
+	// Wasteland has its own distinct decay flavor, reachable without weather.
+	"GetDecayFlavor names magical radiation for wasteland"_test = []
+	{
+		ARegion *r = new ARegion();
+		r->type = R_CERAN_WASTELAND;
+		r->weather = W_NORMAL;
+		r->clearskies = 0;
+		std::string a = r->GetDecayFlavor().Str();
+		expect(eq(a, std::string("Magical radiation has damaged ")));
+	};
+
+	// The bad-weather flavor variants (tundra/mountain/cavern) require WEATHER_EXISTS, which
+	// the unittest ruleset disables -- flip it for the test. badWeather is set when the
+	// weather is not W_NORMAL and clearskies is off.
+	"GetDecayFlavor uses bad-weather variants when weather is enabled"_test = []
+	{
+		int saved = Globals->WEATHER_EXISTS;
+		Globals->WEATHER_EXISTS = 1;
+
+		auto flavor = [](int terrain) {
+			ARegion *r = new ARegion();
+			r->type = terrain;
+			r->weather = W_WINTER; // not W_NORMAL -> bad weather
+			r->clearskies = 0;
+			return std::string(r->GetDecayFlavor().Str());
+		};
+
+		expect(eq(flavor(R_TUNDRA),   std::string("Ground freezing has damaged ")));
+		expect(eq(flavor(R_MOUNTAIN), std::string("Avalanches have damaged ")));
+		expect(eq(flavor(R_CAVERN),   std::string("Lava flows have damaged ")));
+
+		// clearskies overrides bad weather back to the fair-weather variant.
+		ARegion *clear = new ARegion();
+		clear->type = R_MOUNTAIN;
+		clear->weather = W_WINTER;
+		clear->clearskies = 1;
+		expect(eq(std::string(clear->GetDecayFlavor().Str()),
+				std::string("Rockslides have damaged ")))
+			<< "clearskies negates bad weather";
+
+		Globals->WEATHER_EXISTS = saved;
+	};
+
+	// GetMaxClicks adds a weather penalty in bad weather (WEATHER_EXISTS on).
+	"GetMaxClicks adds a weather penalty in bad weather"_test = []
+	{
+		int saved = Globals->WEATHER_EXISTS;
+		Globals->WEATHER_EXISTS = 1;
+
+		auto clicks = [](int terrain) {
+			ARegion *r = new ARegion();
+			r->type = terrain;
+			r->weather = W_WINTER;
+			r->clearskies = 0;
+			return r->GetMaxClicks();
+		};
+
+		// plain: mult 1, add -1, weatherAdd 4 -> 1*(1) + (4+1) = 6
+		expect(clicks(R_PLAIN) == 6_i);
+		// mountain: mult 2, add 0, weatherAdd 4 -> 2*2 + 5 = 9
+		expect(clicks(R_MOUNTAIN) == 9_i);
+
+		Globals->WEATHER_EXISTS = saved;
+	};
 };

@@ -193,4 +193,136 @@ ut::suite<"ARegion savegame"> aregion_savegame_suite = []
 
 		freshScratch();
 	};
+
+	// Covers the positive sides of the two conditional fields: gate > 0 makes gatemonth
+	// part of the stream, and race != -1 writes a real item abbreviation (vs the NO_RACE
+	// sentinel covered above).
+	"ARegion round-trips a gate month and a real race"_test = []
+	{
+		freshScratch();
+
+		ARegion *src = new ARegion();
+		src->SetName("Moria");
+		src->num = 9;
+		src->type = R_PLAIN;
+		src->buildingseq = 1;
+		src->gate = 7;          // gate > 0 -> gatemonth IS written
+		src->gatemonth = 4;
+		src->race = I_LEADERS;  // race != -1 -> "LEAD" is written
+		src->population = 10; src->basepopulation = 10;
+		src->wages = 0; src->maxwages = 0; src->wealth = 0;
+		src->elevation = 0; src->humidity = 0; src->temperature = 0;
+		src->vegetation = 0; src->culture = 0;
+		src->habitat = 0; src->development = 0; src->maxdevelopment = 0;
+		src->town = 0;
+		src->SetLoc(1, 1, 1);
+		src->visited = 0;
+
+		Aoutfile out;
+		expect(fatal(out.OpenByName(SCRATCH) == 0_i));
+		src->Writeout(&out);
+		out.Close();
+
+		AList *facs = new AList();
+		ARegion *dst = new ARegion();
+		Ainfile in;
+		expect(fatal(in.OpenByName(SCRATCH) == 0_i));
+		dst->Readin(&in, facs, CURRENT_ATL_VER);
+		in.Close();
+
+		expect(dst->gate == 7_i);
+		expect(dst->gatemonth == 4_i) << "gatemonth persisted because gate > 0";
+		expect(eq(dst->race, (int)I_LEADERS)) << "real race abbreviation round-trips";
+
+		freshScratch();
+	};
+
+	// A region with no terrain (type == -1) writes the NO_TERRAIN sentinel, which
+	// LookupRegionType maps back to -1.
+	"ARegion round-trips the NO_TERRAIN sentinel"_test = []
+	{
+		freshScratch();
+
+		ARegion *src = new ARegion();
+		src->SetName("Unformed");
+		src->num = 2;
+		src->type = -1;         // -> "NO_TERRAIN"
+		src->buildingseq = 1;
+		src->gate = 0;
+		src->race = -1;
+		src->population = 0; src->basepopulation = 0;
+		src->wages = 0; src->maxwages = 0; src->wealth = 0;
+		src->elevation = 0; src->humidity = 0; src->temperature = 0;
+		src->vegetation = 0; src->culture = 0;
+		src->habitat = 0; src->development = 0; src->maxdevelopment = 0;
+		src->town = 0;
+		src->SetLoc(0, 0, 0);
+		src->visited = 0;
+
+		Aoutfile out;
+		expect(fatal(out.OpenByName(SCRATCH) == 0_i));
+		src->Writeout(&out);
+		out.Close();
+
+		AList *facs = new AList();
+		ARegion *dst = new ARegion();
+		Ainfile in;
+		expect(fatal(in.OpenByName(SCRATCH) == 0_i));
+		dst->Readin(&in, facs, CURRENT_ATL_VER);
+		in.Close();
+
+		expect(dst->type == -1_i) << "NO_TERRAIN resolves back to -1";
+
+		freshScratch();
+	};
+
+	// A region carrying objects exercises the object read/write loop and the buildingseq
+	// bookkeeping (buildingseq becomes max(object num) + 1 on load). Earlier tests all used
+	// zero objects.
+	"ARegion round-trips its objects and rebuilds buildingseq"_test = []
+	{
+		freshScratch();
+
+		ARegion *src = new ARegion();
+		src->SetName("Fortress");
+		src->num = 4;
+		src->type = R_PLAIN;
+		src->buildingseq = 1;
+		src->gate = 0;
+		src->race = -1;
+		src->population = 0; src->basepopulation = 0;
+		src->wages = 0; src->maxwages = 0; src->wealth = 0;
+		src->elevation = 0; src->humidity = 0; src->temperature = 0;
+		src->vegetation = 0; src->culture = 0;
+		src->habitat = 0; src->development = 0; src->maxdevelopment = 0;
+		src->town = 0;
+		src->SetLoc(0, 0, 0);
+		src->visited = 0;
+
+		Object *o = new Object(src);
+		o->num = 5;
+		o->type = O_TOWER;
+		o->SetName(new AString("Watchtower"));
+		src->objects.Add(o);
+
+		Aoutfile out;
+		expect(fatal(out.OpenByName(SCRATCH) == 0_i));
+		src->Writeout(&out);
+		out.Close();
+
+		AList *facs = new AList(); // object has no units, so the faction list is unused
+		ARegion *dst = new ARegion();
+		Ainfile in;
+		expect(fatal(in.OpenByName(SCRATCH) == 0_i));
+		dst->Readin(&in, facs, CURRENT_ATL_VER);
+		in.Close();
+
+		expect(fatal(dst->objects.Num() == 1_i)) << "the object round-trips";
+		Object *ro = dst->GetObject(5);
+		expect(fatal(ro != nullptr));
+		expect(ro->type == O_TOWER);
+		expect(dst->buildingseq == 6_i) << "buildingseq is max object num + 1";
+
+		freshScratch();
+	};
 };
