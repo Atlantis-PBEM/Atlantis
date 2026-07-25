@@ -3989,12 +3989,19 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 	const int w = map->map.width / 2;
 	const int h = map->map.height / 2;
 
+	// DEBUG: reset the tracer so each generation's per-phase (calls,hash) are
+	// directly comparable across platforms regardless of how many tests ran first.
+	g_rng_calls = 0;
+	g_rng_hash = 1469598103934665603UL;
+	rng_trace("start CreateNaturalSurfaceLevel"); // DEBUG portability trace
 	MakeRegions(level, w, h);
-	
+	rng_trace("after MakeRegions"); // DEBUG
+
 	pRegionArrays[level]->SetName(0);
 	pRegionArrays[level]->levelType = ARegionArray::LEVEL_SURFACE;
 
 	map->Generate();
+	rng_trace("after map->Generate"); // DEBUG
 
 	ARegionArray* arr = pRegionArrays[level];
 	for (int x = 0; x < w; x++) {
@@ -4015,21 +4022,30 @@ void ARegionList::CreateNaturalSurfaceLevel(Map* map) {
 	// all rivers
 	std::unordered_map<ARegion*, int> rivers;
 
+	rng_trace("after biome typing"); // DEBUG
+
 	const int maxRiverReach = std::min(w, h) / 4;
 	makeRivers(map, arr, waterBodies, rivers, w, h, maxRiverReach);
-	
+	rng_trace("after makeRivers"); // DEBUG
+
 	cleanupIsolatedPlaces(arr, waterBodies, rivers, w, h);
+	rng_trace("after cleanupIsolatedPlaces"); // DEBUG
 
 	placeVolcanoes(arr, w, h);
+	rng_trace("after placeVolcanoes"); // DEBUG
 
 	GrowRaces(arr);
-	
+	rng_trace("after GrowRaces"); // DEBUG
+
 	giveNames(arr, waterBodies, rivers, w, h);
+	rng_trace("after giveNames"); // DEBUG
 	assertAllRegionsHaveName(w, h, arr);
 
 	economy(arr, w, h);
+	rng_trace("after economy"); // DEBUG
 
 	AddHistoricalBuildings(arr, w, h);
+	rng_trace("after AddHistoricalBuildings"); // DEBUG
 }
 
 ARegionGraph::ARegionGraph(ARegionArray* regions) {
