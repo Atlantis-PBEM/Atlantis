@@ -38,6 +38,21 @@ namespace {
 		r->SetName(name);
 		r->type = R_PLAIN;
 		r->SetLoc(x, y, ARegionArray::LEVEL_SURFACE);
+		// ARegion's ctor does not initialize the economy fields; in a real game
+		// ARegion::Setup()/Readin() fill them in before any region is reported on.
+		// A test that constructs a region directly skips that, so we must set them
+		// here or WriteReport() reads indeterminate memory: it gates a line on
+		// Population() (the raw `population` member) and, inside it, indexes
+		// ItemDefs[race] — an unset `race` is an out-of-bounds read that crashes.
+		// race == -1 is the engine's "no race" sentinel (see economy.cpp and
+		// aregion.cpp's PutStr guard); population 0 keeps the peasant/race branch
+		// out of WriteReport for reporting tests that don't care about peasants.
+		r->race = -1;
+		r->population = 0;
+		r->basepopulation = 0;
+		r->wealth = 0;
+		r->wages = 0;
+		r->maxwages = 0;
 		return r;
 	}
 
