@@ -52,13 +52,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: make unittest
+      # gdb is NOT preinstalled on GitHub's ubuntu-latest image, so install it.
+      - name: Install gdb
+        run: sudo apt-get update && sudo apt-get install -y gdb
       # Plain (non-sanitized) build: pre-existing, benign-on-x86 UB — the ISAAC
       # RNG's misaligned loads, AString's new[]/scalar-delete — must not fail CI.
       # Run under gdb so a genuine crash prints a symbolized backtrace (the build
-      # already compiles with -g) instead of an opaque "exit code 139". gdb is
-      # preinstalled on GitHub-hosted ubuntu runners. --return-child-result makes
-      # this step's exit status follow the test binary's, so a real failure (or a
-      # crash) still fails the job; a clean run exits 0 with no extra noise.
+      # already compiles with -g) instead of an opaque "exit code 139".
+      # --return-child-result makes this step's exit status follow the test
+      # binary's, so a real failure (or a crash) still fails the job; a clean run
+      # exits 0 with no extra noise.
       - name: Run unit tests (backtrace on crash)
         run: gdb -batch -ex run -ex bt -ex quit --return-child-result ./unittest
         working-directory: unittest
