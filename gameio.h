@@ -36,15 +36,6 @@ int getrandom(int);
 void seedrandom(int);
 void seedrandomrandom();
 
-// DEBUG (portability tracing): running count of getrandom() calls and an
-// order-sensitive rolling hash of the values it has returned. Same seed on two
-// platforms must give identical (calls, hash) at every checkpoint; the first
-// checkpoint where they differ is the phase whose RNG consumption order diverged.
-// Remove this block once the mac-vs-linux mapgen divergence is understood.
-extern unsigned long g_rng_calls;
-extern unsigned long g_rng_hash;
-void rng_trace(const char *label);
-
 int makeRoll(int rolls, int sides);
 int clamp(int min, int value, int max);
 

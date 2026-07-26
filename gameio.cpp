@@ -58,18 +58,6 @@ void doneIO()
 {
 }
 
-// DEBUG (portability tracing) -- see gameio.h. Remove with the rng_trace calls.
-unsigned long g_rng_calls = 0;
-unsigned long g_rng_hash = 1469598103934665603UL; // FNV-1a offset basis
-
-void rng_trace(const char *label)
-{
-	// stderr, not stdout: mapgen's captureCout test fixture redirects cout only.
-	std::cerr << "[rng] " << label
-		<< " calls=" << g_rng_calls
-		<< " hash=" << g_rng_hash << std::endl;
-}
-
 int getrandom(int range)
 {
 	int neg = (range < 0);
@@ -80,13 +68,6 @@ int getrandom(int range)
 	i = i % range;
 	if (neg) ret = (int)(i*-1);
 	else ret = (int)i;
-
-	// DEBUG: fold both the range and the result into an order-sensitive FNV-1a
-	// hash so a divergence in either the sequence of calls or their values shows.
-	g_rng_calls++;
-	g_rng_hash = (g_rng_hash ^ (unsigned long)(unsigned int)range) * 1099511628211UL;
-	g_rng_hash = (g_rng_hash ^ (unsigned long)(unsigned int)ret) * 1099511628211UL;
-
 	return ret;
 }
 
