@@ -18,6 +18,12 @@ namespace ut = boost::ut;
 
 using aregion_test::captureCout;
 
+// economy() has external linkage but no prototype in any header -- it is only referenced within
+// aregion.cpp, transitively through CreateNaturalSurfaceLevel. Declare it here so the settlement
+// test can drive it directly on a controlled surface (see aregion_mapgen_helpers_test.cpp for the
+// same pattern used on the map-gen leaf helpers).
+void economy(ARegionArray *arr, const int w, const int h);
+
 namespace {
 	ARegion *placeCity(ARegionArray *arr, ARegionList *regs, int x, int y, int pop)
 	{
@@ -215,8 +221,22 @@ ut::suite<"ARegion mapgen"> aregion_mapgen_suite = []
 	// the economy() and giveNames() subsystems were executed but never verified. Here we assert
 	// whole-surface post-conditions that prove they processed *every* region rather than merely
 	// running: economy() calls ManualSetup on all even-parity hexes (setting habitat > 0) and
-	// places settlements; giveNames() names them all. These hold regardless of the RNG draws, so
-	// they are not brittle against the seed.
+	// giveNames() names them all. These are the only post-conditions that hold *regardless of the
+	// RNG draws*, so they are the only ones safe to assert through CreateNaturalSurfaceLevel.
+	//
+	// Deliberately NOT asserted here: the settlement count. It is not a draw-independent
+	// post-condition, and it is not even reproducible. CreateNaturalSurfaceLevel types the surface
+	// from SimplexNoise, whose permutation table is shuffled with a std::default_random_engine
+	// seeded from time(0) (simplex.cpp) -- NOT from seedrandom(). So the biome map (a) changes every
+	// wall-clock second and (b) differs between C++ standard libraries, because std::default_random_engine
+	// and std::shuffle are implementation-defined (libc++ on macOS vs libstdc++ on Linux). On maps
+	// where getPoints' candidate sites all fall on ocean/barren terrain, economy() places zero
+	// settlements -- which is exactly why an earlier `towns > 0` assertion here passed on macOS but
+	// FAILED on the Linux CI box under the same seed. Settlement placement is instead pinned
+	// portably by the "economy() places settlements deterministically" test below, which drives
+	// economy() directly on a controlled surface and never touches the time(0) terrain generator.
+	// (The time(0)/default_random_engine seeding in simplex.cpp and aregion.cpp makeRivers is an
+	// engine-side reproducibility bug flagged to the maintainers; this test only documents it.)
 	"CreateNaturalSurfaceLevel drives economy and naming across the whole surface"_test = []
 	{
 		ARegionList *regs = new ARegionList();
@@ -231,16 +251,73 @@ ut::suite<"ARegion mapgen"> aregion_mapgen_suite = []
 
 		expect(fatal(regs->Num() == 32_i));
 
-		int named = 0, habitatSet = 0, towns = 0;
+		int named = 0, habitatSet = 0;
 		forlist(regs) {
 			ARegion *r = (ARegion *) elem;
 			if (r->name && std::string(r->name->Str()).size() > 0) named++;
 			if (r->habitat > 0) habitatSet++;   // set by economy() -> ManualSetup
-			if (r->town) towns++;               // settlements placed by economy()
 		}
 
 		expect(named == regs->Num()) << "giveNames named every region";
 		expect(habitatSet == regs->Num()) << "economy() ran ManualSetup on every region";
-		expect(that % towns > 0) << "economy() placed at least one settlement";
+	};
+
+	// Settlement placement, pinned portably. Driving economy() directly -- rather than through
+	// CreateNaturalSurfaceLevel -- sidesteps the non-deterministic time(0) terrain generator (see
+	// the note in the test above) and lets us control the surface. economy() itself is fully
+	// deterministic and platform-independent: getPoints uses only std::vector plus the seedable
+	// ISAAC getrandom(), with no time(0), no std::shuffle and no unordered-container iteration
+	// feeding the RNG. So a fixed seed produces an *identical* town count on every platform, which
+	// is what makes `towns > 0` a legitimate, non-brittle assertion here even though it was not one
+	// through the full generator. On an all-plains surface every getPoints candidate is a valid
+	// settlement site, so at least one town is always placed.
+	"economy() places settlements deterministically on an all-plains surface"_test = []
+	{
+		const int W = 16;
+
+		// R_PLAIN everywhere on the even-parity sublattice; pop 0 so there is no pre-existing town.
+		auto buildPlains = [W] {
+			ARegionList *regs = new ARegionList();
+			regs->CreateLevels(2);
+			ARegionArray *arr = new ARegionArray(W, W);
+			regs->pRegionArrays[1] = arr;
+			for (int y = 0; y < W; y++)
+				for (int x = 0; x < W; x++)
+					if ((x + y) % 2 == 0)
+						placeCity(arr, regs, x, y, 0);
+			return regs;
+		};
+
+		auto countTowns = [](ARegionList *regs) {
+			int towns = 0;
+			forlist(regs) {
+				ARegion *r = (ARegion *) elem;
+				if (r->town) towns++;
+			}
+			return towns;
+		};
+
+		ARegionList *first = buildPlains();
+		int firstTowns = 0;
+		captureCout([&]{
+			seedrandom(20260725);
+			economy(first->GetRegionArray(1), W, W);
+		});
+		firstTowns = countTowns(first);
+
+		expect(that % firstTowns > 0) << "economy() placed at least one settlement on all-plains terrain";
+
+		// Reproducibility property: same seed, same surface -> same settlement count. This holds on
+		// each platform (ISAAC is deterministic) and, because economy() has no platform-dependent
+		// ordering, the count itself matches across platforms too.
+		ARegionList *second = buildPlains();
+		int secondTowns = 0;
+		captureCout([&]{
+			seedrandom(20260725);
+			economy(second->GetRegionArray(1), W, W);
+		});
+		secondTowns = countTowns(second);
+
+		expect(secondTowns == firstTowns) << "same seed -> identical settlement count";
 	};
 };
