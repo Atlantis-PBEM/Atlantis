@@ -29,6 +29,14 @@ namespace {
 	{
 		ARegion *r = new ARegion();
 		r->type = R_PLAIN;
+		// The ARegion() constructor does NOT initialise `race`, so a hand-built region carries a
+		// garbage value. In the live pipeline GrowRaces() sets it before economy() runs; tests that
+		// skip that step must supply the pre-growth sentinel -1 (NO_RACE) themselves. Without it,
+		// economy() -> getRegionEtnos() evaluates `ItemDefs[reg->race]` on a garbage index (an
+		// out-of-bounds read) and SetupHabitat() would never enter its race-selection branch. The
+		// bad read is benign on macOS's allocator but segfaults on Linux (confirmed via coredump:
+		// getRegionEtnos at aregion.cpp:3400). SetupHabitat() treats -1 as "pick a race for me".
+		r->race = -1;
 		r->SetLoc(x, y, ARegionArray::LEVEL_SURFACE);
 		r->num = regs->Num();
 		regs->Add(r);
