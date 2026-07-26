@@ -175,6 +175,17 @@ ut::suite<"ARegion decay"> aregion_decay_suite = []
 		// mountain: mult 2, add 0, weatherAdd 4 -> 2*2 + 5 = 9
 		expect(clicks(R_MOUNTAIN) == 9_i);
 
+		// Plain and mountain share weatherAdd = 4, so they don't distinguish the switch arms
+		// that set a different bad-weather penalty. Cover those distinct weatherAdd values too:
+		// forest (+1), desert (+5) and cavern (+6). Each expected value is derived independently
+		// from the switch coefficients, not by calling GetMaxClicks back on itself.
+		// forest: mult 2, add -1, weatherAdd 1 -> 2*(1) + (1+1) = 4
+		expect(clicks(R_FOREST) == 4_i);
+		// desert: mult 1, add -1, weatherAdd 5 -> 1*(1) + (5+1) = 7
+		expect(clicks(R_DESERT) == 7_i);
+		// cavern: mult 2, add 1, weatherAdd 6 -> 2*(3) + (6+1) = 13
+		expect(clicks(R_CAVERN) == 13_i);
+
 		Globals->WEATHER_EXISTS = saved;
 	};
 };

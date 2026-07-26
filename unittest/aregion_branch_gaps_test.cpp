@@ -163,6 +163,65 @@ ut::suite<"ARegion branch gaps"> aregion_branch_gaps_suite = []
 		Globals->ICOSAHEDRAL_WORLD = saved;
 	};
 
+	// GetPlanarDistance's icosahedral branch projects each endpoint onto the surface array and,
+	// if the projected hex is empty, re-projects to the wedge corner (one_x += GetLevelXScale-1).
+	// The unittest ruleset hardcodes GetLevelXScale/YScale to 1 (unittest/world.cpp), so that
+	// offset is 0: the re-projection block still runs but re-checks the SAME empty cell, and
+	// start/target stay null. That drives the "couldn't find ends" sentinel -- when either
+	// endpoint fails to resolve, the distance is the unreachable marker 10000000.
+	// NOTE: the re-projection SUCCESS sub-path (where the +scale-1 offset lands on a real hex)
+	// needs GetLevelXScale > 1 and so is only reachable in a real ruleset / the snapshot suite.
+	"GetPlanarDistance returns the sentinel when an icosahedral endpoint has no surface hex"_test = []
+	{
+		int saved = Globals->ICOSAHEDRAL_WORLD;
+		Globals->ICOSAHEDRAL_WORLD = 1;
+
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(2);
+		regs->pRegionArrays[0] = new ARegionArray(4, 4);
+		regs->pRegionArrays[1] = new ARegionArray(8, 8); // empty surface grid: no cell populated
+
+		// Both endpoints project onto valid (even-parity) but unpopulated surface cells, so both
+		// GetRegion lookups -- and the zero-offset re-projections -- return null. Using both
+		// exercises the start AND target re-projection blocks before the sentinel.
+		ARegion *a = new ARegion(); a->SetLoc(0, 2, ARegionArray::LEVEL_SURFACE);
+		ARegion *b = new ARegion(); b->SetLoc(2, 0, ARegionArray::LEVEL_SURFACE);
+		expect(regs->GetPlanarDistance(a, b, 0, -1) == 10000000_i)
+			<< "unresolved endpoints -> unreachable sentinel";
+
+		Globals->ICOSAHEDRAL_WORLD = saved;
+	};
+
+	// When both endpoints resolve to real but DISCONNECTED surface hexes, the icosahedral BFS
+	// drains its frontier without reaching the target and bails out through the "ran out of
+	// hexes" arm, again returning the 10000000 sentinel. Two placed hexes with no neighbor link
+	// between them reproduce exactly that: the frontier from the start empties after one step.
+	"GetPlanarDistance returns the sentinel when the icosahedral BFS is exhausted"_test = []
+	{
+		int saved = Globals->ICOSAHEDRAL_WORLD;
+		Globals->ICOSAHEDRAL_WORLD = 1;
+
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(2);
+		regs->pRegionArrays[0] = new ARegionArray(4, 4);
+		ARegionArray *surf = new ARegionArray(8, 8);
+		regs->pRegionArrays[1] = surf;
+
+		ARegion *a = new ARegion(); a->SetLoc(0, 0, ARegionArray::LEVEL_SURFACE);
+		ARegion *b = new ARegion(); b->SetLoc(2, 0, ARegionArray::LEVEL_SURFACE);
+		surf->SetRegion(0, 0, a); // start resolves
+		surf->SetRegion(2, 0, b); // target resolves, but...
+		regs->Add(a);
+		regs->Add(b);
+		// ...deliberately NO neighbor links: FindConnectedRegions adds nothing, so after the
+		// first step the queue is empty (start->next == 0) and the loop returns the sentinel.
+		// maxdist = -1 keeps the loop running until the frontier is genuinely exhausted.
+		expect(regs->GetPlanarDistance(a, b, 0, -1) == 10000000_i)
+			<< "disconnected target -> BFS exhausts -> sentinel";
+
+		Globals->ICOSAHEDRAL_WORLD = saved;
+	};
+
 	// ShortPrint prefixes underworld levels with "deep"/"very deep" (or, under EASIER_UNDERWORLD,
 	// the raw level number in angle brackets). Both need UNDERWORLD_LEVELS > 0, which the unittest
 	// ruleset sets to 0 -- so flip it. pArr->strName must be set for the depth text to appear.

@@ -118,6 +118,70 @@ ut::suite<"ARegion terrain"> aregion_terrain_suite = []
 		expect(dest->MoveCost(M_SWIM, from, D_NORTH, nullptr) == 2_i);
 	};
 
+	// M_FLY takes neither MoveCost branch: not the swim arm, not the walk/ride arm. So the
+	// terrain movepoints multiplier AND the road discount are both skipped -- a flying move
+	// costs exactly the weather base (1 with weather off), independent of terrain and roads.
+	// This is a real, reachable movetype: Unit::MoveType returns M_FLY for flying units
+	// (unit.cpp) and it flows straight into MoveCost. Walking this mountain costs 2 (1 across a
+	// road); flying it costs 1 either way. Without this test a broken flying-cost calculation --
+	// e.g. one that started multiplying by movepoints -- would pass every other MoveCost test.
+	"MoveCost for flying is the weather base, ignoring terrain and roads"_test = []
+	{
+		ARegion *dest = new ARegion();
+		dest->type = R_MOUNTAIN; // movepoints 2 -- would make a walk cost 2
+		dest->weather = W_NORMAL;
+		dest->ZeroNeighbors();
+
+		ARegion *from = new ARegion();
+		from->type = R_MOUNTAIN;
+		from->weather = W_NORMAL;
+		from->ZeroNeighbors();
+
+		// A mutual road on the traversed (north) edge -- which flying must ignore.
+		from->neighbors[D_NORTH] = dest;
+		dest->neighbors[D_SOUTH] = from;
+		addRoad(from, O_ROADN);
+		addRoad(dest, O_ROADS);
+
+		AString road;
+		expect(dest->MoveCost(M_FLY, from, D_NORTH, &road) == 1_i)
+			<< "flying ignores the mountain movepoints and stays at the base cost";
+		expect(eq(std::string(road.Str()), std::string("")))
+			<< "flying never enters the road branch, so the road out-param is left untouched";
+	};
+
+	// With weather enabled the flying base tracks the weather multiplier (2 in bad weather, the
+	// fixed 10 in a blizzard, 1 under clearskies) but still never picks up the terrain
+	// movepoints: a walk over this mountain in bad weather would be 2*2 = 4, whereas flying is
+	// just the doubled base of 2. This pins that M_FLY's cost is the *raw weather base*.
+	"MoveCost for flying tracks the weather base but not the terrain"_test = []
+	{
+		int saved = Globals->WEATHER_EXISTS;
+		Globals->WEATHER_EXISTS = 1;
+
+		ARegion *from = new ARegion();
+		from->ZeroNeighbors();
+
+		ARegion *mtn = new ARegion();
+		mtn->type = R_MOUNTAIN; // movepoints 2 -- irrelevant to flying
+		mtn->weather = W_WINTER; // non-blizzard bad weather -> base doubles to 2
+		mtn->clearskies = 0;
+		mtn->ZeroNeighbors();
+		expect(mtn->MoveCost(M_FLY, from, D_NORTH, nullptr) == 2_i)
+			<< "bad-weather base 2, no terrain multiplier";
+
+		// Blizzard short-circuits to the fixed 10 before the movetype is even considered.
+		mtn->weather = W_BLIZZARD;
+		expect(mtn->MoveCost(M_FLY, from, D_NORTH, nullptr) == 10_i) << "blizzard is a fixed 10";
+
+		// clearskies resets the base back to 1.
+		mtn->weather = W_WINTER;
+		mtn->clearskies = 1;
+		expect(mtn->MoveCost(M_FLY, from, D_NORTH, nullptr) == 1_i) << "clearskies resets the base";
+
+		Globals->WEATHER_EXISTS = saved;
+	};
+
 	// The weather block of MoveCost is gated by WEATHER_EXISTS (off in the unittest ruleset).
 	// Flip it to reach: the blizzard fast-return, the bad-weather doubled base cost, and the
 	// clearskies/normal reset.
