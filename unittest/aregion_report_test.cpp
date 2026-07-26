@@ -771,4 +771,74 @@ ut::suite<"ARegion report"> aregion_report_suite = []
 		Globals->TRANSIT_REPORT = savedT;
 		Globals->GATES_EXIST = savedG;
 	};
+
+	// --- flag-gated print/report branches -------------------------------------------------
+	// ShortPrint prefixes underworld levels with "deep"/"very deep" (or, under EASIER_UNDERWORLD,
+	// the raw level number in angle brackets). Both need UNDERWORLD_LEVELS > 0, which the unittest
+	// ruleset sets to 0 -- so flip it. pArr->strName must be set for the depth text to appear.
+	"ShortPrint prefixes underworld depth text"_test = []
+	{
+		int savedU = Globals->UNDERWORLD_LEVELS;
+		int savedD = Globals->UNDERDEEP_LEVELS;
+		int savedE = Globals->EASIER_UNDERWORLD;
+		Globals->UNDERWORLD_LEVELS = 3; // levels 3 and 4 count as underworld
+		Globals->UNDERDEEP_LEVELS = 0;
+		Globals->EASIER_UNDERWORLD = 0;
+
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(6);
+		ARegionArray *lvl3 = new ARegionArray(8, 8); lvl3->SetName("Underdark");
+		ARegionArray *lvl4 = new ARegionArray(8, 8); lvl4->SetName("Underdark");
+		regs->pRegionArrays[3] = lvl3;
+		regs->pRegionArrays[4] = lvl4;
+
+		ARegion *shallow = new ARegion(); shallow->SetName("Pit"); shallow->type = R_PLAIN;
+		shallow->SetLoc(0, 0, 3);
+		ARegion *deeper = new ARegion(); deeper->SetName("Abyssal"); deeper->type = R_PLAIN;
+		deeper->SetLoc(0, 0, 4);
+
+		std::string s3 = shallow->ShortPrint(regs).Str();
+		std::string s4 = deeper->ShortPrint(regs).Str();
+		expect(has(s3, "deep Underdark")) << s3;
+		expect(!has(s3, "very deep")) << "level 3 is 'deep', not 'very deep'\n" << s3;
+		expect(has(s4, "very deep Underdark")) << s4;
+
+		// EASIER_UNDERWORLD renders the raw level number in angle brackets instead.
+		Globals->EASIER_UNDERWORLD = 1;
+		std::string se = shallow->ShortPrint(regs).Str();
+		expect(has(se, "3 <Underdark>")) << se;
+
+		Globals->UNDERWORLD_LEVELS = savedU;
+		Globals->UNDERDEEP_LEVELS = savedD;
+		Globals->EASIER_UNDERWORLD = savedE;
+	};
+
+	// WriteReport's open-gate line appends " of <numberofgates>" unless DISPERSE_GATE_NUMBERS is
+	// set, in which case only the gate's own number is shown. The other gate tests never toggle
+	// the flag, so the dispersed format was unverified.
+	"WriteReport omits the gate count under DISPERSE_GATE_NUMBERS"_test = []
+	{
+		int savedG = Globals->GATES_EXIST;
+		int savedD = Globals->DISPERSE_GATE_NUMBERS;
+		Globals->GATES_EXIST = 1;
+		Globals->DISPERSE_GATE_NUMBERS = 1;
+
+		ARegionList *regs = makeRegions("Surface");
+		regs->numberofgates = 12;
+		ARegion *r = surfaceRegion(2, 2, "Portland");
+		r->gate = 5;
+		r->gateopen = 1;
+		regs->Add(r);
+		Faction *fac = new Faction(1);
+		Unit *u = addUnit(r, 100, fac);
+		u->items.SetNum(I_LEADERS, 1);
+		u->SetSkill(S_GATE_LORE, 1);
+
+		std::string out = capture([&](Areport *rep){ r->WriteReport(rep, fac, 0, regs); });
+		expect(has(out, "There is a Gate here (Gate 5).")) << out;
+		expect(!has(out, " of 12")) << "dispersed gates hide the total\n" << out;
+
+		Globals->DISPERSE_GATE_NUMBERS = savedD;
+		Globals->GATES_EXIST = savedG;
+	};
 };

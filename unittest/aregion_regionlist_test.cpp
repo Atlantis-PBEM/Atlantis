@@ -1,6 +1,7 @@
 #include "external/boost/ut.hpp"
 
 #include <cstdio>
+#include <string>
 
 #include "game.h"
 #include "gamedata.h"
@@ -10,11 +11,17 @@
 #include "faction.h"
 #include "fileio.h"
 #include "gameio.h"
+#include "market.h"      // statistics suite
+#include "production.h"  // statistics suite
+#include "aregion_test_util.h"
 
 // boost::ut exposes an `events` namespace that collides with the game's Events class, so a
 // file-scope `using namespace boost::ut;` will not compile. Alias it, and pull the literals
 // in inside the suite body where the collision does not apply.
 namespace ut = boost::ut;
+
+using aregion_test::captureCout;
+using aregion_test::contains;
 
 namespace {
 	Unit *placeUnit(ARegion *reg, int num, Faction *fac)
@@ -447,5 +454,243 @@ ut::suite<"ARegion region list"> aregion_regionlist_suite = []
 		expect(lvl2->GetRegion(2, 0) == b2);
 
 		std::remove(scratch);
+	};
+
+	// --- GetPlanarDistance edge cases (flag-gated / error arms) ----------------------------
+	// GetPlanarDistance's `penalty` parameter is added per cross-level step -- but the basic
+	// tests above pass penalty = 0 with both endpoints on the same level. Here we drive the
+	// flat-world z-penalty arithmetic: with the endpoints stacked on the same x,y the horizontal
+	// distance is 0, so the result is exactly penalty * |z difference|.
+	"GetPlanarDistance adds the teleport penalty across levels (flat world)"_test = []
+	{
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(3);
+		regs->pRegionArrays[1] = new ARegionArray(10, 10); // LEVEL_SURFACE: supplies pArr->x
+
+		ARegion *up   = new ARegion(); up->SetLoc(0, 0, ARegionArray::LEVEL_SURFACE); // zloc 1
+		ARegion *down = new ARegion(); down->SetLoc(0, 0, 2);                          // one level deeper
+
+		// Horizontal distance 0, |z| = 1 -> result is the penalty itself.
+		expect(regs->GetPlanarDistance(up, down, 7, -1) == 7_i) << "penalty * 1 level";
+
+		// A horizontal offset of 2 plus the one-level penalty of 3 -> 2 + 3 = 5.
+		ARegion *down2 = new ARegion(); down2->SetLoc(2, 0, 2);
+		expect(regs->GetPlanarDistance(up, down2, 3, -1) == 5_i) << "grid distance + penalty";
+	};
+
+	// The icosahedral branch seeds its BFS distance with zdist * penalty. With both endpoints
+	// mapping to the same surface hex the target is found on the first iteration, so the returned
+	// distance is exactly that seed.
+	"GetPlanarDistance seeds the icosahedral BFS with the z-penalty"_test = []
+	{
+		int saved = Globals->ICOSAHEDRAL_WORLD;
+		Globals->ICOSAHEDRAL_WORLD = 1;
+
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(4);
+		regs->pRegionArrays[0] = new ARegionArray(4, 4);
+		ARegionArray *surf = new ARegionArray(4, 4);
+		regs->pRegionArrays[1] = surf;
+
+		ARegion *r = new ARegion(); r->SetLoc(0, 0, ARegionArray::LEVEL_SURFACE);
+		surf->SetRegion(0, 0, r);
+		regs->Add(r);
+
+		// Both endpoints project onto surface (0,0); |z| = 2, penalty 5 -> 10, found immediately.
+		ARegion *a = new ARegion(); a->SetLoc(0, 0, 1);
+		ARegion *b = new ARegion(); b->SetLoc(0, 0, 3);
+		expect(regs->GetPlanarDistance(a, b, 5, -1) == 10_i) << "zdist(2) * penalty(5)";
+
+		Globals->ICOSAHEDRAL_WORLD = saved;
+	};
+
+	// GetPlanarDistance's `maxdist` bounds the icosahedral BFS. The basic tests pass -1
+	// (unbounded). With a real limit the loop stops early and returns the partial distance rather
+	// than the true one.
+	"GetPlanarDistance honors the icosahedral search range limit"_test = []
+	{
+		int saved = Globals->ICOSAHEDRAL_WORLD;
+		Globals->ICOSAHEDRAL_WORLD = 1;
+
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(2);
+		regs->pRegionArrays[0] = new ARegionArray(4, 4);
+		ARegionArray *surf = new ARegionArray(8, 8);
+		regs->pRegionArrays[1] = surf;
+
+		// Chain a - b - c along one row, target two hops from the start.
+		ARegion *a = new ARegion(); a->SetLoc(0, 0, ARegionArray::LEVEL_SURFACE);
+		ARegion *b = new ARegion(); b->SetLoc(2, 0, ARegionArray::LEVEL_SURFACE);
+		ARegion *c = new ARegion(); c->SetLoc(4, 0, ARegionArray::LEVEL_SURFACE);
+		surf->SetRegion(0, 0, a);
+		surf->SetRegion(2, 0, b);
+		surf->SetRegion(4, 0, c);
+		a->neighbors[D_SOUTHEAST] = b; b->neighbors[D_NORTHWEST] = a;
+		b->neighbors[D_SOUTHEAST] = c; c->neighbors[D_NORTHWEST] = b;
+		regs->Add(a); regs->Add(b); regs->Add(c);
+
+		// Unbounded: the full two-hop distance.
+		expect(regs->GetPlanarDistance(a, c, 0, -1) == 2_i) << "true distance is 2";
+		// Bounded at 0: the search cannot reach distance-1 hexes, so it returns the partial reach.
+		expect(regs->GetPlanarDistance(a, c, 0, 0) == 1_i) << "range limit truncates the search";
+
+		Globals->ICOSAHEDRAL_WORLD = saved;
+	};
+
+	// GetPlanarDistance's icosahedral branch projects each endpoint onto the surface array and,
+	// if the projected hex is empty, re-projects to the wedge corner (one_x += GetLevelXScale-1).
+	// The unittest ruleset hardcodes GetLevelXScale/YScale to 1 (unittest/world.cpp), so that
+	// offset is 0: the re-projection block still runs but re-checks the SAME empty cell, and
+	// start/target stay null. That drives the "couldn't find ends" sentinel -- when either
+	// endpoint fails to resolve, the distance is the unreachable marker 10000000.
+	// NOTE: the re-projection SUCCESS sub-path (where the +scale-1 offset lands on a real hex)
+	// needs GetLevelXScale > 1 and so is only reachable in a real ruleset / the snapshot suite.
+	"GetPlanarDistance returns the sentinel when an icosahedral endpoint has no surface hex"_test = []
+	{
+		int saved = Globals->ICOSAHEDRAL_WORLD;
+		Globals->ICOSAHEDRAL_WORLD = 1;
+
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(2);
+		regs->pRegionArrays[0] = new ARegionArray(4, 4);
+		regs->pRegionArrays[1] = new ARegionArray(8, 8); // empty surface grid: no cell populated
+
+		// Both endpoints project onto valid (even-parity) but unpopulated surface cells, so both
+		// GetRegion lookups -- and the zero-offset re-projections -- return null. Using both
+		// exercises the start AND target re-projection blocks before the sentinel.
+		ARegion *a = new ARegion(); a->SetLoc(0, 2, ARegionArray::LEVEL_SURFACE);
+		ARegion *b = new ARegion(); b->SetLoc(2, 0, ARegionArray::LEVEL_SURFACE);
+		expect(regs->GetPlanarDistance(a, b, 0, -1) == 10000000_i)
+			<< "unresolved endpoints -> unreachable sentinel";
+
+		Globals->ICOSAHEDRAL_WORLD = saved;
+	};
+
+	// When both endpoints resolve to real but DISCONNECTED surface hexes, the icosahedral BFS
+	// drains its frontier without reaching the target and bails out through the "ran out of
+	// hexes" arm, again returning the 10000000 sentinel. Two placed hexes with no neighbor link
+	// between them reproduce exactly that: the frontier from the start empties after one step.
+	"GetPlanarDistance returns the sentinel when the icosahedral BFS is exhausted"_test = []
+	{
+		int saved = Globals->ICOSAHEDRAL_WORLD;
+		Globals->ICOSAHEDRAL_WORLD = 1;
+
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(2);
+		regs->pRegionArrays[0] = new ARegionArray(4, 4);
+		ARegionArray *surf = new ARegionArray(8, 8);
+		regs->pRegionArrays[1] = surf;
+
+		ARegion *a = new ARegion(); a->SetLoc(0, 0, ARegionArray::LEVEL_SURFACE);
+		ARegion *b = new ARegion(); b->SetLoc(2, 0, ARegionArray::LEVEL_SURFACE);
+		surf->SetRegion(0, 0, a); // start resolves
+		surf->SetRegion(2, 0, b); // target resolves, but...
+		regs->Add(a);
+		regs->Add(b);
+		// ...deliberately NO neighbor links: FindConnectedRegions adds nothing, so after the
+		// first step the queue is empty (start->next == 0) and the loop returns the sentinel.
+		// maxdist = -1 keeps the loop running until the frontier is genuinely exhausted.
+		expect(regs->GetPlanarDistance(a, b, 0, -1) == 10000000_i)
+			<< "disconnected target -> BFS exhausts -> sentinel";
+
+		Globals->ICOSAHEDRAL_WORLD = saved;
+	};
+};
+
+namespace {
+	ARegion *typedRegion(ARegionList *regs, int type)
+	{
+		ARegion *r = new ARegion();
+		r->type = type;
+		regs->Add(r);
+		return r;
+	}
+
+	// Attach a town of a chosen size. TownType() = pop*(dev+220)/270 compared against
+	// CITY_POP (20000 here): pop 1000 -> village, 10000 -> town, 25000 -> city (dev 0).
+	void addTown(ARegion *r, int pop)
+	{
+		r->town = new TownInfo;
+		r->town->name = new AString("Town");
+		r->town->pop = pop;
+		r->town->hab = pop;
+		r->town->dev = 0; // TownInfo ctor leaves dev uninitialized
+	}
+}
+
+// The statistics methods report via Awrite (-> std::cout) or std::cout directly and return
+// nothing, so we capture stdout and assert on the printed lines.
+ut::suite<"ARegion statistics"> aregion_stats_suite = []
+{
+	using namespace ut;
+
+	// CalcDensities tallies regions per terrain type and prints the non-zero counts.
+	"CalcDensities reports per-terrain counts"_test = []
+	{
+		ARegionList *regs = new ARegionList();
+		typedRegion(regs, R_PLAIN);
+		typedRegion(regs, R_PLAIN);
+		typedRegion(regs, R_MOUNTAIN);
+
+		std::string out = captureCout([&]{ regs->CalcDensities(); });
+		expect(contains(out, "Densities:")) << out;
+		expect(contains(out, "plain 2")) << out;
+		expect(contains(out, "mountain 1")) << out;
+	};
+
+	// TownStatistics counts each settlement size and prints totals + percentages. It divides by
+	// the settlement total; the zero-town path is pinned separately below.
+	"TownStatistics counts villages, towns and cities"_test = []
+	{
+		ARegionList *regs = new ARegionList();
+		addTown(typedRegion(regs, R_PLAIN), 1000);   // village
+		addTown(typedRegion(regs, R_PLAIN), 10000);  // town
+		addTown(typedRegion(regs, R_PLAIN), 25000);  // city
+
+		std::string out = captureCout([&]{ regs->TownStatistics(); });
+		expect(contains(out, "Settlements: 3")) << out;
+		expect(contains(out, "Villages: 1")) << out;
+		expect(contains(out, "Towns   : 1")) << out;
+		expect(contains(out, "Cities  : 1")) << out;
+	};
+
+	// REGRESSION GUARD: with no towns the settlement total is 0. TownStatistics guards the
+	// percentage divisions with `if (tot > 0)` (aregion.cpp ~line 2410); without that guard the
+	// three `x * 100 / tot` divisions are a divide-by-zero -- SIGFPE -- which would crash the
+	// whole unittest binary and report nothing. This exercises a region list that has regions but
+	// no settlements (e.g. an all-ocean or freshly created level): it must not crash, and every
+	// count/percentage must print as 0.
+	"TownStatistics survives a settlement-free region list"_test = []
+	{
+		ARegionList *regs = new ARegionList();
+		typedRegion(regs, R_OCEAN); // regions present, but none carry a town
+		typedRegion(regs, R_PLAIN);
+
+		std::string out = captureCout([&]{ regs->TownStatistics(); });
+		expect(contains(out, "Settlements: 0")) << out;
+		expect(contains(out, "Villages: 0 (0%)")) << out;
+		expect(contains(out, "Towns   : 0 (0%)")) << out;
+		expect(contains(out, "Cities  : 0 (0%)")) << out;
+	};
+
+	// ResoucesStatistics aggregates products and markets across regions and prints three
+	// sections. I_SILVER is deliberately excluded.
+	"ResoucesStatistics reports products, wanted and for-sale"_test = []
+	{
+		ARegionList *regs = new ARegionList();
+		ARegion *r = typedRegion(regs, R_PLAIN);
+
+		Production *p = new Production(I_IRON, 20);
+		p->amount = 20;
+		r->products.Add(p);
+		r->markets.Add(new Market(M_SELL, I_IRON, 10, 15, 0, 10000, 0, 100)); // -> "wanted"
+		r->markets.Add(new Market(M_BUY,  I_WOOD, 8, 7, 0, 10000, 0, 100));   // -> "for sale"
+
+		std::string out = captureCout([&]{ regs->ResoucesStatistics(); });
+		expect(contains(out, "Products:")) << out;
+		expect(contains(out, "Wanted:")) << out;
+		expect(contains(out, "For Sale:")) << out;
+		expect(contains(out, "[IRON]")) << "iron product/market listed\n" << out;
+		expect(contains(out, "[WOOD]")) << "wood for-sale listed\n" << out;
 	};
 };

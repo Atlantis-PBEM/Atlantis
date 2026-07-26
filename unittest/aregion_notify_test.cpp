@@ -49,6 +49,14 @@ namespace {
 		AString a(abbr);
 		return LookupSkill(&a);
 	}
+
+	Farsight *farsight(Faction *fac, Unit *u)
+	{
+		Farsight *fs = new Farsight();
+		fs->faction = fac;
+		fs->unit = u;
+		return fs;
+	}
 }
 
 ut::suite<"ARegion notify"> aregion_notify_suite = []
@@ -245,5 +253,58 @@ ut::suite<"ARegion notify"> aregion_notify_suite = []
 		expect(reg->CanMakeAdv(fac, I_IRON) == 1_i) << "transit passer's skill counts";
 
 		Globals->TRANSIT_REPORT = saved;
+	};
+
+	// CanMakeAdv reports whether any unit the faction can see has the skill to reveal an advanced
+	// product. I_MITHRIL needs mining (MINI) at pLevel 3. The present-unit arm is covered above;
+	// these two drive the improved-farsight (farsees) and transit-passer (passers) witness arms.
+	"CanMakeAdv sees an advanced product through an improved-farsight witness"_test = []
+	{
+		int saved = Globals->IMPROVED_FARSIGHT;
+		Globals->IMPROVED_FARSIGHT = 1;
+
+		ARegion *reg = new ARegion();
+		Faction *mine = new Faction(1);
+
+		// A capable witness in the farsees list; its unit need not be present in the region.
+		Unit *miner = new Unit(200, mine, 0);
+		miner->items.SetNum(I_LEADERS, 1);
+		miner->SetSkill(LookupSkill(new AString("MINI")), 3);
+		reg->farsees.Add(farsight(mine, miner));
+
+		expect(reg->CanMakeAdv(mine, I_MITHRIL) == 1_i) << "farsight witness reveals the product";
+
+		// A different faction, with no witness, cannot.
+		Faction *other = new Faction(2);
+		expect(reg->CanMakeAdv(other, I_MITHRIL) == 0_i) << "no witness -> hidden";
+
+		Globals->IMPROVED_FARSIGHT = saved;
+	};
+
+	"CanMakeAdv sees an advanced product through a transit passer"_test = []
+	{
+		int savedTR = Globals->TRANSIT_REPORT;
+		Globals->TRANSIT_REPORT =
+			GameDefs::REPORT_USE_UNIT_SKILLS | GameDefs::REPORT_SHOW_RESOURCES;
+
+		ARegion *reg = new ARegion();
+		Faction *mine = new Faction(1);
+
+		Unit *miner = new Unit(200, mine, 0);
+		miner->items.SetNum(I_LEADERS, 1);
+		miner->SetSkill(LookupSkill(new AString("MINI")), 3);
+		reg->passers.Add(farsight(mine, miner));
+
+		expect(reg->CanMakeAdv(mine, I_MITHRIL) == 1_i) << "passer witness reveals the product";
+
+		// Below the required level, the passer does not qualify.
+		Unit *apprentice = new Unit(201, mine, 0);
+		apprentice->items.SetNum(I_LEADERS, 1);
+		apprentice->SetSkill(LookupSkill(new AString("MINI")), 2);
+		ARegion *reg2 = new ARegion();
+		reg2->passers.Add(farsight(mine, apprentice));
+		expect(reg2->CanMakeAdv(mine, I_MITHRIL) == 0_i) << "below pLevel -> hidden";
+
+		Globals->TRANSIT_REPORT = savedTR;
 	};
 };

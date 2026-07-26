@@ -133,4 +133,26 @@ ut::suite<"ARegion observation"> aregion_observation_suite = []
 
 		Globals->IMPROVED_FARSIGHT = saved;
 	};
+
+	// GetTrueSight consults the passers list only when usepassers is set AND the transit report
+	// is configured to use unit skills and show units. The passer's unit carries the skill.
+	// (The farsight helper's `observation` argument is irrelevant to true-seeing, so pass 0.)
+	"GetTrueSight reads passers when transit skills are enabled"_test = []
+	{
+		int savedTR = Globals->TRANSIT_REPORT;
+		Globals->TRANSIT_REPORT =
+			GameDefs::REPORT_USE_UNIT_SKILLS | GameDefs::REPORT_SHOW_UNITS;
+
+		ARegion *reg = new ARegion();
+		Faction *mine = new Faction(1);
+		Unit *scout = new Unit(200, mine, 0);
+		scout->items.SetNum(I_LEADERS, 1);
+		scout->SetSkill(S_TRUE_SEEING, 6);
+		reg->passers.Add(farsight(mine, scout, 0));
+
+		expect(reg->GetTrueSight(mine, 1) == 6_i) << "passer's true-seeing counted with usepassers";
+		expect(reg->GetTrueSight(mine, 0) == 0_i) << "passers ignored without usepassers";
+
+		Globals->TRANSIT_REPORT = savedTR;
+	};
 };
