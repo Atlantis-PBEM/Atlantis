@@ -13,9 +13,11 @@ Three layers, and they protect different things:
 | Snapshot tests | `./snapshot-tests/run-snapshots.sh` | End-to-end turn behaviour, byte-for-byte |
 | Smoke test | `cd smoketest && python3 smoketest.py` | Long-run stability (legacy, not in CI) |
 
-Unit coverage is thin — three suites at present — so the snapshot suite is carrying most of
-the regression load. A clean snapshot run is the primary evidence that a change is safe;
-a snapshot diff is information to read, not an obstacle to route around.
+Unit coverage is now substantial for `aregion.cpp` (the `aregion_*_test.cpp` suites — ~16 files,
+270+ tests — are the reference for the patterns in this skill) but thin elsewhere, so the
+snapshot suite still carries most of the cross-cutting regression load. A clean snapshot run is
+the primary evidence that a change is safe; a snapshot diff is information to read, not an
+obstacle to route around.
 
 ## Before you write a Boost.UT test: the version pin
 
@@ -224,6 +226,15 @@ runner configuration.
   `FactionTypes` because `Game::Game()` normally does it — and that mutation is visible to
   every other suite. If your test mutates a global table, it can break an unrelated suite,
   and the failure will appear to belong to the other file.
+- **A test that flips a `Globals` flag must restore it — reliably.** Because that one object is
+  shared by every suite, a flag left flipped changes an unrelated suite's result, and the
+  failure appears to belong to *that* file. The bare idiom is
+  `int saved = Globals->X; Globals->X = …; /* test */ Globals->X = saved;` — but a `fatal()`
+  abort or an early `return` skips the restore and leaks the flag. Prefer the scoped guard in
+  `aregion_test_util.h`, which restores in its destructor no matter how the test exits:
+  ```cpp
+  aregion_test::GlobalsInt weather(&Globals->WEATHER_EXISTS, 1); // restored at scope exit
+  ```
 - **Prefer pure functions.** Anything needing no world is a clean target: `GetLevelByDays` /
   `GetDaysByLevel`, `SkillCost`, `LookupItem` / `LookupSkill`, `AString` tokenising, capacity
   and weight arithmetic, name formatting, faction type strings.
@@ -256,24 +267,27 @@ Methods that "need a world" are usually still unit-testable with one of three te
 Most of `aregion.cpp`'s once-deferred methods are covered this way (see the `aregion_*_test.cpp`
 suites), leaving only true map generation to the snapshot suite.
 
-**1. Capture report text through an `Areport` backed by a temp file.** Every `Write*` method
-(`WriteReport`, `WriteEconomy`, `WriteProducts`, `WriteMarkets`, `WriteExits`, `WriteTemplate`)
-emits into an `Areport`. Point one at a scratch file, call the method, read the file back, and
-assert on the text. `ShortPrint`/`Print` return an `AString` directly — no capture needed.
+**1. Capture the emitted text — two channels, both in the shared header.** Don't re-roll a
+local `capture`/`has`; include `unittest/aregion_test_util.h` and use `aregion_test::{capture,
+captureCout, contains}`:
+- **`Areport`-emitting methods** (`WriteReport`, `WriteEconomy`, `WriteProducts`, `WriteMarkets`,
+  `WriteExits`, `WriteTemplate`) go through `aregion_test::capture([&](Areport *r){ … })`, which
+  points an `Areport` at a temp file and returns its contents. `ShortPrint`/`Print` return an
+  `AString` directly — no capture needed.
+- **`Awrite`/`std::cout`-emitting methods** (`CalcDensities`, `TownStatistics`,
+  `ResoucesStatistics`, the map generators) have no `Areport` and no return value; capture stdout
+  with `aregion_test::captureCout([&]{ regs->TownStatistics(); })`.
 
 ```cpp
-std::string capture(std::function<void(Areport*)> emit) {
-    const char *scratch = "aregion_report.tmp";
-    std::remove(scratch);                       // Areport::OpenByName refuses a non-empty file
-    Areport rep; rep.OpenByName(scratch);
-    emit(&rep);
-    rep.Close();
-    std::ifstream in(scratch); std::stringstream ss; ss << in.rdbuf();
-    std::remove(scratch);
-    return ss.str();
-}
-// expect(capture([&](Areport *r){ reg->WriteEconomy(r, fac, 1); }).find("Wages: $0.") != npos);
+expect(aregion_test::contains(
+    aregion_test::capture([&](Areport *r){ reg->WriteEconomy(r, fac, 1); }), "Wages: $0."));
 ```
+
+**Testing an un-prototyped free function.** Some helpers (`mapBiome`, `distance`, `economy`, the
+map-gen leaf functions) have external linkage but no header declaration — they are only
+referenced within `aregion.cpp`. Forward-declare the exact signature at the top of your test to
+call them directly. The signature must match exactly: a mismatch is a link error at best and a
+silent ODR mismatch at worst.
 
 **2. Seed the RNG for anything using `getrandom()`.** `seedrandom(int)` (from `gameio.h`) makes
 `Setup`, `SetupProds`/`SetupPop`, `LairCheck`/`MakeLair`, `FindGate(-1)` and the decay checks
@@ -284,11 +298,44 @@ same seed — and (b) the deterministic post-conditions that hold regardless of 
 that themselves draw: `Production(item, amt)` bumps `amount` by `getrandom()` under
 `RANDOM_ECONOMY`, so seed first or set the field explicitly.
 
+Better still, **engineer the inputs so a deterministic branch dominates the draw**, removing RNG
+from the assertion entirely. `DoDecayClicks` adds `getrandom(GetMaxClicks())` but then clamps to
+`maxMonthlyDecay`; setting `maxwages - wages` large makes `PillageCheck` overflow that clamp, so
+the result is a fixed constant for any seed. When you genuinely must hit a specific random
+outcome (e.g. `LairCheck` passing), pin the seed **and comment why that value** — an empirical
+seed is opaque and breaks silently the day an upstream draw order changes (`aregion_setup_test`
+/ the lairs suite in `aregion_setup_test.cpp` do this: "seed 1 produces a lair, seed 2 does not").
+
 **3. Build the unit/faction fixtures by hand.** Guard/tax/observation/notify methods just walk
 `region → objects → units`. Construct units, set `guard`/`type`/skills/items, wire faction
 attitudes with `SetAttitude`, and call. (One caveat: attribute-driven paths like
 `GetAttribute("observation")` return 0 unless the ruleset defines the attribute mods, which the
 unittest ruleset does not — so `GetObservation` can only be exercised in its degenerate form.)
+
+### Hand-building an ARegion fixture (and its two traps)
+
+`ARegion()` initializes navigation and flags but **not** the economy fields — `race`,
+`population`, `basepopulation`, `wealth`, `wages`, `maxwages` hold heap garbage. In a real game
+`Setup()`/`Readin()` fill them before any region is reported on; a hand-built region skips that.
+Any method that reports on a region (`WriteReport`, `Print`, `WriteEconomy`) gates on
+`Population()` and then indexes `ItemDefs[race]` — a garbage `race` is an out-of-bounds read that
+**segfaults on Linux (glibc) while being benign on macOS**. That is the classic "green on my Mac,
+crashes in CI" trap. Set a defined baseline (`race = -1`, the NO_RACE sentinel, plus the numeric
+fields to 0), or just use the shared `aregion_test::surfaceRegion(x, y, name)` builder, which does
+it for you; override `population`/`race` afterwards when the test actually wants peasants.
+
+**ARegionArray grid parity.** `ARegionArray::GetRegion(x, y)` returns `0` for any cell where
+`(x + y)` is odd — only even-parity cells store a region, and `SetRegion` indexes
+`x/2 + y*width/2`. A fixture that places a region on an odd cell reads back null with no error.
+Choose even-parity coordinates.
+
+**Reuse the shared fixtures — don't re-roll them.** `unittest/aregion_test_util.h` (namespace
+`aregion_test`) is the home for cross-file fixtures: `capture` / `captureCout` / `contains`, the
+`GlobalsInt` scoped guard, and the builders `makeRegionList()`, `surfaceRegion(x,y,name)`,
+`addObject(reg,num,type)`, `addUnit(reg,num,fac)` / `addUnit(obj,num,fac)`, and
+`farsight(fac,unit,observation=0)`. Prefer these over a local copy: divergent local helpers with
+the same name but different signatures (`addUnit` had three) are exactly what turns a later file
+merge into a redefinition error. Need a variant? Add an overload to the header.
 
 **Use the recorded turns as a data source.** `snapshot-tests/neworigins_turns/turn_*/` holds real
 NewOrigins `game.in`/`game.out` and `report.*`/`template.*` files. Mine them — do **not** copy
