@@ -299,7 +299,9 @@ ut::suite<"ARegion mapgen"> aregion_mapgen_suite = []
 		const int W = 16;
 
 		// R_PLAIN everywhere on the even-parity sublattice; pop 0 so there is no pre-existing town.
-		auto buildPlains = [W] {
+		// No capture needed: W is a const int constant expression used only by value, so it is
+		// not odr-used. Capturing it trips clang's -Wunused-lambda-capture under -Werror.
+		auto buildPlains = [] {
 			ARegionList *regs = new ARegionList();
 			regs->CreateLevels(2);
 			ARegionArray *arr = new ARegionArray(W, W);

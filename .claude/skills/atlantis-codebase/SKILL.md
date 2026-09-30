@@ -143,7 +143,7 @@ These are not ceremony — each one catches a class of failure that is expensive
 2. **Run the snapshot tests** whenever behaviour, ordering, randomness, or report text
    could have moved.
    ```bash
-   ./snapshot-tests/run-snapshots.sh
+   cd snapshot-tests && ./run-snapshots.sh   # must run from inside snapshot-tests/
    ```
    If the diff is non-empty, read it line by line and confirm every changed line is an
    intended consequence of your change. Then **stop and show the user the diff and ask

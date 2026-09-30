@@ -24,10 +24,12 @@ effectively part of the project's contract: change any of them and the diff ligh
 ## 2. Running it
 
 ```bash
-./snapshot-tests/run-snapshots.sh
+cd snapshot-tests && ./run-snapshots.sh
 ```
 
-This calls `run-game-snapshots.sh` twice — once for `standard`, once for `neworigins`. Both
+Run it from inside `snapshot-tests/`: it invokes `./run-game-snapshots.sh` by relative path, so
+launched from the repo root it prints "No such file or directory" for both games and runs
+nothing. This calls `run-game-snapshots.sh` twice — once for `standard`, once for `neworigins`. Both
 binaries must already be built (`make standard neworigins`, or `make all`); the script exits
 with a clear message if they are missing.
 
@@ -111,10 +113,11 @@ it must compile on Windows — so avoid POSIX-only APIs.
 
 ## 8. Local build note (macOS)
 
-The committed Makefile sets `CPLUS = g++`, which resolves to clang on macOS and does not build
-this tree cleanly under `-Werror` (clang rejects VLAs that GCC accepts). A local override to a
-real GCC (`g++-13`) is what makes `make` work there.
+The committed Makefile uses `g++`, which is Apple clang on macOS. Clang enforces some warnings
+GCC does not (`-Wvla-cxx-extension`, `-Wunused-lambda-capture`, a stricter
+`-Wunused-but-set-variable`), and `-Werror` makes them fatal. The tree has been cleaned so that
+`make all unittest` builds with Apple clang 21 on Apple Silicon, with no compiler override.
 
-If you hit VLA or similar `-Werror` failures on macOS in files you did not touch, check the
-compiler before assuming you broke something. Do not commit a hardcoded `g++-13` without
-making it platform-conditional, or you break the Linux and Windows CI runners.
+If a new `-Werror` failure appears only on macOS, fix the code portably (e.g. `std::vector`
+instead of a VLA) rather than switching compilers. Never commit a hardcoded `g++-NN`: it breaks
+the Linux and Windows CI runners.

@@ -2889,13 +2889,10 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 
 	std::cout << "Distances from water body to water body" << std::endl;
 
+	// std::vector rather than a VLA: VLAs are not standard C++ and clang rejects them
+	// under -Werror (-Wvla-cxx-extension).
 	size_t sz = waterBodies.size();
-	int distances[sz][sz];
-	for (size_t i = 0; i < sz; i++) {
-		for (size_t j = 0; j < sz; j++) {
-			distances[i][j] = INT32_MAX;
-		}
-	}
+	std::vector<std::vector<int>> distances(sz, std::vector<int>(sz, INT32_MAX));
 
 	for (auto water : waterBodies) {
 		std::cout << "WATER BODY " << water->name << std::endl;
@@ -3842,8 +3839,17 @@ void ARegionList::AddHistoricalBuildings(ARegionArray* arr, const int w, const i
 		}
 	});
 
+	// std::vector rather than a VLA: VLAs are not standard C++ and clang rejects them
+	// under -Werror (-Wvla-cxx-extension).
+	// Zero-initialisation matters: the loop below only fills the upper triangle and mirrors
+	// it, so the diagonal distances[i][i] is never written, yet the consumer loop further down
+	// reads it. With the old uninitialised VLA that was a read of garbage (UB). It happened to
+	// be harmless: a value passing the range check routed a city to itself, which builds no
+	// segments and draws no random numbers, and the stray `connected` mark it left cannot
+	// change which roads get built (any city that could still link to it would already have
+	// been linked from its side). 0 means "no road", so the diagonal is now skipped outright.
 	size_t sz = cities.size();
-	int distances[sz][sz];
+	std::vector<std::vector<int>> distances(sz, std::vector<int>(sz, 0));
 	for (size_t i = 0; i < sz; i++) {
 		for (size_t j = i + 1; j < sz; j++) {
 			if (i == j) {

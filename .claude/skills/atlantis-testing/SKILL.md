@@ -10,7 +10,7 @@ Three layers, and they protect different things:
 | Layer | Command | Protects |
 |---|---|---|
 | Unit tests | `make unittest && ./unittest/unittest` | Isolated class and function behaviour |
-| Snapshot tests | `./snapshot-tests/run-snapshots.sh` | End-to-end turn behaviour, byte-for-byte |
+| Snapshot tests | `cd snapshot-tests && ./run-snapshots.sh` | End-to-end turn behaviour, byte-for-byte |
 | Smoke test | `cd smoketest && python3 smoketest.py` | Long-run stability (legacy, not in CI) |
 
 Unit coverage is now substantial for `aregion.cpp` (the `aregion_*_test.cpp` suites — ~16 files,

@@ -1062,11 +1062,11 @@ void ARegionList::SetFractalTerrain(ARegionArray *pArr)
 
 void ARegionList::NameRegions(ARegionArray *pArr)
 {
-	int seed = 0;
-	int grown = 0;
+	[[maybe_unused]] int seed = 0;
+	[[maybe_unused]] int grown = 0;
 	Awrite("Naming Regions");
 	int unnamed = 1;
-	int toname = 0;
+	[[maybe_unused]] int toname = 0;
 	for (int x = 0; x < pArr->x; x++) {
 		for (int y = 0; y < pArr->y; y++) {
 			ARegion *r = pArr->GetRegion(x,y);
@@ -1699,7 +1699,7 @@ void GeoMap::Generate(int spread, int smoothness)
 		}
 	}
 	int frac = 25;
-	int count = 0;
+	[[maybe_unused]] int count = 0;
 	while (step > 1) {
 		count++;
 		int nextstep = step/2 + step%2;
