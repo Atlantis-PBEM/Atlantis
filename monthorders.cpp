@@ -238,8 +238,9 @@ Location *Game::Do1SailOrder(ARegion *reg, Object *fleet, Unit *cap)
 		}
 		wgt += unit->Weight();
 		if (unit->nomove) {
-			// If any unit on-board was in a fight (and
-			// suffered > 5% casualties), then halt movement
+			// If any unit on board was stopped by a battle (its side won
+			// but lost 5% or more, rounded up, or the battle was a draw;
+			// see Army::Win / Army::Tie), then halt the whole fleet
 			nomove = 1;
 		}
 		if (unit->monthorders && unit->monthorders->type == O_SAIL) {

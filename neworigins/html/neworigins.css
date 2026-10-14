@@ -1,0 +1,27 @@
+body {
+  font-family: arial, sans-serif;
+  background: black;
+  color: #B19275;
+}
+
+/* Section divider, drawn in CSS: a 2px tan line fading out at both ends, centred in the
+   23px-tall empty <div class="rule"> that genrules emits before each section. This replaces
+   the Fracas-inherited url(bar.jpg) background: NewOrigins never shipped that image (404 in
+   the browser), and the only copy in the repo, fracas/html/bar.jpg, is a corrupt JPEG that
+   no browser can decode. */
+div.rule {
+  background: linear-gradient(to right, transparent, #B19275 20%, #B19275 80%, transparent)
+    no-repeat center / 100% 2px;
+  height: 23px;
+  color: white;
+}
+
+td.fixed {
+  font-family: monospace;
+}
+
+a:visited,
+a:active,
+a:link {
+  color: white;
+}

@@ -1374,7 +1374,10 @@ int Army::DoAnAttack(Battle * b, char const *special, int numAttacks, int attack
 			}
 
 			if (effect != NULL && !combat) {
-				/* We got through shield... if killing spell, destroy shield */
+				/* We got through the shield. Only a spell with a non-damage effect
+				 * (fear, storm, ...) destroys it; damaging spells and physical
+				 * (ranged) attacks leave it in place. The shield is recast every
+				 * round anyway (Battle::NormalRound). */
 				shields.Remove(hi);
 				delete hi;
 			}

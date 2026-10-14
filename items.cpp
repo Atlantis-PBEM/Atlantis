@@ -1386,10 +1386,21 @@ AString *ItemDescription(int item, int full)
 			if (!(ItemDefs[I_RINGOFI].flags & ItemType::DISABLED)) {
 				*temp += " Also, a unit with an Amulet of True Seeing "
 					"cannot be assassinated by, nor have items "
-					"stolen by, a unit with a Ring of Invisibility "
-					"(note that the unit must have at least one "
-					"Amulet of True Seeing per man in order to repel "
-					"a unit with a Ring of Invisibility).";
+					"stolen by, a unit with a Ring of Invisibility ";
+				// Mirrors Unit::AmtsPreventCrime: with at least one amulet per man the crime is
+				// always prevented; with fewer, PROPORTIONAL_AMTS_USAGE gives an amulets/men
+				// chance, otherwise no protection at all.
+				if (Globals->PROPORTIONAL_AMTS_USAGE) {
+					*temp += "(note that this is certain only if the unit has at "
+						"least one Amulet of True Seeing per man; with fewer "
+						"amulets than men, the chance of repelling a unit with "
+						"a Ring of Invisibility is the number of amulets "
+						"divided by the number of men).";
+				} else {
+					*temp += "(note that the unit must have at least one "
+						"Amulet of True Seeing per man in order to repel "
+						"a unit with a Ring of Invisibility).";
+				}
 			}
 			break;
 		case I_PORTAL:
