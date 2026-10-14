@@ -73,6 +73,71 @@ namespace {
 		a->neighbors[da] = b;
 		b->neighbors[db] = a;
 	}
+
+	// Fixture for the historical-roads pass of AddHistoricalBuildings: a W x H all-plains
+	// surface (every even-parity cell filled, because AddHistoricalBuildings dereferences every
+	// one) with hand-wired hex neighbors, plus a TOWN_CITY at each requested (x, y).
+	//
+	// Neighbors are wired by hand because ARegionList::SetupNeighbors/NeighSetup are private.
+	// Offsets mirror NeighSetup (N = y-2, NE = x+1,y-1, SE = x+1,y+1, S = y+2, SW, NW), but out-of-range
+	// cells are left null: ARegionArray::GetRegion wraps BOTH axes, so using it unchecked would
+	// turn the strip into a torus and let Dijkstra take a shorter path around the edge.
+	//
+	// City pop is 20000 because TownType() needs prestige = pop*(dev+220)/270 >= CITY_POP*4/5
+	// (16000 in unittest/rules.cpp); the pop-9000 placeCity default above is only a TOWN_TOWN
+	// and would not enter the road pass at all.
+	struct RoadCity { int x, y; const char *name; };
+
+	ARegionList *buildRoadStrip(int w, int h, std::initializer_list<RoadCity> cities)
+	{
+		ARegionList *regs = new ARegionList();
+		regs->CreateLevels(2);
+		ARegionArray *arr = new ARegionArray(w, h);
+		regs->pRegionArrays[1] = arr;
+		for (int y = 0; y < h; y++)
+			for (int x = 0; x < w; x++)
+				if ((x + y) % 2 == 0)
+					placeCity(arr, regs, x, y, 0);
+
+		static const int dx[NDIRS] = { 0, 1, 1, 0, -1, -1 };
+		static const int dy[NDIRS] = { -2, -1, 1, 2, 1, -1 };
+		for (int y = 0; y < h; y++)
+			for (int x = 0; x < w; x++) {
+				if ((x + y) % 2) continue;
+				ARegion *r = arr->GetRegion(x, y);
+				for (int d = 0; d < NDIRS; d++) {
+					int nx = x + dx[d], ny = y + dy[d];
+					if (nx >= 0 && nx < w && ny >= 0 && ny < h)
+						r->neighbors[d] = arr->GetRegion(nx, ny);
+				}
+			}
+
+		for (const RoadCity &c : cities) {
+			ARegion *r = arr->GetRegion(c.x, c.y);
+			r->town = new TownInfo;
+			r->town->name = new AString(c.name);
+			r->town->pop = 20000;
+			r->town->hab = 20000;
+			r->town->dev = 100;
+		}
+		return regs;
+	}
+
+	bool isRoad(int type)
+	{
+		return type == O_ROADN || type == O_ROADNE || type == O_ROADSE ||
+			   type == O_ROADS || type == O_ROADSW || type == O_ROADNW;
+	}
+
+	int countRoads(ARegion *r, int type = -1)
+	{
+		int n = 0;
+		forlist(&r->objects) {
+			Object *o = (Object *) elem;
+			if (type == -1 ? isRoad(o->type) : o->type == type) n++;
+		}
+		return n;
+	}
 }
 
 ut::suite<"ARegion mapgen"> aregion_mapgen_suite = []
@@ -161,6 +226,104 @@ ut::suite<"ARegion mapgen"> aregion_mapgen_suite = []
 		});
 
 		expect(that % city->objects.Num() > 0) << "the city gained a historical structure";
+	};
+
+	// Historical roads (the tail of AddHistoricalBuildings). The pass builds a city-to-city
+	// distance matrix, then for each unconnected city lays a road along the Dijkstra path to
+	// every unconnected city with 0 < distance <= 8. A distance of 0 means "no road".
+	//
+	// The matrix used to be an uninitialised VLA whose diagonal distances[i][i] was never
+	// written but was read (UB). Traced by hand, it had no observable effect: pathing a city to
+	// itself builds no segments (the walk-back loop runs zero times) and draws no random numbers,
+	// and the stray `connected` mark cannot change which roads are built. Mutation-checked:
+	// forcing the diagonal to 1 changes no result here. So these tests do not detect the old UB
+	// (nothing observable can); they pin the road pass itself, which had no coverage: range
+	// cutoff, path placement, both-sides pairing and naming. They do fail if the range check or
+	// the opposite-side build is broken.
+
+	// Lone city: the only matrix entry is the diagonal, and it must not produce a road.
+	"AddHistoricalBuildings lays no road for a lone city"_test = []
+	{
+		ARegionList *regs = buildRoadStrip(2, 12, { { 0, 0, "Alpha" } });
+		ARegionArray *arr = regs->GetRegionArray(1);
+
+		captureCout([&]{
+			seedrandom(1);
+			regs->AddHistoricalBuildings(arr, 2, 12);
+		});
+
+		int roads = 0;
+		forlist(regs) roads += countRoads((ARegion *) elem);
+		expect(roads == 0_i) << "a city is never routed to itself";
+	};
+
+	// Two cities 4 hexes apart in a straight N-S line on uniform plains: the unique shortest path
+	// is the column x = 0 (any zig-zag via x = 1 costs extra steps). Each hex-side along it gets a
+	// road with probability 2/3 (`if (getrandom(3))`), so exactly which segments exist depends on
+	// the seed. What holds for every seed is asserted instead:
+	//   - roads appear only on the path column, never off it;
+	//   - each segment is built on both sides or neither (O_ROADS on the north hex paired with
+	//     O_ROADN on the south hex);
+	//   - every road is named for the later city ("Road to Bravo"), since the earlier city Alpha
+	//     is the one doing the routing, and none is named for Alpha itself.
+	// The loop over 10 seeds makes "at least one segment somewhere" certain in practice, and it is
+	// fully deterministic because every run is seeded.
+	"AddHistoricalBuildings joins two nearby cities with paired road segments"_test = []
+	{
+		const int H = 12;
+		int totalSegments = 0;
+		for (int seed = 1; seed <= 10; seed++) {
+			ARegionList *regs = buildRoadStrip(2, H, { { 0, 0, "Alpha" }, { 0, 8, "Bravo" } });
+			ARegionArray *arr = regs->GetRegionArray(1);
+
+			captureCout([&]{
+				seedrandom(seed);
+				regs->AddHistoricalBuildings(arr, 2, H);
+			});
+
+			for (int y = 1; y < H; y += 2)
+				expect(countRoads(arr->GetRegion(1, y)) == 0_i) << "no road off the path column, seed" << seed;
+			for (int y = 10; y < H; y += 2)
+				expect(countRoads(arr->GetRegion(0, y)) == 0_i) << "no road past Bravo, seed" << seed;
+
+			for (int y = 0; y < 8; y += 2) {
+				int south = countRoads(arr->GetRegion(0, y), O_ROADS);
+				int north = countRoads(arr->GetRegion(0, y + 2), O_ROADN);
+				expect(eq(south, north)) << "segment y" << y << "->" << y + 2 << " built on both sides, seed" << seed;
+				totalSegments += south;
+			}
+
+			forlist(regs) {
+				// Capture the region before the inner forlist: it redeclares and shadows `elem`.
+				ARegion *r = (ARegion *) elem;
+				forlist(&r->objects) {
+					Object *o = (Object *) elem;
+					if (!isRoad(o->type)) continue;
+					std::string name = o->name->Str();
+					expect(name.rfind("Road to Bravo [", 0) == 0_ul) << "unexpected road name" << name;
+				}
+			}
+		}
+		expect(that % totalSegments > 0) << "some segment was built across the seeded runs";
+	};
+
+	// Distance 10 > 8: the pair is out of range, so no road is laid for any seed.
+	"AddHistoricalBuildings lays no road between cities more than 8 hexes apart"_test = []
+	{
+		const int H = 24;
+		for (int seed = 1; seed <= 5; seed++) {
+			ARegionList *regs = buildRoadStrip(2, H, { { 0, 0, "Alpha" }, { 0, 20, "Bravo" } });
+			ARegionArray *arr = regs->GetRegionArray(1);
+
+			captureCout([&]{
+				seedrandom(seed);
+				regs->AddHistoricalBuildings(arr, 2, H);
+			});
+
+			int roads = 0;
+			forlist(regs) roads += countRoads((ARegion *) elem);
+			expect(roads == 0_i) << "out-of-range cities stay unconnected, seed" << seed;
+		}
 	};
 
 	// FindNearestStartingCity walks the region graph from a start and returns the nearest
